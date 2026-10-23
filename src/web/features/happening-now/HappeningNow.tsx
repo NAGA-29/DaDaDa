@@ -11,7 +11,7 @@ export function HappeningNow({
   return (
     <section className="section" aria-labelledby="now-title">
       <h2 id="now-title" className="section-title">
-        Happening now
+        Incidents <span className="section-count">{incidents.length}</span>
       </h2>
       {incidents.length === 0 ? (
         <p className="all-clear">

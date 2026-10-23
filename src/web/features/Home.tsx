@@ -20,7 +20,8 @@ export function Home({ summary }: { summary: Loadable<SummaryResponse> }) {
     )
   }
 
-  const serviceNow = data.happeningNow.filter(i => i.kind === 'service').length
+  const serviceIncidents = data.happeningNow.filter(i => i.kind === 'service')
+  const serviceNow = serviceIncidents.length
   const securityNow = data.happeningNow.length - serviceNow
 
   return (
@@ -41,9 +42,25 @@ export function Home({ summary }: { summary: Loadable<SummaryResponse> }) {
           Can't reach DaDaDa right now — showing data from {formatDateTime(data.generatedAt)}.
         </p>
       )}
-      <HappeningNow incidents={data.happeningNow} providers={providers} />
-      <Services services={data.services} />
-      <Security advisories={data.security} kev={data.kev} providers={providers} />
+      <div className="dashboard-columns">
+        <section
+          className="dashboard-column"
+          aria-label="Incidents and service status"
+          // biome-ignore lint/a11y/noNoninteractiveTabindex: this pane must support keyboard scrolling.
+          tabIndex={0}
+        >
+          <HappeningNow incidents={serviceIncidents} providers={providers} />
+          <Services services={data.services} />
+        </section>
+        <section
+          className="dashboard-column"
+          aria-label="Security alerts and known exploited vulnerabilities"
+          // biome-ignore lint/a11y/noNoninteractiveTabindex: this pane must support keyboard scrolling.
+          tabIndex={0}
+        >
+          <Security advisories={data.security} kev={data.kev} providers={providers} />
+        </section>
+      </div>
     </main>
   )
 }

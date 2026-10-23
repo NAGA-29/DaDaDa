@@ -34,7 +34,7 @@ export function App() {
   const detailId = detailMatch === undefined ? undefined : safeDecode(detailMatch)
 
   return (
-    <div className="app">
+    <div className={detailMatch === undefined ? 'app app-dashboard' : 'app'}>
       <Header live={!summary.error && !!summary.data} updatedAt={summary.data?.generatedAt} />
       {detailMatch === undefined ? (
         <Home summary={summary} />

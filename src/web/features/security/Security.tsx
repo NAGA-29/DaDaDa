@@ -11,7 +11,7 @@ export function Security({ advisories, kev, providers }: Props) {
   return (
     <section className="section" aria-labelledby="security-title">
       <h2 id="security-title" className="section-title">
-        Security
+        Security alerts <span className="section-count">{advisories.length}</span>
       </h2>
       {advisories.length === 0 ? (
         <p className="empty">No advisories collected yet.</p>
