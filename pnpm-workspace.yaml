@@ -1,0 +1,30 @@
+# Apply the 7-day quarantine to direct, transitive, and locked dependencies.
+minimumReleaseAge: 10080
+minimumReleaseAgeStrict: true
+minimumReleaseAgeIgnoreMissingTime: false
+trustLockfile: false
+
+# Reject weaker publishing trust and exotic transitive sources.
+trustPolicy: no-downgrade
+# Legacy releases predate modern publishing attestations (e.g. undici-types 6).
+# The 7-day quarantine and vulnerability audit still apply to these packages.
+trustPolicyIgnoreAfter: 525600 # 365 days
+blockExoticSubdeps: true
+
+# Only these dependencies may execute install scripts; new scripts fail closed.
+allowBuilds:
+  esbuild: true
+  workerd: true
+strictDepBuilds: true
+dangerouslyAllowAllBuilds: false
+
+# Pin future additions and reject incompatible peer dependencies.
+savePrefix: ''
+strictPeerDependencies: true
+verifyStoreIntegrity: true
+
+# Always run the root audit, including installs with no dependency changes.
+optimisticRepeatInstall: false
+
+# Disable implicit pre/post hooks for run commands (install lifecycle still runs).
+enablePrePostScripts: false
