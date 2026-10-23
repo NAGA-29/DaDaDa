@@ -3,10 +3,13 @@ const ENTITIES: Record<string, string> = {
 }
 
 export function decodeEntities(text: string): string {
-  return text.replace(/&(#?\w+);/g, (m, name: string) => {
-    if (name.startsWith('#x')) return String.fromCodePoint(Number.parseInt(name.slice(2), 16))
-    if (name.startsWith('#')) return String.fromCodePoint(Number.parseInt(name.slice(1), 10))
-    return ENTITIES[name] ?? m
+  return text.replace(/&(#x[0-9a-f]+|#\d+|[a-z][a-z0-9]*);/gi, (m, name: string) => {
+    if (name.startsWith('#')) {
+      const hex = name[1] === 'x' || name[1] === 'X'
+      const code = Number.parseInt(name.slice(hex ? 2 : 1), hex ? 16 : 10)
+      return code <= 0x10ffff ? String.fromCodePoint(code) : m
+    }
+    return Object.hasOwn(ENTITIES, name) ? ENTITIES[name]! : m
   })
 }
 

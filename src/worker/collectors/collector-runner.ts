@@ -33,17 +33,24 @@ type Collected = {
   sourceId: string
   statuses: ProviderStatus[]
   incidents: Incident[]
+  errors: string[]
 }
 
 async function collectOne(source: Source, context: SourceContext): Promise<Collected> {
-  const [status, inputs] = await Promise.all([
+  // Status と Incident は別 fetch のことがあるので、片方の失敗でもう片方を捨てない
+  const [statusResult, inputsResult] = await Promise.allSettled([
     isStatusSource(source) ? source.collectStatus(context) : undefined,
     isIncidentSource(source) ? source.collect(context) : [],
   ])
+  const errors: string[] = []
+  if (statusResult.status === 'rejected') errors.push(`status: ${errorMessage(statusResult.reason)}`)
+  if (inputsResult.status === 'rejected') errors.push(`incidents: ${errorMessage(inputsResult.reason)}`)
+  const status = statusResult.status === 'fulfilled' ? statusResult.value : undefined
+  const inputs = inputsResult.status === 'fulfilled' ? inputsResult.value : []
   const incidents = await Promise.all(inputs.map(toIncident))
   // 同一 Source 内で ID が重複した場合は後勝ち
   const unique = [...new Map(incidents.map(i => [i.id, i])).values()]
-  return { sourceId: source.id, statuses: status ? [status] : [], incidents: unique }
+  return { sourceId: source.id, statuses: status ? [status] : [], incidents: unique, errors }
 }
 
 function errorMessage(reason: unknown): string {
@@ -86,7 +93,15 @@ export async function runCollectors(
   const results: SourceRunResult[] = settled.map((r, i) => {
     const sourceId = targets[i]!.id
     if (r.status === 'fulfilled') {
-      return { sourceId, ok: true, incidents: r.value.incidents.length, status: r.value.statuses[0]?.status }
+      const { errors, incidents, statuses } = r.value
+      if (errors.length) console.error(`[collector] ${sourceId} partially failed:`, errors.join('; '))
+      return {
+        sourceId,
+        ok: errors.length === 0,
+        incidents: incidents.length,
+        status: statuses[0]?.status,
+        error: errors.length ? errors.join('; ') : undefined,
+      }
     }
     console.error(`[collector] ${sourceId} failed:`, r.reason)
     return { sourceId, ok: false, incidents: 0, error: errorMessage(r.reason) }

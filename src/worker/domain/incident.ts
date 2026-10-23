@@ -30,6 +30,9 @@ export type IncidentInput = Omit<Incident, 'id'>
 /** 上流で「終わった」とみなされる status 値 */
 export const RESOLVED_STATUSES = ['resolved', 'postmortem', 'completed'] as const
 
+/** 上流で取り下げられたもの。raw は残すが一覧には出さない */
+export const HIDDEN_STATUSES = ['withdrawn'] as const
+
 export const HAPPENING_NOW_SECURITY_WINDOW_HOURS = 72
 
 /**

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { canonicalUrl, incidentId, normalizeTitle } from '../src/worker/domain/fingerprint'
 import { isHappeningNow } from '../src/worker/domain/incident'
-import { worstStatus } from '../src/worker/domain/provider-status'
+import { freshStatus, worstStatus } from '../src/worker/domain/provider-status'
+import { decodeEntities } from '../src/worker/lib/text'
 import { decodeCursor, encodeCursor } from '../src/worker/repositories/incident.repository'
 
 describe('incidentId', () => {
@@ -53,5 +54,24 @@ describe('cursor', () => {
     expect(c).not.toMatch(/[+/=]/)
     expect(decodeCursor(c)).toEqual({ publishedAt: '2026-10-23T00:00:00.000Z', id: 'src:ä/日本' })
     expect(decodeCursor('garbage')).toBeNull()
+  })
+})
+
+describe('freshStatus', () => {
+  const status = { providerId: 'x', status: 'operational' as const, checkedAt: '2026-10-23T12:00:00.000Z' }
+  it('keeps recent statuses', () => {
+    expect(freshStatus(status, new Date('2026-10-23T12:29:00Z')).status).toBe('operational')
+  })
+  it('turns stale statuses into unknown', () => {
+    expect(freshStatus(status, new Date('2026-10-23T12:31:00Z'))).toMatchObject({ status: 'unknown', checkedAt: status.checkedAt })
+  })
+})
+
+describe('decodeEntities', () => {
+  it('decodes named and numeric references', () => {
+    expect(decodeEntities('&lt;a&gt; &amp; &#39; &#x41; &#X42;')).toBe("<a> & ' A B")
+  })
+  it('leaves invalid or unknown references untouched', () => {
+    expect(decodeEntities('&#xZZ; &#99999999; &constructor; &toString; &foo;')).toBe('&#xZZ; &#99999999; &constructor; &toString; &foo;')
   })
 })

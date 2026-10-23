@@ -34,6 +34,8 @@ export function normalizeGithubAdvisory(source: string, advisory: GithubAdvisory
     title: advisory.summary,
     description: advisory.description?.slice(0, 2000) ?? undefined,
     url: advisory.html_url,
+    // 取り下げられた Advisory は保存済みの行を上書きして非表示にする
+    status: advisory.withdrawn_at ? 'withdrawn' : undefined,
     severity: advisory.severity,
     product: [...new Set(packages.map(p => p.name))].join(', ') || undefined,
     ecosystem: packages[0]?.ecosystem,
@@ -65,7 +67,7 @@ class GithubAdvisorySource implements IncidentSource {
     }
     if (context.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${context.env.GITHUB_TOKEN}`
     const advisories = await fetchJson<GithubAdvisory[]>(context.fetch, API_URL, headers)
-    return advisories.filter(a => !a.withdrawn_at).map(a => normalizeGithubAdvisory(this.id, a, context.now))
+    return advisories.map(a => normalizeGithubAdvisory(this.id, a, context.now))
   }
 }
 

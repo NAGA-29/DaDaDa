@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { SummaryResponse } from '../../shared/api'
 import type { Loadable } from '../lib/api'
+import { formatDateTime } from '../lib/format'
 import { HappeningNow } from './happening-now/HappeningNow'
 import { Security } from './security/Security'
 import { Services } from './services/Services'
@@ -33,6 +34,11 @@ export function Home({ summary }: { summary: Loadable<SummaryResponse> }) {
           </span>
         </p>
       </div>
+      {error && (
+        <p className="stale" role="status">
+          Can't reach DaDaDa right now — showing data from {formatDateTime(data.generatedAt)}.
+        </p>
+      )}
       <HappeningNow incidents={data.happeningNow} providers={providers} />
       <Services services={data.services} />
       <Security advisories={data.security} kev={data.kev} providers={providers} />

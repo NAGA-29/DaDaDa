@@ -117,6 +117,10 @@ code { font-family: var(--mono); }
 .group-note { font-weight: 400; margin-left: 6px; font-size: 12px; }
 .empty, .muted { color: var(--muted); }
 .empty { margin: 0; }
+.stale {
+  margin: 16px 0 0; padding: 8px 12px; border-radius: 8px; font-size: 13px;
+  color: var(--major); background: color-mix(in srgb, var(--major) 10%, transparent);
+}
 
 .all-clear { margin: 0; display: flex; align-items: center; gap: 10px; font-weight: 500; }
 .all-clear-mark {

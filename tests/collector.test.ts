@@ -7,7 +7,7 @@ import type { Bindings } from '../src/worker/env'
 import { IncidentRepository } from '../src/worker/repositories/incident.repository'
 import { getProviderDetail, getSummary } from '../src/worker/services/incident.service'
 import { sources } from '../src/worker/sources'
-import { fakeFetch } from './helpers'
+import { fakeFetch, fixture } from './helpers'
 
 // wrangler のローカル D1 (インメモリ) に migration を当てて、収集〜API 集約まで通す
 let proxy: Awaited<ReturnType<typeof getPlatformProxy<Bindings>>>
@@ -53,11 +53,12 @@ describe('collector runner + D1', () => {
 
     expect(result.results).toHaveLength(sources.length)
     expect(byId['github-status']).toMatchObject({ ok: false })
-    expect(byId['vercel-status']).toMatchObject({ ok: false, error: 'network down' })
+    expect(byId['vercel-status']).toMatchObject({ ok: false, error: 'status: network down; incidents: network down' })
     expect(byId['cloudflare-status']).toMatchObject({ ok: true, incidents: 2, status: 'partial_outage' })
     expect(byId['google-cloud-status']).toMatchObject({ ok: true, incidents: 2, status: 'partial_outage' })
     expect(byId['php-security']).toMatchObject({ ok: true, incidents: 1 })
-    expect(byId['github-advisory']).toMatchObject({ ok: true, incidents: 1 })
+    // withdrawn も status=withdrawn として保存される (一覧には出ない)
+    expect(byId['github-advisory']).toMatchObject({ ok: true, incidents: 2 })
     expect(byId['cisa-kev']).toMatchObject({ ok: true, incidents: 1 })
   })
 
@@ -105,5 +106,65 @@ describe('collector runner + D1', () => {
     const php = await getProviderDetail(env.DB, 'php')
     expect(php?.currentStatus).toBeNull()
     expect(php?.securityAdvisories).toHaveLength(1)
+  })
+
+  it('keeps the successful half when status or incidents fail', async () => {
+    const partial = fakeFetch({
+      'https://www.githubstatus.com/api/v2/summary.json': 'statuspage-summary.json',
+      'https://www.githubstatus.com/api/v2/incidents.json': () => new Response('down', { status: 503 }),
+    })
+    const githubOnly = sources.filter(s => s.id === 'github-status')
+    const result = await runCollectors(env, ['status'], { now, fetch: partial, sources: githubOnly })
+    expect(result.results[0]).toMatchObject({ sourceId: 'github-status', ok: false, status: 'partial_outage', incidents: 0 })
+    expect(result.results[0]!.error).toMatch(/^incidents: /)
+
+    const summary = await getSummary(env.DB, now)
+    expect(summary.services.find(s => s.id === 'github')?.currentStatus?.status).toBe('partial_outage')
+  })
+
+  it('reports stale statuses as unknown', async () => {
+    const later = new Date(now.getTime() + 2 * 60 * 60 * 1000)
+    const summary = await getSummary(env.DB, later)
+    expect(summary.services.find(s => s.id === 'cloudflare')?.currentStatus?.status).toBe('unknown')
+    expect((await getProviderDetail(env.DB, 'cloudflare', later))?.currentStatus?.status).toBe('unknown')
+  })
+
+  it('applies the KEV window when reading', async () => {
+    const later = new Date(now.getTime() + 40 * 24 * 60 * 60 * 1000)
+    expect((await getSummary(env.DB, later)).kev).toEqual([])
+  })
+
+  it('hides advisories that were withdrawn after being stored', async () => {
+    const advisories = JSON.parse(fixture('github-advisories.json')) as { withdrawn_at?: string | null }[]
+    advisories[0]!.withdrawn_at = '2026-10-23T09:00:00Z'
+    const withdrawn = fakeFetch({ 'https://api.github.com/advisories': () => new Response(JSON.stringify(advisories)) })
+    const ghsa = sources.filter(s => s.id === 'github-advisory')
+
+    expect((await getSummary(env.DB, now)).security.map(i => i.externalId)).toContain('GHSA-aaaa-bbbb-cccc')
+    await runCollectors(env, ['security'], { now, fetch: withdrawn, sources: ghsa })
+    const summary = await getSummary(env.DB, now)
+    expect(summary.security.map(i => i.externalId)).not.toContain('GHSA-aaaa-bbbb-cccc')
+    expect(summary.happeningNow.map(i => i.externalId)).not.toContain('GHSA-aaaa-bbbb-cccc')
+    expect((await getProviderDetail(env.DB, 'github-advisory'))?.securityAdvisories).toEqual([])
+    // raw は残っている
+    expect((await new IncidentRepository(env.DB).get('github-advisory:GHSA-aaaa-bbbb-cccc'))?.status).toBe('withdrawn')
+  })
+
+  it('stores empty external ids as NULL', async () => {
+    const empty = fakeFetch({
+      'https://www.vercel-status.com/api/v2/summary.json': 'statuspage-summary.json',
+      'https://www.vercel-status.com/api/v2/incidents.json': () =>
+        new Response(
+          JSON.stringify({
+            incidents: [
+              { id: '', name: 'First', status: 'resolved', impact: 'minor', created_at: '2026-10-22T00:00:00Z' },
+              { id: '', name: 'Second', status: 'resolved', impact: 'minor', created_at: '2026-10-22T01:00:00Z' },
+            ],
+          }),
+        ),
+    })
+    const vercel = sources.filter(s => s.id === 'vercel-status')
+    const result = await runCollectors(env, ['status'], { now, fetch: empty, sources: vercel })
+    expect(result.results[0]).toMatchObject({ ok: true, incidents: 2 })
   })
 })

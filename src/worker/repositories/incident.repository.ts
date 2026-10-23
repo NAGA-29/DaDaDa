@@ -1,4 +1,4 @@
-import { RESOLVED_STATUSES, type Incident, type IncidentKind } from '../domain/incident'
+import { HIDDEN_STATUSES, RESOLVED_STATUSES, type Incident, type IncidentKind } from '../domain/incident'
 
 type IncidentRow = {
   id: string
@@ -26,6 +26,7 @@ export type IncidentFilter = {
   kind?: IncidentKind
   providerId?: string
   source?: string
+  excludeSource?: string
   ecosystem?: string
   status?: string
   /** true: 未解決のみ / false: 解決済みのみ */
@@ -48,6 +49,7 @@ const LIST_COLUMNS =
   'id, provider_id, kind, source, external_id, title, description, url, status, severity, product, ecosystem, cves_json, started_at, published_at, updated_at, resolved_at, collected_at'
 
 const RESOLVED_SQL = RESOLVED_STATUSES.map(s => `'${s}'`).join(', ')
+const HIDDEN_SQL = HIDDEN_STATUSES.map(s => `'${s}'`).join(', ')
 
 function toIncident(row: IncidentRow): Incident {
   return {
@@ -126,7 +128,7 @@ export class IncidentRepository {
         i.providerId ?? null,
         i.kind,
         i.source,
-        i.externalId ?? null,
+        i.externalId || null,
         i.title,
         i.description ?? null,
         i.url,
@@ -162,8 +164,11 @@ export class IncidentRepository {
     if (filter.kind) add('kind = ?', filter.kind)
     if (filter.providerId) add('provider_id = ?', filter.providerId)
     if (filter.source) add('source = ?', filter.source)
+    if (filter.excludeSource) add('source != ?', filter.excludeSource)
     if (filter.ecosystem) add('ecosystem = ?', filter.ecosystem)
+    // withdrawn などの非表示 status は、明示的に指定されたときだけ返す
     if (filter.status) add('status = ?', filter.status)
+    else add(`(status IS NULL OR status NOT IN (${HIDDEN_SQL}))`)
     if (filter.active === true) add(`resolved_at IS NULL AND (status IS NULL OR status NOT IN (${RESOLVED_SQL}))`)
     if (filter.active === false) add(`(resolved_at IS NOT NULL OR status IN (${RESOLVED_SQL}))`)
     if (filter.from) add('published_at >= ?', filter.from)

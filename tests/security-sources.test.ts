@@ -67,14 +67,17 @@ describe('GitHub Advisory source', () => {
     })
   })
 
-  it('skips withdrawn advisories and sends a token when configured', async () => {
+  it('marks withdrawn advisories and sends a token when configured', async () => {
     let auth: string | null = null
     const fetcher = (async (_url: string, init?: RequestInit) => {
       auth = new Headers(init?.headers).get('Authorization')
       return new Response(fixture('github-advisories.json'))
     }) as typeof fetch
     const result = await githubAdvisory.collect({ now, fetch: fetcher, env: { GITHUB_TOKEN: 't0ken' } } as SourceContext)
-    expect(result.map(r => r.externalId)).toEqual(['GHSA-aaaa-bbbb-cccc'])
+    expect(result.map(r => [r.externalId, r.status])).toEqual([
+      ['GHSA-aaaa-bbbb-cccc', undefined],
+      ['GHSA-dddd-eeee-ffff', 'withdrawn'],
+    ])
     expect(auth).toBe('Bearer t0ken')
   })
 })

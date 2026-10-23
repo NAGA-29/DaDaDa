@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   const res = await fetch(path, { headers: { Accept: 'application/json' }, signal })
@@ -20,9 +20,16 @@ export function useApi<T>(path: string, refreshMs?: number): Loadable<T> {
   const [loading, setLoading] = useState(true)
   const [tick, setTick] = useState(0)
   const reload = useCallback(() => setTick(t => t + 1), [])
+  const previousPath = useRef(path)
 
   useEffect(() => {
     const controller = new AbortController()
+    // 別リソースに切り替わったら前のデータは見せない (定期更新の失敗時は保持する)
+    if (previousPath.current !== path) {
+      previousPath.current = path
+      setData(null)
+      setError(null)
+    }
     setLoading(true)
     getJson<T>(path, controller.signal)
       .then(d => {
