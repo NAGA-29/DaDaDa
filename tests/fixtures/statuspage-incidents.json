@@ -1,0 +1,32 @@
+{
+  "page": { "id": "yh6f0r4529hb", "name": "Cloudflare", "url": "https://www.cloudflarestatus.com" },
+  "incidents": [
+    {
+      "id": "inc-active-1",
+      "name": "Workers API elevated errors",
+      "status": "investigating",
+      "impact": "major",
+      "shortlink": "https://stspg.io/abc123",
+      "created_at": "2026-10-23T10:12:00.000Z",
+      "started_at": "2026-10-23T10:05:00.000Z",
+      "updated_at": "2026-10-23T10:20:00.000Z",
+      "resolved_at": null,
+      "incident_updates": [
+        { "id": "u2", "status": "investigating", "body": "We are seeing elevated 5xx errors on Workers.", "created_at": "2026-10-23T10:20:00.000Z" },
+        { "id": "u1", "status": "investigating", "body": "Investigating.", "created_at": "2026-10-23T10:12:00.000Z" }
+      ],
+      "components": [{ "id": "c1", "name": "Workers" }]
+    },
+    {
+      "id": "inc-old-1",
+      "name": "R2 latency",
+      "status": "resolved",
+      "impact": "minor",
+      "created_at": "2026-10-20T01:00:00+09:00",
+      "updated_at": "2026-10-20T03:00:00+09:00",
+      "resolved_at": "2026-10-20T03:00:00+09:00",
+      "incident_updates": [],
+      "components": []
+    }
+  ]
+}

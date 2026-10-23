@@ -1,0 +1,28 @@
+[
+  {
+    "ghsa_id": "GHSA-aaaa-bbbb-cccc",
+    "cve_id": "CVE-2026-33333",
+    "html_url": "https://github.com/advisories/GHSA-aaaa-bbbb-cccc",
+    "summary": "Remote code execution in example-lib",
+    "description": "example-lib before 2.3.4 allows RCE.",
+    "severity": "critical",
+    "published_at": "2026-10-22T12:00:00Z",
+    "updated_at": "2026-10-22T13:00:00Z",
+    "withdrawn_at": null,
+    "identifiers": [{ "type": "GHSA", "value": "GHSA-aaaa-bbbb-cccc" }, { "type": "CVE", "value": "CVE-2026-33333" }],
+    "vulnerabilities": [
+      { "package": { "ecosystem": "npm", "name": "example-lib" } },
+      { "package": { "ecosystem": "npm", "name": "example-lib" } }
+    ]
+  },
+  {
+    "ghsa_id": "GHSA-dddd-eeee-ffff",
+    "cve_id": null,
+    "html_url": "https://github.com/advisories/GHSA-dddd-eeee-ffff",
+    "summary": "Withdrawn advisory",
+    "severity": "critical",
+    "published_at": "2026-10-21T12:00:00Z",
+    "withdrawn_at": "2026-10-21T18:00:00Z",
+    "vulnerabilities": []
+  }
+]
