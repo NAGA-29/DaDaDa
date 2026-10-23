@@ -12,7 +12,7 @@ Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・�
 - React + Vite (`@cloudflare/vite-plugin` で Worker と SPA を 1 プロジェクトに)
 - Vanilla CSS
 
-## 初期 Source (8)
+## Source (17)
 
 | 種別 | Source | 取得方法 |
 | --- | --- | --- |
@@ -20,8 +20,26 @@ Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・�
 | Status | Google Cloud | `status.cloud.google.com/incidents.json` |
 | Security | PHP | php.net Atom (security release のみ) |
 | Security | Node.js | Vulnerability RSS |
-| Security | GitHub Advisory | REST API (reviewed / critical) |
+| Security | GitHub Advisory | REST API（全体の reviewed / Critical） |
+| Security | Go / Java / Rust / C# (.NET) のライブラリ | GitHub Advisory を `go` / `maven` / `rust` / `nuget` 別に High / Critical 収集（4 Source） |
+| Security | Go 標準ライブラリ・toolchain | Go 公式 Vulnerability Database（OSV JSON） |
+| Security | Java SE / GraalVM | Oracle 公式 Security Alerts RSS と Java SE Risk Matrix |
+| Security | Rust / Cargo / rustup | Rust 公式ブログ Atom のセキュリティ告知 |
+| Security | .NET / ASP.NET Core | Microsoft 公式リポジトリの Security Advisory API（2 Source） |
 | Security | CISA KEV | JSON feed (直近 30 日の追加分) |
+
+## セキュリティアラートの表示・収集範囲
+
+- 言語フィルターで Go / Java / Rust / C# (.NET) と既存の JavaScript・PHP・Python を選べます。初期表示は Critical、High または High + Critical に切り替えられます。C++ の専用収集は追加していません。
+- PHP フィルターは PHP 本体（`php`）と Composer ライブラリ（`composer`）の両方を対象にします。
+- 上流が重要度を提供しない公式告知は、重要度を推測せず「Official notices」に別表示します。言語フィルターはこの欄にも適用します。KEV は言語別情報がないため全言語共通の別枠です。
+- CVE / GHSA が一致する情報は集約して表示し、複数言語にまたがる情報は各言語のフィルターで見つけられます。元のデータは取得元ごとに保存します。
+- ライブラリは各言語・各重要度について更新日時順に最大200件を毎回確認します。過去全件の同期ではありません。1 Source の取得失敗はほかの Source に波及させません。
+- トップ画面は各言語の High / Critical / 重要度未設定それぞれ最大30件と全体の最新30件を取得してから重複をまとめます。件数が多い言語によって他言語が一覧から押し出されるのを防ぎます。
+- Go 本体は標準ライブラリ・toolchain の更新順12件、Rust は公式 Atom に残っている告知、Java は過去120日内の最新4告知（Java SE 部分のみ）、.NET / ASP.NET Core は各公式リポジトリの最新100件が対象です。Java は Oracle Java SE / GraalVM の範囲で、全 JDK ベンダーを網羅するものではありません。
+- GitHub API の呼び出しが増えるため、`GITHUB_TOKEN` の設定を推奨します。未設定でも取得できますが、公開 API のレート制限に達した Source は収集結果にエラーを返します。
+
+取得元仕様: [GitHub Advisory API](https://docs.github.com/en/rest/security-advisories/global-advisories)、[Go 公式 DB](https://go.dev/doc/security/vuln/database)、[Rust の告知方針](https://rust-lang.org/security)、[Oracle Security Alerts](https://www.oracle.com/security-alerts/)、[.NET 公式告知](https://github.com/dotnet/runtime/security/advisories)。
 
 ## 開発
 

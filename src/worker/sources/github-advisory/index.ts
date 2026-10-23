@@ -52,6 +52,14 @@ export function normalizeGithubAdvisory(
   }
 }
 
+export function githubHeaders(context: SourceContext): Record<string, string> {
+  return {
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+    ...(context.env.GITHUB_TOKEN ? { Authorization: `Bearer ${context.env.GITHUB_TOKEN}` } : {}),
+  }
+}
+
 class GithubAdvisorySource implements IncidentSource {
   readonly id = 'github-advisory'
   readonly type = 'api'
@@ -66,11 +74,7 @@ class GithubAdvisorySource implements IncidentSource {
   }
 
   async collect(context: SourceContext): Promise<IncidentInput[]> {
-    const headers: Record<string, string> = {
-      Accept: 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-    }
-    if (context.env.GITHUB_TOKEN) headers.Authorization = `Bearer ${context.env.GITHUB_TOKEN}`
+    const headers = githubHeaders(context)
     const advisories = await fetchJson<GithubAdvisory[]>(context.fetch, API_URL, headers)
     return advisories.map(a => normalizeGithubAdvisory(this.id, a, context.now))
   }

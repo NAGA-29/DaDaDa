@@ -4,6 +4,8 @@ import { cloudflareStatus } from './cloudflare'
 import { githubAdvisory } from './github-advisory'
 import { githubStatus } from './github-status'
 import { googleCloudStatus } from './google-cloud'
+import { languageAdvisories } from './language-advisories'
+import { runtimeSecuritySources } from './runtime-security'
 import { nodejsSecurity } from './nodejs'
 import { phpSecurity } from './php'
 import type { Source, SourceGroup } from './types'
@@ -20,6 +22,8 @@ export const sources: Source[] = [
   phpSecurity,
   nodejsSecurity,
   githubAdvisory,
+  ...languageAdvisories,
+  ...runtimeSecuritySources,
   cisaKev,
 ]
 

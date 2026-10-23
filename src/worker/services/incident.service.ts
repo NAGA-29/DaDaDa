@@ -5,6 +5,7 @@ import { IncidentRepository } from '../repositories/incident.repository'
 import { ProviderRepository } from '../repositories/provider.repository'
 import { ProviderStatusRepository } from '../repositories/provider-status.repository'
 import { KEV_LOOKBACK_DAYS } from '../sources/cisa-kev'
+import { deduplicateSecurity, getSecuritySummary } from './security.service'
 import { listProviderStatuses } from './status.service'
 
 const KEV_SOURCE = 'cisa-kev'
@@ -26,7 +27,7 @@ export async function getSummary(db: D1Database, now = new Date()): Promise<Summ
       from: hoursAgo(now, HAPPENING_NOW_SECURITY_WINDOW_HOURS),
       limit: 100,
     }),
-    incidents.list({ kind: 'security', excludeSource: KEV_SOURCE, limit: 30 }),
+    getSecuritySummary(incidents),
     // KEV は通常の Advisory と別枠。保存済みの行にも 30 日の期限を適用する
     incidents.list({
       kind: 'security',
@@ -46,9 +47,11 @@ export async function getSummary(db: D1Database, now = new Date()): Promise<Summ
 
   return {
     generatedAt: now.toISOString(),
-    happeningNow: happeningNow.map(toView),
+    happeningNow: deduplicateSecurity(
+      [...happeningNow, ...security.filter(i => i.status === 'withdrawn')].map(toView),
+    ).sort((a, b) => (b.startedAt ?? b.publishedAt).localeCompare(a.startedAt ?? a.publishedAt)),
     services,
-    security: security.items.map(toView),
+    security: deduplicateSecurity(security.map(toView)),
     kev: kev.items.map(toView),
     providers,
   }
@@ -73,6 +76,6 @@ export async function getProviderDetail(
     currentStatus: currentStatus ? freshStatus(currentStatus, now) : null,
     activeIncidents: active.items.map(toView),
     recentIncidents: recent.items.map(toView),
-    securityAdvisories: security.items.map(toView),
+    securityAdvisories: deduplicateSecurity(security.items.map(toView)),
   }
 }

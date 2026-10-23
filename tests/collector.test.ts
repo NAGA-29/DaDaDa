@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { getPlatformProxy } from 'wrangler'
+import { toIncident } from '../src/worker/domain/fingerprint'
 import { runCollectors } from '../src/worker/collectors/collector-runner'
 import type { Bindings } from '../src/worker/env'
 import { IncidentRepository } from '../src/worker/repositories/incident.repository'
@@ -218,5 +219,62 @@ describe('collector runner + D1', () => {
     const vercel = sources.filter(s => s.id === 'vercel-status')
     const result = await runCollectors(env, ['status'], { now, fetch: empty, sources: vercel })
     expect(result.results[0]).toMatchObject({ ok: true, incidents: 2 })
+  })
+
+  it('keeps each language and severity visible when another language fills the latest page', async () => {
+    const recent = Array.from({ length: 35 }, (_, i) => ({
+      source: 'quota-test',
+      externalId: `npm-${i}`,
+      kind: 'security' as const,
+      title: `Recent npm advisory ${i}`,
+      url: 'https://example.com/advisory',
+      ecosystem: 'npm',
+      severity: 'critical',
+      publishedAt: now.toISOString(),
+      collectedAt: now.toISOString(),
+      raw: {},
+    }))
+    const older = ['high', 'critical'].map(severity => ({
+      source: 'quota-test',
+      externalId: `go-${severity}`,
+      kind: 'security' as const,
+      title: `Older Go ${severity}`,
+      url: 'https://example.com/go',
+      ecosystem: 'go',
+      severity,
+      publishedAt: '2026-09-01T00:00:00.000Z',
+      collectedAt: now.toISOString(),
+      raw: {},
+    }))
+    const repo = new IncidentRepository(env.DB)
+    await repo.upsertMany(await Promise.all([...recent, ...older].map(toIncident)), now)
+    const summary = await getSummary(env.DB, now)
+    expect(
+      summary.security
+        .filter(i => i.source === 'quota-test' && i.ecosystem === 'go')
+        .map(i => i.severity)
+        .sort(),
+    ).toEqual(['critical', 'high'])
+    expect(summary.security.every(i => !('raw' in i))).toBe(true)
+  })
+  it('keeps unscored PHP releases even when newer advisories fill the global page', async () => {
+    const repo = new IncidentRepository(env.DB)
+    const release = await toIncident({
+      source: 'php-security',
+      providerId: 'php',
+      externalId: 'quota-php-release',
+      kind: 'security',
+      title: 'PHP security release',
+      url: 'https://www.php.net/releases/',
+      ecosystem: 'php',
+      publishedAt: '2026-09-01T00:00:00.000Z',
+      collectedAt: now.toISOString(),
+      raw: {},
+    })
+    await repo.upsertMany([release], now)
+    expect(
+      (await repo.list({ kind: 'security', limit: 30 })).items.some(i => i.id === release.id),
+    ).toBe(false)
+    expect((await getSummary(env.DB, now)).security.some(i => i.id === release.id)).toBe(true)
   })
 })

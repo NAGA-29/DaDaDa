@@ -6,7 +6,7 @@ import type { ProviderStatus, ProviderStatusValue } from '../worker/domain/provi
 export type { IncidentKind, Provider, ProviderCategory, ProviderStatusValue }
 
 /** 一覧系では raw を返さない */
-export type IncidentView = Omit<Incident, 'raw'>
+export type IncidentView = Omit<Incident, 'raw'> & { ecosystems?: string[] }
 export type ProviderStatusView = Omit<ProviderStatus, 'raw'>
 
 export type ProviderWithStatus = Provider & {
