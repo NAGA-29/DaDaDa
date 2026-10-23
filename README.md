@@ -44,6 +44,27 @@ pnpm run typecheck
 pnpm run build
 ```
 
+## コミット前のチェック
+
+`pnpm install` の `prepare` で [Husky](https://typicode.github.io/husky/) を設定します。コミット時は `.husky/pre-commit` から次のチェックを順番に実行し、失敗した場合はコミットを停止します。
+
+1. Biome による lint（警告もエラー扱い）
+2. Biome によるフォーマット確認
+3. TypeScript 型チェック
+4. 全テスト
+5. 本番ビルド
+
+```bash
+pnpm run check        # コミット時・CI と同じ全チェック
+pnpm run lint         # lint のみ
+pnpm run lint:fix     # 安全に自動修正できる lint を修正
+pnpm run format       # 書式を自動修正
+pnpm run format:check # 書式の確認のみ
+```
+
+コミット時にはファイルを自動修正しません。書式の指摘は `pnpm run format` で修正してから、変更をステージし直してください。チェック対象はプロジェクト全体の Biome 対応ファイル（ソース・テスト・設定など）で、外部フィードの fixture と生成物は除外します。README / YAML / SQL は Biome の対象外です。既存コードの非 null アサーションは許可しています。
+CI は Git フックの登録を省略し、同じ `pnpm run check` を直接実行します。
+
 ## 依存関係の安全性
 
 `pnpm-workspace.yaml` で以下を適用します。

@@ -12,7 +12,9 @@ import { getSummary } from './services/incident.service'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
-app.get('/api/health', c => c.json<HealthResponse>({ ok: true, name: 'DaDaDa', time: new Date().toISOString() }))
+app.get('/api/health', c =>
+  c.json<HealthResponse>({ ok: true, name: 'DaDaDa', time: new Date().toISOString() }),
+)
 app.get('/api/summary', async c => {
   c.header('Cache-Control', 'public, max-age=30')
   return c.json<SummaryResponse>(await getSummary(c.env.DB))

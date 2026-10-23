@@ -6,7 +6,15 @@ import { StatusBadge } from '../../components/StatusBadge'
 import { useApi } from '../../lib/api'
 import { CATEGORY_LABEL, formatDate, hostOf, timeAgo } from '../../lib/format'
 
-function IncidentSection({ title, incidents, empty }: { title: string; incidents: IncidentView[]; empty?: string }) {
+function IncidentSection({
+  title,
+  incidents,
+  empty,
+}: {
+  title: string
+  incidents: IncidentView[]
+  empty?: string
+}) {
   if (!incidents.length && !empty) return null
   return (
     <section className="section">
@@ -32,7 +40,9 @@ function History({ incidents }: { incidents: IncidentView[] }) {
       <ul className="history">
         {incidents.map(i => (
           <li key={i.id}>
-            <time dateTime={i.startedAt ?? i.publishedAt}>{formatDate(i.startedAt ?? i.publishedAt)}</time>
+            <time dateTime={i.startedAt ?? i.publishedAt}>
+              {formatDate(i.startedAt ?? i.publishedAt)}
+            </time>
             <a href={i.url} target="_blank" rel="noreferrer noopener">
               {i.title}
             </a>
@@ -44,12 +54,17 @@ function History({ incidents }: { incidents: IncidentView[] }) {
 }
 
 export function ProviderDetail({ id }: { id: string }) {
-  const { data, error, loading } = useApi<ProviderDetailResponse>(`/api/providers/${encodeURIComponent(id)}`, 60_000)
+  const { data, error, loading } = useApi<ProviderDetailResponse>(
+    `/api/providers/${encodeURIComponent(id)}`,
+    60_000,
+  )
 
   if (!data) {
     return (
       <main className="page">
-        <Link to="/" className="back">← Everything</Link>
+        <Link to="/" className="back">
+          ← Everything
+        </Link>
         <p className="empty">{loading ? 'Loading…' : error ? `Could not load ${id}.` : null}</p>
       </main>
     )
@@ -58,7 +73,9 @@ export function ProviderDetail({ id }: { id: string }) {
   const { provider, currentStatus, activeIncidents, recentIncidents, securityAdvisories } = data
   return (
     <main className="page">
-      <Link to="/" className="back">← Everything</Link>
+      <Link to="/" className="back">
+        ← Everything
+      </Link>
       <div className="detail-head">
         <ProviderIcon provider={provider} size={48} />
         <div>
@@ -70,25 +87,40 @@ export function ProviderDetail({ id }: { id: string }) {
       {provider.supportsStatus && (
         <div className="detail-status">
           <StatusBadge status={currentStatus?.status} />
-          {currentStatus?.message && <span className="detail-message">{currentStatus.message}</span>}
-          {currentStatus && <span className="muted">checked {timeAgo(currentStatus.checkedAt)}</span>}
+          {currentStatus?.message && (
+            <span className="detail-message">{currentStatus.message}</span>
+          )}
+          {currentStatus && (
+            <span className="muted">checked {timeAgo(currentStatus.checkedAt)}</span>
+          )}
         </div>
       )}
 
       <p className="detail-links">
         {provider.statusUrl && (
           <>
-            Official status <ExternalLink href={provider.statusUrl}>{hostOf(provider.statusUrl)}</ExternalLink>
+            Official status{' '}
+            <ExternalLink href={provider.statusUrl}>{hostOf(provider.statusUrl)}</ExternalLink>
           </>
         )}
-        {!provider.statusUrl && <ExternalLink href={provider.homepageUrl}>{hostOf(provider.homepageUrl)}</ExternalLink>}
+        {!provider.statusUrl && (
+          <ExternalLink href={provider.homepageUrl}>{hostOf(provider.homepageUrl)}</ExternalLink>
+        )}
       </p>
 
       {provider.supportsStatus && (
-        <IncidentSection title="Current incidents" incidents={activeIncidents} empty="No active incidents." />
+        <IncidentSection
+          title="Current incidents"
+          incidents={activeIncidents}
+          empty="No active incidents."
+        />
       )}
       {provider.supportsSecurity && (
-        <IncidentSection title="Security" incidents={securityAdvisories} empty="No advisories collected yet." />
+        <IncidentSection
+          title="Security"
+          incidents={securityAdvisories}
+          empty="No advisories collected yet."
+        />
       )}
       {provider.supportsStatus && <History incidents={recentIncidents} />}
     </main>

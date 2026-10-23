@@ -28,12 +28,17 @@ incidentsRoute.get('/', async c => {
     cursor: q.cursor,
     limit: Number.isFinite(limit) ? limit : undefined,
   })
-  return c.json<IncidentListResponse>({ items: page.items.map(toView), nextCursor: page.nextCursor })
+  return c.json<IncidentListResponse>({
+    items: page.items.map(toView),
+    nextCursor: page.nextCursor,
+  })
 })
 
 incidentsRoute.get('/:id', async c => {
   const incident = await new IncidentRepository(c.env.DB).get(c.req.param('id'))
   if (!incident) return c.json<ErrorResponse>({ error: 'incident not found' }, 404)
-  const provider = incident.providerId ? await new ProviderRepository(c.env.DB).get(incident.providerId) : null
+  const provider = incident.providerId
+    ? await new ProviderRepository(c.env.DB).get(incident.providerId)
+    : null
   return c.json<IncidentDetailResponse>({ incident, provider })
 })

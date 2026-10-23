@@ -10,7 +10,11 @@ export class SourceFetchError extends Error {
   }
 }
 
-async function get(fetcher: typeof fetch, url: string, headers: Record<string, string>): Promise<Response> {
+async function get(
+  fetcher: typeof fetch,
+  url: string,
+  headers: Record<string, string>,
+): Promise<Response> {
   const res = await fetcher(url, {
     headers: { 'User-Agent': USER_AGENT, ...headers },
     signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
@@ -19,12 +23,20 @@ async function get(fetcher: typeof fetch, url: string, headers: Record<string, s
   return res
 }
 
-export async function fetchJson<T>(fetcher: typeof fetch, url: string, headers: Record<string, string> = {}): Promise<T> {
+export async function fetchJson<T>(
+  fetcher: typeof fetch,
+  url: string,
+  headers: Record<string, string> = {},
+): Promise<T> {
   const res = await get(fetcher, url, { Accept: 'application/json', ...headers })
   return (await res.json()) as T
 }
 
-export async function fetchText(fetcher: typeof fetch, url: string, headers: Record<string, string> = {}): Promise<string> {
+export async function fetchText(
+  fetcher: typeof fetch,
+  url: string,
+  headers: Record<string, string> = {},
+): Promise<string> {
   const res = await get(fetcher, url, headers)
   return res.text()
 }

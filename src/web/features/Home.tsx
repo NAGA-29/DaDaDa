@@ -13,7 +13,9 @@ export function Home({ summary }: { summary: Loadable<SummaryResponse> }) {
   if (!data) {
     return (
       <main className="page">
-        <p className="empty">{loading ? 'Scanning…' : error ? 'Could not reach the DaDaDa API.' : null}</p>
+        <p className="empty">
+          {loading ? 'Scanning…' : error ? 'Could not reach the DaDaDa API.' : null}
+        </p>
       </main>
     )
   }

@@ -1,6 +1,4 @@
-export type IncidentKind =
-  | 'service'
-  | 'security'
+export type IncidentKind = 'service' | 'security'
 
 export type Incident = {
   id: string
@@ -39,7 +37,10 @@ export const HAPPENING_NOW_SECURITY_WINDOW_HOURS = 72
  * Happening Now に表示するか。
  * Service: 未解決のもの / Security: 公開から 72h 以内
  */
-export function isHappeningNow(incident: Pick<Incident, 'kind' | 'status' | 'resolvedAt' | 'publishedAt'>, now: Date): boolean {
+export function isHappeningNow(
+  incident: Pick<Incident, 'kind' | 'status' | 'resolvedAt' | 'publishedAt'>,
+  now: Date,
+): boolean {
   if (incident.kind === 'service') {
     return !incident.resolvedAt && !RESOLVED_STATUSES.includes(incident.status as never)
   }

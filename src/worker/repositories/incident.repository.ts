@@ -1,4 +1,9 @@
-import { HIDDEN_STATUSES, RESOLVED_STATUSES, type Incident, type IncidentKind } from '../domain/incident'
+import {
+  HIDDEN_STATUSES,
+  RESOLVED_STATUSES,
+  type Incident,
+  type IncidentKind,
+} from '../domain/incident'
 
 type IncidentRow = {
   id: string
@@ -78,7 +83,10 @@ function toIncident(row: IncidentRow): Incident {
 // cursor は [published_at, id] の JSON を base64url にしたもの
 export function encodeCursor(incident: Pick<Incident, 'publishedAt' | 'id'>): string {
   const bytes = new TextEncoder().encode(JSON.stringify([incident.publishedAt, incident.id]))
-  return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  return btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '')
 }
 
 export function decodeCursor(cursor: string): { publishedAt: string; id: string } | null {
@@ -169,13 +177,20 @@ export class IncidentRepository {
     // withdrawn などの非表示 status は、明示的に指定されたときだけ返す
     if (filter.status) add('status = ?', filter.status)
     else add(`(status IS NULL OR status NOT IN (${HIDDEN_SQL}))`)
-    if (filter.active === true) add(`resolved_at IS NULL AND (status IS NULL OR status NOT IN (${RESOLVED_SQL}))`)
+    if (filter.active === true)
+      add(`resolved_at IS NULL AND (status IS NULL OR status NOT IN (${RESOLVED_SQL}))`)
     if (filter.active === false) add(`(resolved_at IS NOT NULL OR status IN (${RESOLVED_SQL}))`)
     if (filter.from) add('published_at >= ?', filter.from)
     if (filter.to) add('published_at <= ?', filter.to)
     if (filter.cursor) {
       const c = decodeCursor(filter.cursor)
-      if (c) add('(published_at < ? OR (published_at = ? AND id < ?))', c.publishedAt, c.publishedAt, c.id)
+      if (c)
+        add(
+          '(published_at < ? OR (published_at = ? AND id < ?))',
+          c.publishedAt,
+          c.publishedAt,
+          c.id,
+        )
     }
 
     const limit = Math.min(Math.max(filter.limit ?? DEFAULT_LIMIT, 1), MAX_LIMIT)
@@ -195,7 +210,10 @@ export class IncidentRepository {
 
   /** 詳細取得。raw も含める */
   async get(id: string): Promise<Incident | null> {
-    const row = await this.db.prepare('SELECT * FROM incidents WHERE id = ?').bind(id).first<IncidentRow>()
+    const row = await this.db
+      .prepare('SELECT * FROM incidents WHERE id = ?')
+      .bind(id)
+      .first<IncidentRow>()
     return row ? toIncident(row) : null
   }
 }

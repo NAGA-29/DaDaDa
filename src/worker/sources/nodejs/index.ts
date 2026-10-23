@@ -8,7 +8,11 @@ import type { IncidentSource, SourceContext } from '../types'
 
 const FEED_URL = 'https://nodejs.org/en/feed/vulnerability.xml'
 
-export function normalizeNodeItem(source: string, item: RssItem, now: Date): IncidentInput | undefined {
+export function normalizeNodeItem(
+  source: string,
+  item: RssItem,
+  now: Date,
+): IncidentInput | undefined {
   const publishedAt = toIsoUtc(item.pubDate)
   if (!publishedAt || !item.link) return undefined
   return {

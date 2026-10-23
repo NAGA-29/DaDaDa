@@ -22,6 +22,7 @@ export function useApi<T>(path: string, refreshMs?: number): Loadable<T> {
   const reload = useCallback(() => setTick(t => t + 1), [])
   const previousPath = useRef(path)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: tick intentionally triggers manual and scheduled reloads.
   useEffect(() => {
     const controller = new AbortController()
     // 別リソースに切り替わったら前のデータは見せない (定期更新の失敗時は保持する)

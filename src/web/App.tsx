@@ -19,7 +19,9 @@ function safeDecode(segment: string): string | undefined {
 function NotFound() {
   return (
     <main className="page">
-      <Link to="/" className="back">← Everything</Link>
+      <Link to="/" className="back">
+        ← Everything
+      </Link>
       <p className="empty">Page not found.</p>
     </main>
   )

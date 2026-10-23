@@ -63,14 +63,19 @@ export class ProviderRepository {
 
   async list(filter: { category?: string } = {}): Promise<Provider[]> {
     const query = filter.category
-      ? this.db.prepare('SELECT * FROM providers WHERE category = ? ORDER BY name').bind(filter.category)
+      ? this.db
+          .prepare('SELECT * FROM providers WHERE category = ? ORDER BY name')
+          .bind(filter.category)
       : this.db.prepare('SELECT * FROM providers ORDER BY name')
     const { results } = await query.all<ProviderRow>()
     return results.map(toProvider)
   }
 
   async get(id: string): Promise<Provider | null> {
-    const row = await this.db.prepare('SELECT * FROM providers WHERE id = ?').bind(id).first<ProviderRow>()
+    const row = await this.db
+      .prepare('SELECT * FROM providers WHERE id = ?')
+      .bind(id)
+      .first<ProviderRow>()
     return row ? toProvider(row) : null
   }
 }

@@ -26,7 +26,9 @@ async function sha256Hex(input: string): Promise<string> {
  * - externalId あり: `source:externalId`
  * - なし: SHA-256(source + canonicalUrl + normalizedTitle + publishedDate)
  */
-export async function incidentId(input: Pick<IncidentInput, 'source' | 'externalId' | 'url' | 'title' | 'publishedAt'>): Promise<string> {
+export async function incidentId(
+  input: Pick<IncidentInput, 'source' | 'externalId' | 'url' | 'title' | 'publishedAt'>,
+): Promise<string> {
   if (input.externalId) return `${input.source}:${input.externalId}`
   const publishedDate = input.publishedAt.slice(0, 10)
   const hash = await sha256Hex(

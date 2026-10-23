@@ -26,7 +26,8 @@ export function usePathname(): string {
 /** <a> の onClick 用。修飾キー付きクリックはブラウザに任せる */
 export function onLinkClick(path: string) {
   return (e: MouseEvent<HTMLAnchorElement>) => {
-    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)
+      return
     e.preventDefault()
     navigate(path)
   }

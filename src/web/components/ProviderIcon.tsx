@@ -7,15 +7,28 @@ function hue(id: string): number {
   return h
 }
 
-export function ProviderIcon({ provider, size = 28 }: { provider: Pick<Provider, 'id' | 'name' | 'iconUrl'>; size?: number }) {
+export function ProviderIcon({
+  provider,
+  size = 28,
+}: {
+  provider: Pick<Provider, 'id' | 'name' | 'iconUrl'>
+  size?: number
+}) {
   if (provider.iconUrl) {
-    return <img className="provider-icon" src={provider.iconUrl} alt="" width={size} height={size} />
+    return (
+      <img className="provider-icon" src={provider.iconUrl} alt="" width={size} height={size} />
+    )
   }
   return (
     <span
       className="provider-icon"
       aria-hidden
-      style={{ width: size, height: size, fontSize: size * 0.46, ['--h' as string]: hue(provider.id) }}
+      style={{
+        width: size,
+        height: size,
+        fontSize: size * 0.46,
+        ['--h' as string]: hue(provider.id),
+      }}
     >
       {provider.name.charAt(0)}
     </span>

@@ -11,7 +11,9 @@ export function Services({ services }: { services: ProviderWithStatus[] }) {
 
   return (
     <section className="section" aria-labelledby="services-title">
-      <h2 id="services-title" className="section-title">Services</h2>
+      <h2 id="services-title" className="section-title">
+        Services
+      </h2>
       {ordered.length === 0 && <p className="empty">No status sources collected yet.</p>}
       <div className="service-groups">
         {ordered.map(category => (

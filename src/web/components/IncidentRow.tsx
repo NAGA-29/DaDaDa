@@ -23,7 +23,11 @@ export function IncidentRow({ incident, provider, showProvider = true }: Props) 
   return (
     <li className={`incident tone-${tone}`}>
       <span className="incident-mark">
-        {showProvider && provider ? <ProviderIcon provider={provider} /> : <Dot tone={tone} pulse={active} />}
+        {showProvider && provider ? (
+          <ProviderIcon provider={provider} />
+        ) : (
+          <Dot tone={tone} pulse={active} />
+        )}
       </span>
       <div className="incident-body">
         {showProvider && provider && (

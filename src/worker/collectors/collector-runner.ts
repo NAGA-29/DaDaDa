@@ -43,8 +43,10 @@ async function collectOne(source: Source, context: SourceContext): Promise<Colle
     isIncidentSource(source) ? source.collect(context) : [],
   ])
   const errors: string[] = []
-  if (statusResult.status === 'rejected') errors.push(`status: ${errorMessage(statusResult.reason)}`)
-  if (inputsResult.status === 'rejected') errors.push(`incidents: ${errorMessage(inputsResult.reason)}`)
+  if (statusResult.status === 'rejected')
+    errors.push(`status: ${errorMessage(statusResult.reason)}`)
+  if (inputsResult.status === 'rejected')
+    errors.push(`incidents: ${errorMessage(inputsResult.reason)}`)
   const status = statusResult.status === 'fulfilled' ? statusResult.value : undefined
   const inputs = inputsResult.status === 'fulfilled' ? inputsResult.value : []
   const incidents = await Promise.all(inputs.map(toIncident))
@@ -94,7 +96,8 @@ export async function runCollectors(
     const sourceId = targets[i]!.id
     if (r.status === 'fulfilled') {
       const { errors, incidents, statuses } = r.value
-      if (errors.length) console.error(`[collector] ${sourceId} partially failed:`, errors.join('; '))
+      if (errors.length)
+        console.error(`[collector] ${sourceId} partially failed:`, errors.join('; '))
       return {
         sourceId,
         ok: errors.length === 0,
@@ -107,7 +110,12 @@ export async function runCollectors(
     return { sourceId, ok: false, incidents: 0, error: errorMessage(r.reason) }
   })
 
-  const result = { startedAt: now.toISOString(), finishedAt: new Date().toISOString(), groups, results }
+  const result = {
+    startedAt: now.toISOString(),
+    finishedAt: new Date().toISOString(),
+    groups,
+    results,
+  }
   console.log('[collector] done', JSON.stringify(results))
   return result
 }

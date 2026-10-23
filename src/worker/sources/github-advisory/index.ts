@@ -5,7 +5,8 @@ import { toIsoUtc } from '../../lib/time'
 import type { IncidentSource, SourceContext } from '../types'
 
 // GitHub Advisory Database (reviewed のみ)。ノイズを避けるため上流 severity が critical のものに絞る
-const API_URL = 'https://api.github.com/advisories?type=reviewed&severity=critical&sort=published&direction=desc&per_page=50'
+const API_URL =
+  'https://api.github.com/advisories?type=reviewed&severity=critical&sort=published&direction=desc&per_page=50'
 
 export type GithubAdvisory = {
   ghsa_id: string
@@ -21,7 +22,11 @@ export type GithubAdvisory = {
   vulnerabilities?: { package?: { ecosystem: string; name: string } | null }[]
 }
 
-export function normalizeGithubAdvisory(source: string, advisory: GithubAdvisory, now: Date): IncidentInput {
+export function normalizeGithubAdvisory(
+  source: string,
+  advisory: GithubAdvisory,
+  now: Date,
+): IncidentInput {
   const packages = (advisory.vulnerabilities ?? []).flatMap(v => (v.package ? [v.package] : []))
   const cves = new Set<string>()
   if (advisory.cve_id) cves.add(advisory.cve_id)

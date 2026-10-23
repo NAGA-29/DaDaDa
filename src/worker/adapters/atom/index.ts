@@ -18,7 +18,10 @@ type AtomLink = { '@_href'?: string; '@_rel'?: string }
 function markupOf(node: unknown): string | undefined {
   const text = textOf(node)
   if (!text) return undefined
-  const type = typeof node === 'object' && node !== null ? (node as Record<string, unknown>)['@_type'] : undefined
+  const type =
+    typeof node === 'object' && node !== null
+      ? (node as Record<string, unknown>)['@_type']
+      : undefined
   return type === 'xhtml' ? text : decodeEntities(text)
 }
 

@@ -21,18 +21,28 @@ export async function getSummary(db: D1Database, now = new Date()): Promise<Summ
   const incidents = new IncidentRepository(db)
   const [activeService, recentSecurity, security, kev, services, providers] = await Promise.all([
     incidents.list({ kind: 'service', active: true, limit: 100 }),
-    incidents.list({ kind: 'security', from: hoursAgo(now, HAPPENING_NOW_SECURITY_WINDOW_HOURS), limit: 100 }),
+    incidents.list({
+      kind: 'security',
+      from: hoursAgo(now, HAPPENING_NOW_SECURITY_WINDOW_HOURS),
+      limit: 100,
+    }),
     incidents.list({ kind: 'security', excludeSource: KEV_SOURCE, limit: 30 }),
     // KEV は通常の Advisory と別枠。保存済みの行にも 30 日の期限を適用する
-    incidents.list({ kind: 'security', source: KEV_SOURCE, from: hoursAgo(now, KEV_LOOKBACK_DAYS * 24), limit: 20 }),
+    incidents.list({
+      kind: 'security',
+      source: KEV_SOURCE,
+      from: hoursAgo(now, KEV_LOOKBACK_DAYS * 24),
+      limit: 20,
+    }),
     listProviderStatuses(db, {}, now),
     new ProviderRepository(db).list(),
   ])
 
   const isKev = (i: Incident) => i.source === KEV_SOURCE
-  const happeningNow = [...activeService.items, ...recentSecurity.items.filter(i => !isKev(i))].sort((a, b) =>
-    (b.startedAt ?? b.publishedAt).localeCompare(a.startedAt ?? a.publishedAt),
-  )
+  const happeningNow = [
+    ...activeService.items,
+    ...recentSecurity.items.filter(i => !isKev(i)),
+  ].sort((a, b) => (b.startedAt ?? b.publishedAt).localeCompare(a.startedAt ?? a.publishedAt))
 
   return {
     generatedAt: now.toISOString(),
@@ -44,7 +54,11 @@ export async function getSummary(db: D1Database, now = new Date()): Promise<Summ
   }
 }
 
-export async function getProviderDetail(db: D1Database, providerId: string, now = new Date()): Promise<ProviderDetailResponse | null> {
+export async function getProviderDetail(
+  db: D1Database,
+  providerId: string,
+  now = new Date(),
+): Promise<ProviderDetailResponse | null> {
   const provider = await new ProviderRepository(db).get(providerId)
   if (!provider) return null
   const incidents = new IncidentRepository(db)

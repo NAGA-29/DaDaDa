@@ -13,7 +13,11 @@ const now = new Date('2026-10-23T10:30:00Z')
 
 describe('Statuspage adapter', () => {
   it('uses the worst component status (groups ignored)', () => {
-    const status = normalizeStatuspageSummary('cloudflare', fixtureJson<StatuspageSummary>('statuspage-summary.json'), now)
+    const status = normalizeStatuspageSummary(
+      'cloudflare',
+      fixtureJson<StatuspageSummary>('statuspage-summary.json'),
+      now,
+    )
     expect(status).toMatchObject({
       providerId: 'cloudflare',
       status: 'partial_outage',
@@ -26,15 +30,26 @@ describe('Statuspage adapter', () => {
   it('maps all-operational summary to operational', () => {
     const status = normalizeStatuspageSummary(
       'github',
-      { status: { indicator: 'none', description: 'All Systems Operational' }, components: [{ id: 'a', name: 'Git', status: 'operational' }] },
+      {
+        status: { indicator: 'none', description: 'All Systems Operational' },
+        components: [{ id: 'a', name: 'Git', status: 'operational' }],
+      },
       now,
     )
     expect(status.status).toBe('operational')
   })
 
   it('normalizes incidents keeping upstream impact as severity', () => {
-    const [active, resolved] = fixtureJson<StatuspageIncidents>('statuspage-incidents.json').incidents.map(i =>
-      normalizeStatuspageIncident('cloudflare-status', 'cloudflare', 'https://www.cloudflarestatus.com', i, now),
+    const [active, resolved] = fixtureJson<StatuspageIncidents>(
+      'statuspage-incidents.json',
+    ).incidents.map(i =>
+      normalizeStatuspageIncident(
+        'cloudflare-status',
+        'cloudflare',
+        'https://www.cloudflarestatus.com',
+        i,
+        now,
+      ),
     )
     expect(active).toMatchObject({
       kind: 'service',

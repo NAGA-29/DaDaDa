@@ -16,12 +16,21 @@ export function timeAgo(iso: string | undefined, now = Date.now()): string {
 
 export function formatDate(iso: string | undefined): string {
   if (!iso) return ''
-  return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+  return new Date(iso).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
 }
 
 export function formatDateTime(iso: string | undefined): string {
   if (!iso) return ''
-  return new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+  return new Date(iso).toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 export const STATUS_LABEL: Record<ProviderStatusValue, string> = {
@@ -46,7 +55,15 @@ export const CATEGORY_LABEL: Record<ProviderCategory, string> = {
 }
 
 export const CATEGORY_ORDER: ProviderCategory[] = [
-  'cloud', 'developer', 'database', 'ai', 'communication', 'payment', 'runtime', 'security', 'other',
+  'cloud',
+  'developer',
+  'database',
+  'ai',
+  'communication',
+  'payment',
+  'runtime',
+  'security',
+  'other',
 ]
 
 /** 上流の status 文字列 ("partial_outage", "investigating" ...) を読みやすくする */

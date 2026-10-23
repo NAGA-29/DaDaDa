@@ -1,7 +1,11 @@
 import { fetchJson } from '../../adapters/http'
 import type { IncidentInput } from '../../domain/incident'
 import type { Provider } from '../../domain/provider'
-import { worstStatus, type ProviderStatus, type ProviderStatusValue } from '../../domain/provider-status'
+import {
+  worstStatus,
+  type ProviderStatus,
+  type ProviderStatusValue,
+} from '../../domain/provider-status'
 import { toIsoUtc } from '../../lib/time'
 import type { IncidentSource, SourceContext, StatusSource } from '../types'
 
@@ -37,13 +41,19 @@ export function gcpProviderStatus(incidents: GcpIncident[], now: Date): Provider
   return {
     providerId: 'google-cloud',
     status: worstStatus(active.map(i => IMPACT_STATUS[i.status_impact ?? ''] ?? 'degraded')),
-    message: active.length ? `${active.length} active incident${active.length > 1 ? 's' : ''}` : 'All services available',
+    message: active.length
+      ? `${active.length} active incident${active.length > 1 ? 's' : ''}`
+      : 'All services available',
     checkedAt: now.toISOString(),
     raw: active,
   }
 }
 
-export function normalizeGcpIncident(source: string, incident: GcpIncident, now: Date): IncidentInput {
+export function normalizeGcpIncident(
+  source: string,
+  incident: GcpIncident,
+  now: Date,
+): IncidentInput {
   const begin = toIsoUtc(incident.begin) ?? now.toISOString()
   return {
     providerId: 'google-cloud',
@@ -53,7 +63,9 @@ export function normalizeGcpIncident(source: string, incident: GcpIncident, now:
     title: incident.external_desc.trim(),
     description: incident.most_recent_update?.text,
     url: `${BASE_URL}/${incident.uri.replace(/^\//, '')}`,
-    status: incident.end ? 'resolved' : (incident.most_recent_update?.status?.toLowerCase() ?? 'active'),
+    status: incident.end
+      ? 'resolved'
+      : (incident.most_recent_update?.status?.toLowerCase() ?? 'active'),
     severity: incident.severity,
     product: incident.affected_products?.map(p => p.title).join(', ') || undefined,
     startedAt: begin,

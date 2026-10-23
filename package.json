@@ -14,7 +14,13 @@
     "db:migrate:local": "wrangler d1 migrations apply dadada --local",
     "db:migrate:remote": "wrangler d1 migrations apply dadada --remote",
     "security:audit": "pnpm audit --audit-level=low",
-    "postinstall": "pnpm run security:audit"
+    "postinstall": "pnpm run security:audit",
+    "lint": "biome lint . --error-on-warnings",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "check": "pnpm run lint && pnpm run format:check && pnpm run typecheck && pnpm test && pnpm run build",
+    "prepare": "husky"
   },
   "dependencies": {
     "fast-xml-parser": "5.11.2",
@@ -23,12 +29,14 @@
     "react-dom": "19.3.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.15",
     "@cloudflare/vite-plugin": "1.64.0",
     "@cloudflare/workers-types": "5.20261016.1",
     "@types/node": "22.20.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.2",
+    "husky": "9.1.7",
     "typescript": "5.9.3",
     "vite": "8.3.4",
     "vitest": "5.0.5",

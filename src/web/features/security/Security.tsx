@@ -10,13 +10,19 @@ type Props = {
 export function Security({ advisories, kev, providers }: Props) {
   return (
     <section className="section" aria-labelledby="security-title">
-      <h2 id="security-title" className="section-title">Security</h2>
+      <h2 id="security-title" className="section-title">
+        Security
+      </h2>
       {advisories.length === 0 ? (
         <p className="empty">No advisories collected yet.</p>
       ) : (
         <ul className="incident-list">
           {advisories.map(i => (
-            <IncidentRow key={i.id} incident={i} provider={i.providerId ? providers.get(i.providerId) : undefined} />
+            <IncidentRow
+              key={i.id}
+              incident={i}
+              provider={i.providerId ? providers.get(i.providerId) : undefined}
+            />
           ))}
         </ul>
       )}

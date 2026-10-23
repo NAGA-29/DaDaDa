@@ -1,6 +1,10 @@
 import type { IncidentInput } from '../../domain/incident'
 import type { Provider } from '../../domain/provider'
-import { worstStatus, type ProviderStatus, type ProviderStatusValue } from '../../domain/provider-status'
+import {
+  worstStatus,
+  type ProviderStatus,
+  type ProviderStatusValue,
+} from '../../domain/provider-status'
 import { toIsoUtc } from '../../lib/time'
 import type { IncidentSource, SourceContext, StatusSource } from '../../sources/types'
 import { fetchJson } from '../http'
@@ -10,7 +14,13 @@ import { fetchJson } from '../http'
 export type StatuspageComponent = {
   id: string
   name: string
-  status: 'operational' | 'degraded_performance' | 'partial_outage' | 'major_outage' | 'under_maintenance' | string
+  status:
+    | 'operational'
+    | 'degraded_performance'
+    | 'partial_outage'
+    | 'major_outage'
+    | 'under_maintenance'
+    | string
   group?: boolean
   only_show_if_degraded?: boolean
 }
@@ -37,7 +47,10 @@ export type StatuspageIncident = {
 }
 
 export type StatuspageSummary = {
-  status: { indicator: 'none' | 'minor' | 'major' | 'critical' | 'maintenance' | string; description: string }
+  status: {
+    indicator: 'none' | 'minor' | 'major' | 'critical' | 'maintenance' | string
+    description: string
+  }
   components?: StatuspageComponent[]
 }
 
@@ -61,7 +74,11 @@ const INDICATOR_STATUS: Record<string, ProviderStatusValue> = {
   maintenance: 'maintenance',
 }
 
-export function normalizeStatuspageSummary(providerId: string, summary: StatuspageSummary, now: Date): ProviderStatus {
+export function normalizeStatuspageSummary(
+  providerId: string,
+  summary: StatuspageSummary,
+  now: Date,
+): ProviderStatus {
   const components = (summary.components ?? []).filter(c => !c.group)
   const fromComponents = components.map(c => COMPONENT_STATUS[c.status] ?? 'unknown')
   const fromIndicator = INDICATOR_STATUS[summary.status.indicator] ?? 'unknown'
@@ -123,12 +140,20 @@ export class StatuspageAdapter implements StatusSource, IncidentSource {
   }
 
   async collectStatus(context: SourceContext): Promise<ProviderStatus> {
-    const summary = await fetchJson<StatuspageSummary>(context.fetch, `${this.baseUrl}/api/v2/summary.json`)
+    const summary = await fetchJson<StatuspageSummary>(
+      context.fetch,
+      `${this.baseUrl}/api/v2/summary.json`,
+    )
     return normalizeStatuspageSummary(this.provider.id, summary, context.now)
   }
 
   async collect(context: SourceContext): Promise<IncidentInput[]> {
-    const data = await fetchJson<StatuspageIncidents>(context.fetch, `${this.baseUrl}/api/v2/incidents.json`)
-    return data.incidents.map(i => normalizeStatuspageIncident(this.id, this.provider.id, this.baseUrl, i, context.now))
+    const data = await fetchJson<StatuspageIncidents>(
+      context.fetch,
+      `${this.baseUrl}/api/v2/incidents.json`,
+    )
+    return data.incidents.map(i =>
+      normalizeStatuspageIncident(this.id, this.provider.id, this.baseUrl, i, context.now),
+    )
   }
 }

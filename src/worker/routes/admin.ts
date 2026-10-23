@@ -13,6 +13,7 @@ adminRoute.post('/collect', async c => {
     return c.json<ErrorResponse>({ error: 'not found' }, 404)
   }
   const group = c.req.query('group') as SourceGroup | undefined
-  const groups: SourceGroup[] = group === 'status' || group === 'security' ? [group] : ['status', 'security']
+  const groups: SourceGroup[] =
+    group === 'status' || group === 'security' ? [group] : ['status', 'security']
   return c.json(await runCollectors(c.env, groups))
 })

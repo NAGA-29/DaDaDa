@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest'
 import { parseAtom } from '../src/worker/adapters/atom'
 import { parseRss } from '../src/worker/adapters/rss'
 import { normalizeKev, recentKev, type KevCatalog } from '../src/worker/sources/cisa-kev'
-import { githubAdvisory, normalizeGithubAdvisory, type GithubAdvisory } from '../src/worker/sources/github-advisory'
+import {
+  githubAdvisory,
+  normalizeGithubAdvisory,
+  type GithubAdvisory,
+} from '../src/worker/sources/github-advisory'
 import { normalizeNodeItem } from '../src/worker/sources/nodejs'
 import { isPhpSecurityEntry, normalizePhpEntry, phpSecurity } from '../src/worker/sources/php'
 import type { SourceContext } from '../src/worker/sources/types'
@@ -31,11 +35,17 @@ describe('PHP security source', () => {
   })
 
   it('decodes escaped html content', () => {
-    expect(parseAtom(fixture('php-feed.atom'))[1]!.content).toBe('<p>Join us at the conference.</p>')
+    expect(parseAtom(fixture('php-feed.atom'))[1]!.content).toBe(
+      '<p>Join us at the conference.</p>',
+    )
   })
 
   it('collects via fetch', async () => {
-    const context = { now, fetch: fakeFetch({ 'https://www.php.net/feed.atom': 'php-feed.atom' }), env: {} } as SourceContext
+    const context = {
+      now,
+      fetch: fakeFetch({ 'https://www.php.net/feed.atom': 'php-feed.atom' }),
+      env: {},
+    } as SourceContext
     expect(await phpSecurity.collect(context)).toHaveLength(1)
   })
 })
@@ -73,7 +83,11 @@ describe('GitHub Advisory source', () => {
       auth = new Headers(init?.headers).get('Authorization')
       return new Response(fixture('github-advisories.json'))
     }) as typeof fetch
-    const result = await githubAdvisory.collect({ now, fetch: fetcher, env: { GITHUB_TOKEN: 't0ken' } } as SourceContext)
+    const result = await githubAdvisory.collect({
+      now,
+      fetch: fetcher,
+      env: { GITHUB_TOKEN: 't0ken' },
+    } as SourceContext)
     expect(result.map(r => [r.externalId, r.status])).toEqual([
       ['GHSA-aaaa-bbbb-cccc', undefined],
       ['GHSA-dddd-eeee-ffff', 'withdrawn'],

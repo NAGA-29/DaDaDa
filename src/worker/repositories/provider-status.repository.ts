@@ -32,7 +32,13 @@ export class ProviderStatusRepository {
     )
     await this.db.batch(
       statuses.map(s =>
-        stmt.bind(s.providerId, s.status, s.message ?? null, s.checkedAt, s.raw === undefined ? null : JSON.stringify(s.raw)),
+        stmt.bind(
+          s.providerId,
+          s.status,
+          s.message ?? null,
+          s.checkedAt,
+          s.raw === undefined ? null : JSON.stringify(s.raw),
+        ),
       ),
     )
   }
@@ -46,7 +52,9 @@ export class ProviderStatusRepository {
 
   async get(providerId: string): Promise<ProviderStatus | null> {
     const row = await this.db
-      .prepare('SELECT provider_id, status, message, checked_at FROM provider_statuses WHERE provider_id = ?')
+      .prepare(
+        'SELECT provider_id, status, message, checked_at FROM provider_statuses WHERE provider_id = ?',
+      )
       .bind(providerId)
       .first<ProviderStatusRow>()
     return row ? toProviderStatus(row) : null

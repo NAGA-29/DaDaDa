@@ -16,7 +16,10 @@ export function Header({ live, updatedAt }: { live: boolean; updatedAt?: string 
         <Radar />
         <span className="brand-name">DaDaDa</span>
       </Link>
-      <span className={`live${live ? '' : ' offline'}`} title={updatedAt ? `Updated ${new Date(updatedAt).toLocaleTimeString()}` : undefined}>
+      <span
+        className={`live${live ? '' : ' offline'}`}
+        title={updatedAt ? `Updated ${new Date(updatedAt).toLocaleTimeString()}` : undefined}
+      >
         <span className="live-dot" />
         {live ? 'LIVE' : 'OFFLINE'}
       </span>

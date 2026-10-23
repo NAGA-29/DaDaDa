@@ -2,13 +2,7 @@ import type { IncidentInput } from '../domain/incident'
 import type { Provider } from '../domain/provider'
 import type { ProviderStatus } from '../domain/provider-status'
 
-export type SourceType =
-  | 'rss'
-  | 'atom'
-  | 'api'
-  | 'webhook'
-  | 'provider_event'
-  | 'scrape'
+export type SourceType = 'rss' | 'atom' | 'api' | 'webhook' | 'provider_event' | 'scrape'
 
 export type SourceContext = {
   now: Date

@@ -13,7 +13,11 @@ export function isPhpSecurityEntry(entry: AtomEntry): boolean {
   return /security/i.test(`${entry.title}\n${entry.summary ?? ''}\n${entry.content ?? ''}`)
 }
 
-export function normalizePhpEntry(source: string, entry: AtomEntry, now: Date): IncidentInput | undefined {
+export function normalizePhpEntry(
+  source: string,
+  entry: AtomEntry,
+  now: Date,
+): IncidentInput | undefined {
   const publishedAt = toIsoUtc(entry.published) ?? toIsoUtc(entry.updated)
   const url = entry.link ?? entry.id
   if (!publishedAt || !url) return undefined
