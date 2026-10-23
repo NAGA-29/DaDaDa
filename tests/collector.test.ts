@@ -17,6 +17,12 @@ let env: Bindings
 const now = new Date('2026-10-23T10:30:00Z')
 
 const fetcher = fakeFetch({
+  'https://www.netlifystatus.com/api/v2/summary.json': () =>
+    Response.json({
+      status: { indicator: 'none', description: 'All Systems Operational' },
+      components: [],
+    }),
+  'https://www.netlifystatus.com/api/v2/incidents.json': () => Response.json({ incidents: [] }),
   'https://www.cloudflarestatus.com/api/v2/summary.json': 'statuspage-summary.json',
   'https://www.cloudflarestatus.com/api/v2/incidents.json': 'statuspage-incidents.json',
   'https://status.cloud.google.com/incidents.json': 'gcp-incidents.json',
@@ -68,6 +74,7 @@ describe('collector runner + D1', () => {
       incidents: 2,
       status: 'partial_outage',
     })
+    expect(byId['netlify-status']).toMatchObject({ ok: true, incidents: 0, status: 'operational' })
     expect(byId['php-security']).toMatchObject({ ok: true, incidents: 1 })
     // withdrawn も status=withdrawn として保存される (一覧には出ない)
     expect(byId['github-advisory']).toMatchObject({ ok: true, incidents: 2 })
@@ -114,6 +121,7 @@ describe('collector runner + D1', () => {
       github: null,
       'google-cloud': 'partial_outage',
       vercel: null,
+      netlify: 'operational',
     })
   })
 

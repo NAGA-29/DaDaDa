@@ -12,11 +12,11 @@ Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・�
 - React + Vite (`@cloudflare/vite-plugin` で Worker と SPA を 1 プロジェクトに)
 - Vanilla CSS
 
-## Source (17)
+## Source (18)
 
 | 種別 | Source | 取得方法 |
 | --- | --- | --- |
-| Status | Cloudflare / GitHub / Vercel | Statuspage API (`StatuspageAdapter`) |
+| Status | Cloudflare / GitHub / Vercel / Netlify | Statuspage API (`StatuspageAdapter`) |
 | Status | Google Cloud | `status.cloud.google.com/incidents.json` |
 | Security | PHP | php.net Atom (security release のみ) |
 | Security | Node.js | Vulnerability RSS |
