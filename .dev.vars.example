@@ -1,0 +1,5 @@
+# ローカル開発用。.dev.vars にコピーして使う
+# POST /api/admin/collect を有効にするトークン
+ADMIN_TOKEN=change-me
+# GitHub Advisory API のレート制限緩和 (任意)
+GITHUB_TOKEN=

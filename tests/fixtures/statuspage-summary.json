@@ -1,0 +1,12 @@
+{
+  "page": { "id": "yh6f0r4529hb", "name": "Cloudflare", "url": "https://www.cloudflarestatus.com" },
+  "status": { "indicator": "minor", "description": "Minor Service Outage" },
+  "components": [
+    { "id": "grp1", "name": "Cloudflare Sites and Services", "status": "partial_outage", "group": true },
+    { "id": "c1", "name": "Workers", "status": "partial_outage", "group": false },
+    { "id": "c2", "name": "R2", "status": "operational", "group": false },
+    { "id": "c3", "name": "DNS", "status": "operational", "group": false }
+  ],
+  "incidents": [],
+  "scheduled_maintenances": []
+}
