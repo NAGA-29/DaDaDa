@@ -3,24 +3,35 @@ import { IncidentRow } from '../../components/IncidentRow'
 
 export function HappeningNow({
   incidents,
+  notices = [],
   providers,
 }: {
   incidents: IncidentView[]
+  notices?: IncidentView[]
   providers: Map<string, Provider>
 }) {
+  // Keep the overview balanced when a provider publishes many similar notices.
+  const latestNotices = new Map<string, IncidentView>()
+  for (const notice of [...notices].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))) {
+    const key = notice.providerId ?? notice.source
+    if (!latestNotices.has(key)) latestNotices.set(key, notice)
+  }
+  const updates = [...incidents, ...latestNotices.values()].sort((a, b) =>
+    (b.startedAt ?? b.publishedAt).localeCompare(a.startedAt ?? a.publishedAt),
+  )
+
   return (
     <section className="section" aria-labelledby="now-title">
       <h2 id="now-title" className="section-title">
-        Incidents <span className="section-count">{incidents.length}</span>
+        Incidents &amp; notices <span className="section-count">{updates.length}</span>
       </h2>
-      {incidents.length === 0 ? (
+      {updates.length === 0 ? (
         <p className="all-clear">
-          <span className="all-clear-mark">✓</span> No active incident reports. Check official
-          notices below.
+          <span className="all-clear-mark">✓</span> No active incident reports or recent notices.
         </p>
       ) : (
         <ul className="incident-list">
-          {incidents.map(i => (
+          {updates.map(i => (
             <IncidentRow
               key={i.id}
               incident={i}

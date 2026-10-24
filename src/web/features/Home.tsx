@@ -49,12 +49,12 @@ export function Home({ summary }: { summary: Loadable<SummaryResponse> }) {
           // biome-ignore lint/a11y/noNoninteractiveTabindex: this pane must support keyboard scrolling.
           tabIndex={0}
         >
-          <HappeningNow incidents={serviceIncidents} providers={providers} />
-          <Services
-            services={data.services}
+          <HappeningNow
+            incidents={serviceIncidents}
             notices={data.serviceNotices ?? []}
             providers={providers}
           />
+          <Services services={data.services} />
         </section>
         <section
           className="dashboard-column"

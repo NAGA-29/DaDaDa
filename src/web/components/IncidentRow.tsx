@@ -17,7 +17,9 @@ export function IncidentRow({ incident, provider, showProvider = true }: Props) 
   const active = incident.kind === 'service' && incident.status !== 'notice' && !incident.resolvedAt
   const meta = [
     incident.product,
-    incident.kind === 'service' ? humanize(incident.status) : undefined,
+    incident.kind === 'service' && incident.status !== 'notice'
+      ? humanize(incident.status)
+      : undefined,
   ].filter(Boolean)
 
   return (
@@ -39,6 +41,7 @@ export function IncidentRow({ incident, provider, showProvider = true }: Props) 
           {incident.title}
         </ExternalLink>
         <div className="incident-meta">
+          {incident.status === 'notice' && <Pill tone={tone}>告知</Pill>}
           {incident.severity && <Pill tone={tone}>{incident.severity}</Pill>}
           {meta.length > 0 && <span>{meta.join(' · ')}</span>}
           {incident.cves?.slice(0, 3).map(cve => (
