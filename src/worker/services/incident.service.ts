@@ -4,6 +4,7 @@ import { freshStatus } from '../domain/provider-status'
 import { IncidentRepository } from '../repositories/incident.repository'
 import { ProviderRepository } from '../repositories/provider.repository'
 import { ProviderStatusRepository } from '../repositories/provider-status.repository'
+import { registeredProviders } from '../sources'
 import { KEV_LOOKBACK_DAYS } from '../sources/cisa-kev'
 import { deduplicateSecurity, getSecuritySummary } from './security.service'
 import { listProviderStatuses } from './status.service'
@@ -38,7 +39,19 @@ export async function getSummary(db: D1Database, now = new Date()): Promise<Summ
       }),
       listProviderStatuses(db, {}, now),
       new ProviderRepository(db).list(),
-      incidents.list({ kind: 'service', status: 'notice', limit: 10 }),
+      // One provider's frequent notices must not hide another provider's latest.
+      Promise.all(
+        registeredProviders()
+          .filter(provider => provider.supportsStatus)
+          .map(provider =>
+            incidents.list({
+              providerId: provider.id,
+              kind: 'service',
+              status: 'notice',
+              limit: 1,
+            }),
+          ),
+      ),
     ])
 
   const isKev = (i: Incident) => i.source === KEV_SOURCE
@@ -53,7 +66,9 @@ export async function getSummary(db: D1Database, now = new Date()): Promise<Summ
       [...happeningNow, ...security.filter(i => i.status === 'withdrawn')].map(toView),
     ).sort((a, b) => (b.startedAt ?? b.publishedAt).localeCompare(a.startedAt ?? a.publishedAt)),
     services,
-    serviceNotices: serviceNotices.items.map(toView),
+    serviceNotices: serviceNotices
+      .flatMap(page => page.items.map(toView))
+      .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt)),
     security: deduplicateSecurity(security.map(toView)),
     kev: kev.items.map(toView),
     providers,

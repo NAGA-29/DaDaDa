@@ -17,6 +17,7 @@ let env: Bindings
 const now = new Date('2026-10-23T10:30:00Z')
 
 const fetcher = fakeFetch({
+  'https://status.aws.amazon.com/rss/all.rss': 'aws-notices.xml',
   'https://www.sakura.ad.jp/rss/mainte.rdf': 'sakura-notices.xml',
   'https://www.netlifystatus.com/api/v2/summary.json': () =>
     Response.json({
@@ -75,6 +76,7 @@ describe('collector runner + D1', () => {
       incidents: 2,
       status: 'partial_outage',
     })
+    expect(byId['aws-notices']).toMatchObject({ ok: true, incidents: 3, status: 'unverified' })
     expect(byId['sakura-notices']).toMatchObject({ ok: true, incidents: 3, status: 'unverified' })
     expect(byId['netlify-status']).toMatchObject({ ok: true, incidents: 0, status: 'operational' })
     expect(byId['php-security']).toMatchObject({ ok: true, incidents: 1 })
@@ -119,6 +121,7 @@ describe('collector runner + D1', () => {
       summary.services.map(s => [s.id, s.currentStatus?.status ?? null]),
     )
     expect(services).toEqual({
+      aws: 'unverified',
       cloudflare: 'partial_outage',
       github: null,
       'google-cloud': 'partial_outage',
@@ -131,7 +134,7 @@ describe('collector runner + D1', () => {
   it('shows Sakura in Services with notices, never as active or resolved incidents', async () => {
     const summary = await getSummary(env.DB, now)
     expect(summary.services.find(s => s.id === 'sakura')?.currentStatus?.status).toBe('unverified')
-    expect(summary.serviceNotices?.filter(i => i.providerId === 'sakura')).toHaveLength(3)
+    expect(summary.serviceNotices?.filter(i => i.providerId === 'sakura')).toHaveLength(1)
     expect(summary.happeningNow.some(i => i.providerId === 'sakura')).toBe(false)
     const detail = await getProviderDetail(env.DB, 'sakura', now)
     expect(detail?.activeIncidents).toEqual([])
@@ -142,6 +145,31 @@ describe('collector runner + D1', () => {
     ).toEqual([])
     const staleDetail = await getProviderDetail(env.DB, 'sakura', new Date(now.getTime() + 3600000))
     expect(staleDetail?.currentStatus?.status).toBe('unverified')
+  })
+
+  it('keeps AWS notices visible when newer notices from another provider fill the page', async () => {
+    const repo = new IncidentRepository(env.DB)
+    const notices = Array.from({ length: 12 }, (_, i) => ({
+      providerId: 'sakura',
+      source: 'sakura-notices',
+      externalId: `frequent-notice-${i}`,
+      kind: 'service' as const,
+      status: 'notice',
+      title: `Newer Sakura notice ${i}`,
+      url: 'https://www.sakura.ad.jp/',
+      publishedAt: now.toISOString(),
+      collectedAt: now.toISOString(),
+      raw: {},
+    }))
+    await repo.upsertMany(await Promise.all(notices.map(toIncident)), now)
+    const summary = await getSummary(env.DB, now)
+    expect(summary.serviceNotices?.map(i => i.providerId).sort()).toEqual(['aws', 'sakura'])
+    expect(summary.happeningNow.some(i => i.providerId === 'aws')).toBe(false)
+    const detail = await getProviderDetail(env.DB, 'aws', now)
+    expect(detail?.currentStatus?.status).toBe('unverified')
+    expect(detail?.activeIncidents).toEqual([])
+    expect(detail?.recentIncidents).toEqual([])
+    expect(detail?.officialNotices).toHaveLength(3)
   })
 
   it('returns provider detail', async () => {

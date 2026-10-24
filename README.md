@@ -17,6 +17,7 @@ Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・�
 | 種別 | Source | 取得方法 |
 | --- | --- | --- |
 | Status | Cloudflare / GitHub / Vercel / Netlify | Statuspage API (`StatuspageAdapter`) |
+| Status | AWS | 公式 RSS（公開告知のみ。稼働状態は未判定） |
 | Status | さくらインターネット | 公式 RSS（障害・メンテナンスの告知のみ。稼働状態は未判定） |
 | Status | Google Cloud | `status.cloud.google.com/incidents.json` |
 | Security | PHP | php.net Atom (security release のみ) |
@@ -30,6 +31,10 @@ Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・�
 | Security | CISA KEV | JSON feed (直近 30 日の追加分) |
 
 ## さくらインターネットの告知
+
+AWS は [公式の全サービス RSS](https://status.aws.amazon.com/rss/all.rss) を5分間隔で収集し、Services と共通の「Incidents & notices」に表示します。ホームは各社の最新1件、詳細画面は最新30件です。GUID のサービスコード・リージョンを読み取れる場合は併記し、識別子と元データを保持します。RSS の文言や記事の消失から障害の発生中・復旧を推測せず、稼働状態は「未判定」、記事は `status=notice` として扱います。アカウント固有のイベントは対象外です。
+
+AWS 公式は RSS の形式変更・網羅性の制約を説明し、プログラム連携には [EventBridge](https://docs.aws.amazon.com/health/latest/ug/cloudwatch-events-health.html) を推奨しています。将来の対応は [Issue #3](https://github.com/NAGA-29/DaDaDa/issues/3) で管理します。
 
 Services に「さくらインターネット」を表示し、[公式の障害・メンテナンス RSS](https://www.sakura.ad.jp/rss/mainte.rdf) を5分間隔の Status 収集で取得します。クラウド・VPS・レンタルサーバ・専用サーバなどの告知が混在します。
 

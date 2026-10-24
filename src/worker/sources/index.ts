@@ -1,4 +1,5 @@
 import type { Provider } from '../domain/provider'
+import { awsNotices } from './aws'
 import { cisaKev } from './cisa-kev'
 import { cloudflareStatus } from './cloudflare'
 import { githubAdvisory } from './github-advisory'
@@ -16,6 +17,7 @@ import { vercelStatus } from './vercel'
 /** 登録済み Source。追加はここに 1 行足すだけ */
 export const sources: Source[] = [
   // Status
+  awsNotices,
   cloudflareStatus,
   githubStatus,
   vercelStatus,
