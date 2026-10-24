@@ -13,6 +13,7 @@ import { netlifyStatus } from './netlify'
 import { nodejsSecurity } from './nodejs'
 import { phpSecurity } from './php'
 import type { Source, SourceGroup } from './types'
+import { supabaseStatus } from './supabase'
 import { vercelStatus } from './vercel'
 
 /** 登録済み Source。追加はここに 1 行足すだけ */
@@ -24,6 +25,7 @@ export const sources: Source[] = [
   vercelStatus,
   netlifyStatus,
   railwayStatus,
+  supabaseStatus,
   sakuraNotices,
   googleCloudStatus,
   // Security

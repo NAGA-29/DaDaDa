@@ -1,0 +1,31 @@
+{
+  "status": {
+    "indicator": "none",
+    "description": "All Systems Operational"
+  },
+  "components": [
+    {
+      "id": "supabase-region",
+      "name": "ap-northeast-1",
+      "status": "operational"
+    }
+  ],
+  "incidents": [
+    {
+      "id": "supabase-active",
+      "name": "Management API errors",
+      "status": "monitoring",
+      "impact": "minor",
+      "created_at": "2026-10-23T08:00:00Z",
+      "updated_at": "2026-10-23T10:00:00Z",
+      "incident_updates": [
+        {
+          "id": "supabase-update",
+          "status": "monitoring",
+          "body": "Monitoring API recovery.",
+          "created_at": "2026-10-23T10:00:00Z"
+        }
+      ]
+    }
+  ]
+}

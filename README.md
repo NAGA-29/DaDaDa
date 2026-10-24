@@ -19,6 +19,7 @@ Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・�
 | Status | Cloudflare / GitHub / Vercel / Netlify | Statuspage API (`StatuspageAdapter`) |
 | Status | AWS | 公式 RSS（公開告知のみ。稼働状態は未判定） |
 | Status | さくらインターネット | 公式 RSS（障害・メンテナンスの告知のみ。稼働状態は未判定） |
+| Status | Supabase | incident.io の Statuspage 互換 API（未解決の障害の影響度も状態に反映） |
 | Status | Railway | 公式ステータス JSON (`status.railway.com/api/status`) |
 | Status | Google Cloud | `status.cloud.google.com/incidents.json` |
 | Security | PHP | php.net Atom (security release のみ) |
@@ -32,6 +33,8 @@ Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・�
 | Security | CISA KEV | JSON feed (直近 30 日の追加分) |
 
 ## さくらインターネットの告知
+
+Supabase は公式ステータスサイトの Statuspage 互換 API から、状態と障害履歴を5分間隔で取得します。集約状態が正常でも未解決の障害がある場合は、上流の影響度もカードの状態に反映します。認証キーは不要です。
 
 Railway は公式ステータスサイトの公開 JSON を5分間隔で取得します。公式の影響度から状態を集約し、発生中の障害と復旧履歴を共通画面に表示します。`TRIAGE`（公式表示: Notice）は告知として扱い、障害件数に含めません。Noticeのみの場合は稼働状態を「未判定」にします。予定メンテナンスは告知、実施中はメンテナンスとして扱い、予定終了日時から復旧を推測しません。認証キーは不要ですが、専用JSON形式の変更時には取得処理の更新が必要です。
 

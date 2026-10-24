@@ -17,6 +17,8 @@ let env: Bindings
 const now = new Date('2026-10-23T10:30:00Z')
 
 const fetcher = fakeFetch({
+  'https://status.supabase.com/api/v2/summary.json': 'supabase-summary.json',
+  'https://status.supabase.com/api/v2/incidents.json': 'supabase-incidents.json',
   'https://status.railway.com/api/status': 'railway-status.json',
   'https://status.aws.amazon.com/rss/all.rss': 'aws-notices.xml',
   'https://www.sakura.ad.jp/rss/mainte.rdf': 'sakura-notices.xml',
@@ -82,6 +84,7 @@ describe('collector runner + D1', () => {
       incidents: 3,
       status: 'partial_outage',
     })
+    expect(byId['supabase-status']).toMatchObject({ ok: true, incidents: 2, status: 'degraded' })
     expect(byId['aws-notices']).toMatchObject({ ok: true, incidents: 3, status: 'unverified' })
     expect(byId['sakura-notices']).toMatchObject({ ok: true, incidents: 3, status: 'unverified' })
     expect(byId['netlify-status']).toMatchObject({ ok: true, incidents: 0, status: 'operational' })
@@ -127,6 +130,7 @@ describe('collector runner + D1', () => {
       summary.services.map(s => [s.id, s.currentStatus?.status ?? null]),
     )
     expect(services).toEqual({
+      supabase: 'degraded',
       railway: 'partial_outage',
       aws: 'unverified',
       cloudflare: 'partial_outage',
@@ -193,6 +197,20 @@ describe('collector runner + D1', () => {
     expect(detail?.activeIncidents.map(i => i.externalId)).toEqual(['railway-active'])
     expect(detail?.recentIncidents.map(i => i.externalId)).toEqual(['railway-resolved'])
     expect(detail?.officialNotices?.map(i => i.externalId)).toEqual(['railway-notice'])
+  })
+
+  it('shows Supabase monitoring incidents and resolved history in the common views', async () => {
+    const summary = await getSummary(env.DB, now)
+    expect(summary.services.find(s => s.id === 'supabase')?.currentStatus?.status).toBe('degraded')
+    expect(
+      summary.happeningNow.filter(i => i.providerId === 'supabase').map(i => i.externalId),
+    ).toEqual(['supabase-active'])
+    const detail = await getProviderDetail(env.DB, 'supabase', now)
+    expect(detail?.activeIncidents.map(i => i.status)).toEqual(['monitoring'])
+    expect(detail?.recentIncidents.map(i => i.externalId)).toEqual(['supabase-resolved'])
+    expect(detail?.activeIncidents[0]?.url).toBe(
+      'https://status.supabase.com/incidents/supabase-active',
+    )
   })
 
   it('returns provider detail', async () => {
