@@ -1,3 +1,4 @@
+import { useI18n } from '../../lib/i18n'
 import type { IncidentView, Provider } from '../../../shared/api'
 import { IncidentRow } from '../../components/IncidentRow'
 
@@ -10,6 +11,7 @@ export function HappeningNow({
   notices?: IncidentView[]
   providers: Map<string, Provider>
 }) {
+  const { t } = useI18n()
   // Keep the overview balanced when a provider publishes many similar notices.
   const latestNotices = new Map<string, IncidentView>()
   for (const notice of [...notices].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))) {
@@ -23,11 +25,11 @@ export function HappeningNow({
   return (
     <section className="section" aria-labelledby="now-title">
       <h2 id="now-title" className="section-title">
-        Incidents &amp; notices <span className="section-count">{updates.length}</span>
+        {t('incidentsNotices')} <span className="section-count">{updates.length}</span>
       </h2>
       {updates.length === 0 ? (
         <p className="all-clear">
-          <span className="all-clear-mark">✓</span> No active incident reports or recent notices.
+          <span className="all-clear-mark">✓</span> {t('noIncidentsNotices')}
         </p>
       ) : (
         <ul className="incident-list">

@@ -4,5 +4,6 @@
     "lib": ["ES2023"],
     "types": ["@cloudflare/workers-types", "node"]
   },
-  "include": ["src/worker", "src/shared", "tests"]
+  "include": ["src/worker", "src/shared", "tests"],
+  "exclude": ["tests/web"]
 }

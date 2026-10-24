@@ -1,3 +1,4 @@
+import { useI18n } from '../lib/i18n'
 import { useMemo } from 'react'
 import type { SummaryResponse } from '../../shared/api'
 import type { Loadable } from '../lib/api'
@@ -7,15 +8,14 @@ import { Security } from './security/Security'
 import { Services } from './services/Services'
 
 export function Home({ summary }: { summary: Loadable<SummaryResponse> }) {
+  const { locale, t } = useI18n()
   const { data, error, loading } = summary
   const providers = useMemo(() => new Map((data?.providers ?? []).map(p => [p.id, p])), [data])
 
   if (!data) {
     return (
       <main className="page">
-        <p className="empty">
-          {loading ? 'Scanning…' : error ? 'Could not reach the DaDaDa API.' : null}
-        </p>
+        <p className="empty">{loading ? t('scanning') : error ? t('apiError') : null}</p>
       </main>
     )
   }
@@ -27,25 +27,25 @@ export function Home({ summary }: { summary: Loadable<SummaryResponse> }) {
   return (
     <main className="page">
       <div className="hero">
-        <h1 className="hero-title">What's breaking now?</h1>
+        <h1 className="hero-title">{t('hero')}</h1>
         <p className="hero-counts">
           <span className={serviceNow ? 'count hot' : 'count'}>
-            <strong>{serviceNow}</strong> incident{serviceNow === 1 ? '' : 's'} now
+            <strong>{serviceNow}</strong> {t('incidentCount')}
           </span>
           <span className={securityNow ? 'count warm' : 'count'}>
-            <strong>{securityNow}</strong> security advisor{securityNow === 1 ? 'y' : 'ies'}
+            <strong>{securityNow}</strong> {t('advisoryCount')}
           </span>
         </p>
       </div>
       {error && (
         <p className="stale" role="status">
-          Can't reach DaDaDa right now — showing data from {formatDateTime(data.generatedAt)}.
+          {t('stale', { time: formatDateTime(data.generatedAt, locale) })}
         </p>
       )}
       <div className="dashboard-columns">
         <section
           className="dashboard-column"
-          aria-label="Incidents and service status"
+          aria-label={t('incidentPane')}
           // biome-ignore lint/a11y/noNoninteractiveTabindex: this pane must support keyboard scrolling.
           tabIndex={0}
         >
@@ -58,7 +58,7 @@ export function Home({ summary }: { summary: Loadable<SummaryResponse> }) {
         </section>
         <section
           className="dashboard-column"
-          aria-label="Security alerts and known exploited vulnerabilities"
+          aria-label={t('securityPane')}
           // biome-ignore lint/a11y/noNoninteractiveTabindex: this pane must support keyboard scrolling.
           tabIndex={0}
         >

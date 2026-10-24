@@ -1,3 +1,4 @@
+import { useI18n } from '../lib/i18n'
 import type { IncidentView, Provider } from '../../shared/api'
 import { humanize, timeAgo } from '../lib/format'
 import { incidentTone } from '../lib/tone'
@@ -13,12 +14,13 @@ type Props = {
 }
 
 export function IncidentRow({ incident, provider, showProvider = true }: Props) {
+  const { locale, t } = useI18n()
   const tone = incidentTone(incident)
   const active = incident.kind === 'service' && incident.status !== 'notice' && !incident.resolvedAt
   const meta = [
     incident.product,
     incident.kind === 'service' && incident.status !== 'notice'
-      ? humanize(incident.status)
+      ? humanize(incident.status, locale)
       : undefined,
   ].filter(Boolean)
 
@@ -41,8 +43,8 @@ export function IncidentRow({ incident, provider, showProvider = true }: Props) 
           {incident.title}
         </ExternalLink>
         <div className="incident-meta">
-          {incident.status === 'notice' && <Pill tone={tone}>告知</Pill>}
-          {incident.severity && <Pill tone={tone}>{incident.severity}</Pill>}
+          {incident.status === 'notice' && <Pill tone={tone}>{t('notice')}</Pill>}
+          {incident.severity && <Pill tone={tone}>{humanize(incident.severity, locale)}</Pill>}
           {meta.length > 0 && <span>{meta.join(' · ')}</span>}
           {incident.cves?.slice(0, 3).map(cve => (
             <code key={cve} className="cve">
@@ -53,7 +55,7 @@ export function IncidentRow({ incident, provider, showProvider = true }: Props) 
         </div>
       </div>
       <time className="incident-time" dateTime={incident.startedAt ?? incident.publishedAt}>
-        {timeAgo(incident.startedAt ?? incident.publishedAt)}
+        {timeAgo(incident.startedAt ?? incident.publishedAt, Date.now(), locale)}
       </time>
     </li>
   )

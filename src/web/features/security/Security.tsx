@@ -1,3 +1,4 @@
+import { useI18n } from '../../lib/i18n'
 import { useState } from 'react'
 import { matchesEcosystem, SECURITY_ECOSYSTEMS } from '../../../shared/security'
 import type { IncidentView, Provider } from '../../../shared/api'
@@ -10,6 +11,7 @@ type Props = {
 }
 
 export function Security({ advisories, kev, providers }: Props) {
+  const { t } = useI18n()
   const [ecosystem, setEcosystem] = useState('')
   const [severity, setSeverity] = useState('critical')
   const languageMatches = advisories.filter(i => matchesEcosystem(i, ecosystem))
@@ -21,13 +23,13 @@ export function Security({ advisories, kev, providers }: Props) {
   return (
     <section className="section" aria-labelledby="security-title">
       <h2 id="security-title" className="section-title">
-        Security alerts <span className="section-count">{visible.length}</span>
+        {t('securityAlerts')} <span className="section-count">{visible.length}</span>
       </h2>
       <div className="security-filters">
         <label>
-          Language
+          {t('programmingLanguage')}
           <select value={ecosystem} onChange={event => setEcosystem(event.target.value)}>
-            <option value="">All languages</option>
+            <option value="">{t('allLanguages')}</option>
             {SECURITY_ECOSYSTEMS.map(language => (
               <option key={language.ecosystem} value={language.ecosystem}>
                 {language.label}
@@ -36,25 +38,28 @@ export function Security({ advisories, kev, providers }: Props) {
           </select>
         </label>
         <label>
-          Severity
+          {t('severity')}
           <select value={severity} onChange={event => setSeverity(event.target.value)}>
-            <option value="critical">Critical</option>
-            <option value="high">High</option>
-            <option value="all">High + Critical</option>
+            <option value="critical">{t('critical')}</option>
+            <option value="high">{t('high')}</option>
+            <option value="all">{t('highCritical')}</option>
           </select>
         </label>
       </div>
       <p className="security-result" role="status">
-        {visible.length} matching alerts
+        {t('matchingAlerts', { count: visible.length })}
         {notices.length > 0 && (
           <>
             {' '}
-            · <a href="#official-security-notices">Official notices ({notices.length}) ↓</a>
+            ·{' '}
+            <a href="#official-security-notices">
+              {t('officialNoticesLink', { count: notices.length })}
+            </a>
           </>
         )}
       </p>
       {visible.length === 0 ? (
-        <p className="empty">No alerts match these filters.</p>
+        <p className="empty">{t('noMatches')}</p>
       ) : (
         <ul className="incident-list">
           {visible.map(i => (
@@ -70,8 +75,7 @@ export function Security({ advisories, kev, providers }: Props) {
       {notices.length > 0 && (
         <div className="kev" id="official-security-notices">
           <h3 className="group-title">
-            Official release &amp; security notices{' '}
-            <span className="group-note">Severity not supplied</span>
+            {t('releaseNotices')} <span className="group-note">{t('noSeverity')}</span>
           </h3>
           <ul className="incident-list">
             {notices.map(i => (
@@ -87,8 +91,7 @@ export function Security({ advisories, kev, providers }: Props) {
       {kev.length > 0 && (
         <div className="kev">
           <h3 className="group-title">
-            Known exploited{' '}
-            <span className="group-note">CISA KEV · all languages · last 30 days</span>
+            {t('knownExploited')} <span className="group-note">{t('kevScope')}</span>
           </h3>
           <ul className="incident-list compact">
             {kev.map(i => (

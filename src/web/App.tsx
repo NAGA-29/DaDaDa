@@ -1,3 +1,4 @@
+import { useI18n } from './lib/i18n'
 import type { SummaryResponse } from '../shared/api'
 import { Header } from './components/Header'
 import { Link } from './components/Link'
@@ -17,17 +18,19 @@ function safeDecode(segment: string): string | undefined {
 }
 
 function NotFound() {
+  const { t } = useI18n()
   return (
     <main className="page">
       <Link to="/" className="back">
-        ← Everything
+        {t('back')}
       </Link>
-      <p className="empty">Page not found.</p>
+      <p className="empty">{t('notFound')}</p>
     </main>
   )
 }
 
 export function App() {
+  const { t } = useI18n()
   const pathname = usePathname()
   const summary = useApi<SummaryResponse>('/api/summary', REFRESH_MS)
   const detailMatch = /^\/d\/([^/]+)\/?$/.exec(pathname)?.[1]
@@ -43,9 +46,7 @@ export function App() {
       ) : (
         <NotFound />
       )}
-      <footer className="footer">
-        DaDaDa collects public status pages & security feeds. Always check the official source.
-      </footer>
+      <footer className="footer">{t('footer')}</footer>
     </div>
   )
 }

@@ -95,10 +95,31 @@ code {
 
 /* header */
 .header {
+  flex-wrap: wrap;
+  gap: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 20px 0 8px;
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.locale-select {
+  max-width: 110px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+.locale-select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 .brand {
   display: inline-flex;
@@ -608,4 +629,14 @@ code {
     /* biome-ignore lint/complexity/noImportantStyles: reduced-motion preferences must override all animations. */
     animation: none !important;
   }
+}
+
+html:lang(ja) .hero-title {
+  line-height: 1.4;
+  font-size: clamp(24px, 4vw, 34px);
+}
+html:lang(ja) .section-title {
+  font-family: var(--font);
+  letter-spacing: 0.04em;
+  line-height: 1.5;
 }

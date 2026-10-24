@@ -76,6 +76,10 @@ curl -X POST -H "Authorization: Bearer $ADMIN_TOKEN" "http://localhost:5173/api/
 curl -X POST -H "Authorization: Bearer $ADMIN_TOKEN" "http://localhost:5173/api/admin/collect?group=status"
 ```
 
+開発サーバーのポートは5173に固定しています。使用中の場合は起動を停止するため、既存の開発サーバーを終了してから起動してください。
+
+`jq` が `Invalid numeric literal` を返す場合は、JSON以外のエラーページが返っている可能性があります。`curl -sS -i http://localhost:5173/api/health` でHTTPステータスを確認してください。開発サーバーが `fetch failed` のHTMLを返している場合は、実行中の `pnpm run dev` をCtrl+Cで終了し、起動し直してください。
+
 ```bash
 pnpm test          # vitest (Adapter 単体 + ローカル D1 を使った収集〜集約の結合テスト)
 pnpm run typecheck
@@ -202,3 +206,7 @@ export const netlifyStatus = new StatuspageAdapter({
 - raw payload は必ず `raw_json` に保存
 - 日時は内部 UTC、表示時にローカルタイム
 - Runtime / Library には Current Status を付けない
+
+## 表示言語
+
+日本語を初期表示とし、ヘッダーの言語選択からEnglishに切り替えられます。選択はブラウザーに保存され、詳細画面と再読み込み後も引き継がれます。見出し・状態・フィルター・日時は選択言語に合わせ、公式記事のタイトル・本文とサービス名は原文のまま表示します。
