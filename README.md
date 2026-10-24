@@ -1,9 +1,21 @@
+<p align="center">
+  <img src="public/logo.png" alt="DaDaDa ロゴ" width="500" />
+</p>
+
 # DaDaDa
 
 What's breaking now?
 
 Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・発生中の障害・Security Advisory** を 1 画面で確認する Developer Status / Security Radar。
 自分で監視はせず、公開 Status Page / Security Feed を **Collect → Normalize → Browse** する。
+
+## 主な機能
+
+- ホーム (`/`) で発生中の障害・公式告知・サービスの稼働状態と、セキュリティアラートを確認できます。幅960px以上では左右2カラムを個別にスクロールでき、小さい画面では縦に並びます。
+- サービス名から詳細画面 (`/d/:providerId`) に移動し、現在状態・発生中の障害・最近の履歴・公式告知・セキュリティ情報を確認できます。
+- セキュリティ情報は言語と重要度で絞り込めます。重要度のない公式告知と、CISA KEV（悪用が確認された脆弱性）はそれぞれ別枠で表示します。
+- ホームと詳細画面は60秒ごとにAPIを再取得します。上流からの収集はStatusが5分ごと、Securityが30分ごとです。取得済みの稼働状態が30分を超えて古くなると「不明」にします（RSSなどの「未判定」は維持します）。
+- 日本語・英語の切り替えと、OSの設定に合わせたライト・ダーク表示に対応しています。
 
 ## Stack
 
@@ -33,17 +45,23 @@ Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・�
 | Security | .NET / ASP.NET Core | Microsoft 公式リポジトリの Security Advisory API（2 Source） |
 | Security | CISA KEV | JSON feed (直近 30 日の追加分) |
 
-## さくらインターネットの告知
+## ステータスと公式告知の扱い
+
+### Supabase / Railway
 
 Supabase は公式ステータスサイトの Statuspage 互換 API から、状態と障害履歴を5分間隔で取得します。集約状態が正常でも未解決の障害がある場合は、上流の影響度もカードの状態に反映します。認証キーは不要です。
 
 Railway は公式ステータスサイトの公開 JSON を5分間隔で取得します。公式の影響度から状態を集約し、発生中の障害と復旧履歴を共通画面に表示します。`TRIAGE`（公式表示: Notice）は告知として扱い、障害件数に含めません。Noticeのみの場合は稼働状態を「未判定」にします。予定メンテナンスは告知、実施中はメンテナンスとして扱い、予定終了日時から復旧を推測しません。認証キーは不要ですが、専用JSON形式の変更時には取得処理の更新が必要です。
+
+### AWS / Azure
 
 AWS は [公式の全サービス RSS](https://status.aws.amazon.com/rss/all.rss) を5分間隔で収集し、Services と共通の「Incidents & notices」に表示します。ホームは各社の最新1件、詳細画面は最新30件です。GUID のサービスコード・リージョンを読み取れる場合は併記し、識別子と元データを保持します。RSS の文言や記事の消失から障害の発生中・復旧を推測せず、稼働状態は「未判定」、記事は `status=notice` として扱います。アカウント固有のイベントは対象外です。
 
 AWS 公式は RSS の形式変更・網羅性の制約を説明し、プログラム連携には [EventBridge](https://docs.aws.amazon.com/health/latest/ug/cloudwatch-events-health.html) を推奨しています。将来の対応は [Issue #3](https://github.com/NAGA-29/DaDaDa/issues/3) で管理します。
 
 Azure は [公式 RSS](https://azure.status.microsoft/en-us/status/feed/) を認証なしで5分間隔で収集し、他のクラウドと同じ Services と共通の告知一覧に表示します。ホームは最新1件、詳細画面は最新30件です。GUID・記事URLのクエリ・元データを保持し、同じ告知の再取得は上書きします。記事は `status=notice`、稼働状態は「未判定」とし、記事が0件でも正常稼働や復旧とは判断しません。[公開ステータスの対象](https://learn.microsoft.com/en-us/azure/service-health/azure-status-overview)は広範囲の障害などに限られ、サブスクリプション固有の障害・計画メンテナンスを取得する Azure Service Health 連携は含みません。
+
+### さくらインターネット
 
 Services に「さくらインターネット」を表示し、[公式の障害・メンテナンス RSS](https://www.sakura.ad.jp/rss/mainte.rdf) を5分間隔の Status 収集で取得します。クラウド・VPS・レンタルサーバ・専用サーバなどの告知が混在します。
 
@@ -54,11 +72,13 @@ RSS から項目が消えても、復旧したとは判断しません。元デ�
 ## セキュリティアラートの表示・収集範囲
 
 - 言語フィルターで Go / Java / Rust / C# (.NET) と既存の JavaScript・PHP・Python を選べます。初期表示は Critical、High または High + Critical に切り替えられます。C++ の専用収集は追加していません。
+- Go / Java / Rust / C# (.NET) は専用SourceでHigh / Criticalを収集します。JavaScript・PHP・Pythonのライブラリ情報は全体向けGitHub Advisory SourceのCriticalが対象で、Highの専用収集はありません。全体向けSourceは公開日時順の最新50件を取得します。
 - PHP フィルターは PHP 本体（`php`）と Composer ライブラリ（`composer`）の両方を対象にします。
 - 上流が重要度を提供しない公式告知は、重要度を推測せず「Official notices」に別表示します。言語フィルターはこの欄にも適用します。KEV は言語別情報がないため全言語共通の別枠です。
 - CVE / GHSA が一致する情報は集約して表示し、複数言語にまたがる情報は各言語のフィルターで見つけられます。元のデータは取得元ごとに保存します。
-- ライブラリは各言語・各重要度について更新日時順に最大200件を毎回確認します。過去全件の同期ではありません。1 Source の取得失敗はほかの Source に波及させません。
-- トップ画面は各言語の High / Critical / 重要度未設定それぞれ最大30件と全体の最新30件を取得してから重複をまとめます。件数が多い言語によって他言語が一覧から押し出されるのを防ぎます。
+- Go / Java / Rust / C# (.NET) のライブラリは各言語・各重要度について更新日時順に最大200件を毎回確認します。過去全件の同期ではありません。1 Source の取得失敗はほかの Source に波及させません。
+- トップ画面は各言語の High / Critical / 重要度未設定それぞれ最大30件と全体の最新30件に、直近72時間のセキュリティ情報（最大100件、KEVを除く）を加えて重複をまとめます。件数が多い言語によって他言語が一覧から押し出されるのを防ぎます。KEVは直近30日の最大20件を別表示します。
+- 取得した取り下げ済みAdvisoryは保存済みデータを更新し、一覧から除外します。
 - Go 本体は標準ライブラリ・toolchain の更新順12件、Rust は公式 Atom に残っている告知、Java は過去120日内の最新4告知（Java SE 部分のみ）、.NET / ASP.NET Core は各公式リポジトリの最新100件が対象です。Java は Oracle Java SE / GraalVM の範囲で、全 JDK ベンダーを網羅するものではありません。
 - GitHub API の呼び出しが増えるため、`GITHUB_TOKEN` の設定を推奨します。未設定でも取得できますが、公開 API のレート制限に達した Source は収集結果にエラーを返します。
 
@@ -66,18 +86,29 @@ RSS から項目が消えても、復旧したとは判断しません。元デ�
 
 ## 開発
 
-パッケージ管理には pnpm 12.14.0 を使用します。
+Node.js 22（CIと同じバージョン）と pnpm 12.14.0 を使用します。
 
 ```bash
 pnpm install
 cp .dev.vars.example .dev.vars       # ADMIN_TOKEN などを設定
 pnpm run db:migrate:local             # ローカル D1 に migration
 pnpm run dev                          # http://localhost:5173
-
-# 手動で収集を走らせる (ADMIN_TOKEN 設定時のみ有効)
-curl -X POST -H "Authorization: Bearer $ADMIN_TOKEN" "http://localhost:5173/api/admin/collect"
-curl -X POST -H "Authorization: Bearer $ADMIN_TOKEN" "http://localhost:5173/api/admin/collect?group=status"
 ```
+
+初回はDBが空のため、開発サーバーを起動したまま別のターミナルから手動収集を実行してください。`.dev.vars` はWorker用の設定ファイルで、シェルの環境変数には自動で読み込まれません。以下の `ADMIN_TOKEN` には `.dev.vars` に設定した値を指定します。
+
+```bash
+export ADMIN_TOKEN='設定したトークン'
+
+# 全Sourceを収集
+curl -X POST -H "Authorization: Bearer $ADMIN_TOKEN" "http://localhost:5173/api/admin/collect"
+
+# グループを指定して収集
+curl -X POST -H "Authorization: Bearer $ADMIN_TOKEN" "http://localhost:5173/api/admin/collect?group=status"
+curl -X POST -H "Authorization: Bearer $ADMIN_TOKEN" "http://localhost:5173/api/admin/collect?group=security"
+```
+
+`ADMIN_TOKEN` が未設定、または認証ヘッダーが一致しない場合、手動収集APIは404を返します。収集レスポンスの `results` にSourceごとの成功・失敗を返すため、HTTPステータスだけでなく `ok` / `error` も確認してください。
 
 開発サーバーのポートは5173に固定しています。使用中の場合は起動を停止するため、既存の開発サーバーを終了してから起動してください。
 
@@ -136,6 +167,7 @@ pnpm run security:audit # 現在の依存の既知の脆弱性を再確認
 pnpm exec wrangler d1 create dadada        # 出力された database_id を wrangler.jsonc に設定
 pnpm run db:migrate:remote
 pnpm exec wrangler secret put GITHUB_TOKEN # 任意 (Advisory API のレート制限緩和)
+pnpm exec wrangler secret put ADMIN_TOKEN  # 任意 (本番で手動収集を使う場合)
 pnpm run deploy
 ```
 
@@ -153,16 +185,16 @@ Cron (`wrangler.jsonc` / `src/worker/collectors/schedule.ts`):
 | GET | `/api/status?category=&status=` | Provider Status 一覧 |
 | GET | `/api/incidents?kind=&provider=&ecosystem=&status=&active=&from=&to=&cursor=&limit=` | Incident 一覧 (cursor pagination) |
 | GET | `/api/incidents/:id` | Incident 詳細 (raw 含む) |
-| GET | `/api/providers` | Provider 一覧 |
+| GET | `/api/providers?category=` | Provider 一覧 |
 | GET | `/api/providers/:id` | Provider 詳細 (Status / Active / History / Security) |
-| POST | `/api/webhooks/:source` | Push 型 Source 用 (MVP ではハンドラ未登録) |
-| POST | `/api/admin/collect?group=` | 手動収集 (`ADMIN_TOKEN` 必須) |
+| POST | `/api/webhooks/:source` | Push 型 Source 用 (現在ハンドラ未登録のため404) |
+| POST | `/api/admin/collect?group=` | 手動収集 (`ADMIN_TOKEN` 必須、`status` / `security`、省略時は両方) |
 
 ## 構成
 
 ```text
 src/
-├─ shared/api.ts            API レスポンス型 (Worker / Web 共有)
+├─ shared/                  API レスポンス型・セキュリティの言語定義 (Worker / Web 共有)
 ├─ worker/
 │  ├─ index.ts              Hono app + scheduled
 │  ├─ routes/               status / incidents / providers / webhooks / admin
@@ -175,7 +207,9 @@ src/
 └─ web/
    ├─ App.tsx               `/` と `/d/:providerId`
    ├─ components/
+   ├─ lib/                  API 取得 / ルーティング / 日英翻訳 / 日時整形
    └─ features/             happening-now / services / security / provider-detail
+public/                     ロゴ / favicon（Vite の静的アセット）
 migrations/                 D1 schema
 tests/                      vitest + fixtures
 ```
@@ -204,7 +238,7 @@ export const netlifyStatus = new StatuspageAdapter({
 
 ## 方針メモ
 
-- Severity は上流の値をそのまま保持・表示する (独自判定しない)
+- Severity は上流が提供する値を使用し、重要度のない告知に独自の重要度を付けない
 - Incident ID: externalId があれば `source:externalId`、なければ SHA-256 fingerprint
 - raw payload は必ず `raw_json` に保存
 - 日時は内部 UTC、表示時にローカルタイム
