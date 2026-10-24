@@ -367,6 +367,12 @@ describe('collector runner + D1', () => {
         .sort(),
     ).toEqual(['critical', 'high'])
     expect(summary.security.every(i => !('raw' in i))).toBe(true)
+    // Recent entries counted in the hero must remain available in the security pane,
+    // including entries beyond the global and per-ecosystem 30-item quotas.
+    const displayedIds = new Set(summary.security.map(i => i.id))
+    const recentAdvisories = summary.happeningNow.filter(i => i.kind === 'security')
+    expect(recentAdvisories.filter(i => i.source === 'quota-test')).toHaveLength(35)
+    expect(recentAdvisories.every(i => displayedIds.has(i.id))).toBe(true)
   })
   it('keeps unscored PHP releases even when newer advisories fill the global page', async () => {
     const repo = new IncidentRepository(env.DB)

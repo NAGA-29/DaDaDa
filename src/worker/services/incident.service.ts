@@ -69,7 +69,11 @@ export async function getSummary(db: D1Database, now = new Date()): Promise<Summ
     serviceNotices: serviceNotices
       .flatMap(page => page.items.map(toView))
       .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt)),
-    security: deduplicateSecurity(security.map(toView)),
+    // Preserve every recent advisory when the dashboard separates service and
+    // security panes, even if a language or global quota is already full.
+    security: deduplicateSecurity(
+      [...security, ...recentSecurity.items.filter(i => !isKev(i))].map(toView),
+    ),
     kev: kev.items.map(toView),
     providers,
   }
