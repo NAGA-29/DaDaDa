@@ -6,7 +6,7 @@ import type { ProviderStatus, ProviderStatusValue } from '../worker/domain/provi
 export type { IncidentKind, Provider, ProviderCategory, ProviderStatusValue }
 
 /** 一覧系では raw を返さない */
-export type IncidentView = Omit<Incident, 'raw'>
+export type IncidentView = Omit<Incident, 'raw'> & { ecosystems?: string[] }
 export type ProviderStatusView = Omit<ProviderStatus, 'raw'>
 
 export type ProviderWithStatus = Provider & {
@@ -43,6 +43,7 @@ export type ProviderDetailResponse = {
   activeIncidents: IncidentView[]
   recentIncidents: IncidentView[]
   securityAdvisories: IncidentView[]
+  officialNotices?: IncidentView[]
 }
 
 /** トップ画面を 1 リクエストで描画するための集約 */
@@ -50,6 +51,7 @@ export type SummaryResponse = {
   generatedAt: string
   happeningNow: IncidentView[]
   services: ProviderWithStatus[]
+  serviceNotices?: IncidentView[]
   security: IncidentView[]
   kev: IncidentView[]
   providers: Provider[]

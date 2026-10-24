@@ -1,0 +1,123 @@
+{
+  "activeIncidents": [
+    {
+      "id": "railway-active",
+      "slug": "ACTIVE1",
+      "title": "Builds are delayed",
+      "status": "INVESTIGATING",
+      "createdAt": "2026-10-23T10:00:00Z",
+      "resolvedAt": null,
+      "components": [
+        {
+          "name": "Builds",
+          "groupName": "US East (Virginia, USA)",
+          "impact": "PARTIAL_OUTAGE"
+        }
+      ],
+      "updates": [
+        {
+          "status": "INVESTIGATING",
+          "message": "Investigating delays.",
+          "createdAt": "2026-10-23T10:00:00Z"
+        }
+      ]
+    },
+    {
+      "id": "railway-notice",
+      "slug": "NOTICE1",
+      "title": "Community site notice",
+      "status": "TRIAGE",
+      "createdAt": "2026-10-23T09:00:00Z",
+      "resolvedAt": null,
+      "components": [
+        {
+          "name": "Builds",
+          "groupName": "US East (Virginia, USA)",
+          "impact": "OPERATIONAL"
+        }
+      ],
+      "updates": [
+        {
+          "status": "TRIAGE",
+          "message": "Our community site is unavailable.",
+          "createdAt": "2026-10-23T09:00:00Z"
+        }
+      ]
+    }
+  ],
+  "recentIncidents": [
+    {
+      "id": "railway-notice",
+      "slug": "NOTICE1",
+      "title": "Community site notice",
+      "status": "TRIAGE",
+      "createdAt": "2026-10-23T09:00:00Z",
+      "resolvedAt": null,
+      "components": [
+        {
+          "name": "Builds",
+          "groupName": "US East (Virginia, USA)",
+          "impact": "OPERATIONAL"
+        }
+      ],
+      "updates": [
+        {
+          "status": "TRIAGE",
+          "message": "Our community site is unavailable.",
+          "createdAt": "2026-10-23T09:00:00Z"
+        }
+      ]
+    },
+    {
+      "id": "railway-active",
+      "slug": "ACTIVE1",
+      "title": "Builds are delayed",
+      "status": "INVESTIGATING",
+      "createdAt": "2026-10-23T10:00:00Z",
+      "resolvedAt": null,
+      "components": [
+        {
+          "name": "Builds",
+          "groupName": "US East (Virginia, USA)",
+          "impact": "PARTIAL_OUTAGE"
+        }
+      ],
+      "updates": [
+        {
+          "status": "INVESTIGATING",
+          "message": "Investigating delays.",
+          "createdAt": "2026-10-23T10:00:00Z"
+        }
+      ]
+    },
+    {
+      "id": "railway-resolved",
+      "slug": "RESOLVED1",
+      "title": "Previous build delays",
+      "status": "RESOLVED",
+      "createdAt": "2026-10-22T08:00:00Z",
+      "resolvedAt": "2026-10-22T10:00:00Z",
+      "components": [
+        {
+          "name": "Builds",
+          "groupName": "US East (Virginia, USA)",
+          "impact": "PARTIAL_OUTAGE"
+        }
+      ],
+      "updates": [
+        {
+          "status": "RESOLVED",
+          "message": "Recovered.",
+          "createdAt": "2026-10-22T10:00:00Z"
+        },
+        {
+          "status": "INVESTIGATING",
+          "message": "Investigating.",
+          "createdAt": "2026-10-22T08:00:00Z"
+        }
+      ]
+    }
+  ],
+  "maintenances": [],
+  "generatedAt": "2026-10-23T10:29:00Z"
+}

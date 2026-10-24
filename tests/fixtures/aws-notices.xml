@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel><title>AWS Service Status</title>
+<item><title>Service disruption: Increased Error Rates</title>
+<link>https://status.aws.amazon.com/</link>
+<guid isPermaLink="false">https://status.aws.amazon.com/#ec2-ap-northeast-1_1792652400</guid>
+<pubDate>Thu, 22 Oct 2026 03:00:00 PDT</pubDate>
+<description><![CDATA[<p>Investigating increased errors in Tokyo.</p>]]></description></item>
+<item><title>Service is operating normally: Increased Error Rates</title>
+<link>https://status.aws.amazon.com/</link>
+<guid isPermaLink="false">https://status.aws.amazon.com/#ec2-ap-northeast-1_1792656000</guid>
+<pubDate>Thu, 22 Oct 2026 04:00:00 PDT</pubDate>
+<description>Recovery update for Tokyo.</description></item>
+<item><title>Informational message: Maintenance</title>
+<link>https://status.aws.amazon.com/</link>
+<guid isPermaLink="false">https://status.aws.amazon.com/#route53-global_1792648800</guid>
+<pubDate>Thu, 22 Oct 2026 02:00:00 PDT</pubDate>
+<description>Global service notice.</description></item>
+</channel></rss>

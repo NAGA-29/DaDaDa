@@ -32,6 +32,16 @@ export async function fetchJson<T>(
   return (await res.json()) as T
 }
 
+/** Preserve pagination metadata for APIs using cursor-based Link headers. */
+export async function fetchJsonPage<T>(
+  fetcher: typeof fetch,
+  url: string,
+  headers: Record<string, string> = {},
+): Promise<{ data: T; headers: Headers }> {
+  const res = await get(fetcher, url, { Accept: 'application/json', ...headers })
+  return { data: (await res.json()) as T, headers: res.headers }
+}
+
 export async function fetchText(
   fetcher: typeof fetch,
   url: string,

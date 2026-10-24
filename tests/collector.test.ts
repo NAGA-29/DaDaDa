@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { getPlatformProxy } from 'wrangler'
+import { toIncident } from '../src/worker/domain/fingerprint'
 import { runCollectors } from '../src/worker/collectors/collector-runner'
 import type { Bindings } from '../src/worker/env'
 import { IncidentRepository } from '../src/worker/repositories/incident.repository'
@@ -16,6 +17,18 @@ let env: Bindings
 const now = new Date('2026-10-23T10:30:00Z')
 
 const fetcher = fakeFetch({
+  'https://status.supabase.com/api/v2/summary.json': 'supabase-summary.json',
+  'https://status.supabase.com/api/v2/incidents.json': 'supabase-incidents.json',
+  'https://status.railway.com/api/status': 'railway-status.json',
+  'https://status.aws.amazon.com/rss/all.rss': 'aws-notices.xml',
+  'https://azure.status.microsoft/en-us/status/feed/': 'azure-notices.xml',
+  'https://www.sakura.ad.jp/rss/mainte.rdf': 'sakura-notices.xml',
+  'https://www.netlifystatus.com/api/v2/summary.json': () =>
+    Response.json({
+      status: { indicator: 'none', description: 'All Systems Operational' },
+      components: [],
+    }),
+  'https://www.netlifystatus.com/api/v2/incidents.json': () => Response.json({ incidents: [] }),
   'https://www.cloudflarestatus.com/api/v2/summary.json': 'statuspage-summary.json',
   'https://www.cloudflarestatus.com/api/v2/incidents.json': 'statuspage-incidents.json',
   'https://status.cloud.google.com/incidents.json': 'gcp-incidents.json',
@@ -67,6 +80,16 @@ describe('collector runner + D1', () => {
       incidents: 2,
       status: 'partial_outage',
     })
+    expect(byId['railway-status']).toMatchObject({
+      ok: true,
+      incidents: 3,
+      status: 'partial_outage',
+    })
+    expect(byId['supabase-status']).toMatchObject({ ok: true, incidents: 2, status: 'degraded' })
+    expect(byId['aws-notices']).toMatchObject({ ok: true, incidents: 3, status: 'unverified' })
+    expect(byId['azure-notices']).toMatchObject({ ok: true, incidents: 2, status: 'unverified' })
+    expect(byId['sakura-notices']).toMatchObject({ ok: true, incidents: 3, status: 'unverified' })
+    expect(byId['netlify-status']).toMatchObject({ ok: true, incidents: 0, status: 'operational' })
     expect(byId['php-security']).toMatchObject({ ok: true, incidents: 1 })
     // withdrawn も status=withdrawn として保存される (一覧には出ない)
     expect(byId['github-advisory']).toMatchObject({ ok: true, incidents: 2 })
@@ -109,11 +132,100 @@ describe('collector runner + D1', () => {
       summary.services.map(s => [s.id, s.currentStatus?.status ?? null]),
     )
     expect(services).toEqual({
+      supabase: 'degraded',
+      railway: 'partial_outage',
+      aws: 'unverified',
+      azure: 'unverified',
       cloudflare: 'partial_outage',
       github: null,
       'google-cloud': 'partial_outage',
       vercel: null,
+      netlify: 'operational',
+      sakura: 'unverified',
     })
+  })
+
+  it('shows Sakura in Services with notices, never as active or resolved incidents', async () => {
+    const summary = await getSummary(env.DB, now)
+    expect(summary.services.find(s => s.id === 'sakura')?.currentStatus?.status).toBe('unverified')
+    expect(summary.serviceNotices?.filter(i => i.providerId === 'sakura')).toHaveLength(1)
+    expect(summary.happeningNow.some(i => i.providerId === 'sakura')).toBe(false)
+    const detail = await getProviderDetail(env.DB, 'sakura', now)
+    expect(detail?.activeIncidents).toEqual([])
+    expect(detail?.recentIncidents).toEqual([])
+    expect(detail?.officialNotices).toHaveLength(3)
+    expect(
+      (await new IncidentRepository(env.DB).list({ providerId: 'sakura', active: true })).items,
+    ).toEqual([])
+    const staleDetail = await getProviderDetail(env.DB, 'sakura', new Date(now.getTime() + 3600000))
+    expect(staleDetail?.currentStatus?.status).toBe('unverified')
+  })
+
+  it('shows Azure in the common views without counting its notices as active or resolved', async () => {
+    const summary = await getSummary(env.DB, now)
+    expect(summary.services.find(s => s.id === 'azure')?.currentStatus?.status).toBe('unverified')
+    expect(summary.serviceNotices?.filter(i => i.providerId === 'azure')).toHaveLength(1)
+    expect(summary.happeningNow.some(i => i.providerId === 'azure')).toBe(false)
+    const detail = await getProviderDetail(env.DB, 'azure', now)
+    expect(detail?.activeIncidents).toEqual([])
+    expect(detail?.recentIncidents).toEqual([])
+    expect(detail?.officialNotices).toHaveLength(2)
+  })
+
+  it('keeps AWS notices visible when newer notices from another provider fill the page', async () => {
+    const repo = new IncidentRepository(env.DB)
+    const notices = Array.from({ length: 12 }, (_, i) => ({
+      providerId: 'sakura',
+      source: 'sakura-notices',
+      externalId: `frequent-notice-${i}`,
+      kind: 'service' as const,
+      status: 'notice',
+      title: `Newer Sakura notice ${i}`,
+      url: 'https://www.sakura.ad.jp/',
+      publishedAt: now.toISOString(),
+      collectedAt: now.toISOString(),
+      raw: {},
+    }))
+    await repo.upsertMany(await Promise.all(notices.map(toIncident)), now)
+    const summary = await getSummary(env.DB, now)
+    expect(summary.serviceNotices?.map(i => i.providerId).sort()).toEqual([
+      'aws',
+      'azure',
+      'railway',
+      'sakura',
+    ])
+    expect(summary.happeningNow.some(i => i.providerId === 'aws')).toBe(false)
+    const detail = await getProviderDetail(env.DB, 'aws', now)
+    expect(detail?.currentStatus?.status).toBe('unverified')
+    expect(detail?.activeIncidents).toEqual([])
+    expect(detail?.recentIncidents).toEqual([])
+    expect(detail?.officialNotices).toHaveLength(3)
+  })
+
+  it('shows Railway incidents, notices and recovery history in their respective lists', async () => {
+    const summary = await getSummary(env.DB, now)
+    expect(
+      summary.happeningNow.filter(i => i.providerId === 'railway').map(i => i.externalId),
+    ).toEqual(['railway-active'])
+    expect(summary.serviceNotices?.find(i => i.providerId === 'railway')?.status).toBe('notice')
+    const detail = await getProviderDetail(env.DB, 'railway', now)
+    expect(detail?.activeIncidents.map(i => i.externalId)).toEqual(['railway-active'])
+    expect(detail?.recentIncidents.map(i => i.externalId)).toEqual(['railway-resolved'])
+    expect(detail?.officialNotices?.map(i => i.externalId)).toEqual(['railway-notice'])
+  })
+
+  it('shows Supabase monitoring incidents and resolved history in the common views', async () => {
+    const summary = await getSummary(env.DB, now)
+    expect(summary.services.find(s => s.id === 'supabase')?.currentStatus?.status).toBe('degraded')
+    expect(
+      summary.happeningNow.filter(i => i.providerId === 'supabase').map(i => i.externalId),
+    ).toEqual(['supabase-active'])
+    const detail = await getProviderDetail(env.DB, 'supabase', now)
+    expect(detail?.activeIncidents.map(i => i.status)).toEqual(['monitoring'])
+    expect(detail?.recentIncidents.map(i => i.externalId)).toEqual(['supabase-resolved'])
+    expect(detail?.activeIncidents[0]?.url).toBe(
+      'https://status.supabase.com/incidents/supabase-active',
+    )
   })
 
   it('returns provider detail', async () => {
@@ -218,5 +330,68 @@ describe('collector runner + D1', () => {
     const vercel = sources.filter(s => s.id === 'vercel-status')
     const result = await runCollectors(env, ['status'], { now, fetch: empty, sources: vercel })
     expect(result.results[0]).toMatchObject({ ok: true, incidents: 2 })
+  })
+
+  it('keeps each language and severity visible when another language fills the latest page', async () => {
+    const recent = Array.from({ length: 35 }, (_, i) => ({
+      source: 'quota-test',
+      externalId: `npm-${i}`,
+      kind: 'security' as const,
+      title: `Recent npm advisory ${i}`,
+      url: 'https://example.com/advisory',
+      ecosystem: 'npm',
+      severity: 'critical',
+      publishedAt: now.toISOString(),
+      collectedAt: now.toISOString(),
+      raw: {},
+    }))
+    const older = ['high', 'critical'].map(severity => ({
+      source: 'quota-test',
+      externalId: `go-${severity}`,
+      kind: 'security' as const,
+      title: `Older Go ${severity}`,
+      url: 'https://example.com/go',
+      ecosystem: 'go',
+      severity,
+      publishedAt: '2026-09-01T00:00:00.000Z',
+      collectedAt: now.toISOString(),
+      raw: {},
+    }))
+    const repo = new IncidentRepository(env.DB)
+    await repo.upsertMany(await Promise.all([...recent, ...older].map(toIncident)), now)
+    const summary = await getSummary(env.DB, now)
+    expect(
+      summary.security
+        .filter(i => i.source === 'quota-test' && i.ecosystem === 'go')
+        .map(i => i.severity)
+        .sort(),
+    ).toEqual(['critical', 'high'])
+    expect(summary.security.every(i => !('raw' in i))).toBe(true)
+    // Recent entries counted in the hero must remain available in the security pane,
+    // including entries beyond the global and per-ecosystem 30-item quotas.
+    const displayedIds = new Set(summary.security.map(i => i.id))
+    const recentAdvisories = summary.happeningNow.filter(i => i.kind === 'security')
+    expect(recentAdvisories.filter(i => i.source === 'quota-test')).toHaveLength(35)
+    expect(recentAdvisories.every(i => displayedIds.has(i.id))).toBe(true)
+  })
+  it('keeps unscored PHP releases even when newer advisories fill the global page', async () => {
+    const repo = new IncidentRepository(env.DB)
+    const release = await toIncident({
+      source: 'php-security',
+      providerId: 'php',
+      externalId: 'quota-php-release',
+      kind: 'security',
+      title: 'PHP security release',
+      url: 'https://www.php.net/releases/',
+      ecosystem: 'php',
+      publishedAt: '2026-09-01T00:00:00.000Z',
+      collectedAt: now.toISOString(),
+      raw: {},
+    })
+    await repo.upsertMany([release], now)
+    expect(
+      (await repo.list({ kind: 'security', limit: 30 })).items.some(i => i.id === release.id),
+    ).toBe(false)
+    expect((await getSummary(env.DB, now)).security.some(i => i.id === release.id)).toBe(true)
   })
 })

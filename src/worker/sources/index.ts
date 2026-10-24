@@ -1,25 +1,41 @@
 import type { Provider } from '../domain/provider'
+import { awsNotices } from './aws'
+import { azureNotices } from './azure'
 import { cisaKev } from './cisa-kev'
 import { cloudflareStatus } from './cloudflare'
 import { githubAdvisory } from './github-advisory'
 import { githubStatus } from './github-status'
 import { googleCloudStatus } from './google-cloud'
+import { languageAdvisories } from './language-advisories'
+import { railwayStatus } from './railway'
+import { runtimeSecuritySources } from './runtime-security'
+import { sakuraNotices } from './sakura'
+import { netlifyStatus } from './netlify'
 import { nodejsSecurity } from './nodejs'
 import { phpSecurity } from './php'
 import type { Source, SourceGroup } from './types'
+import { supabaseStatus } from './supabase'
 import { vercelStatus } from './vercel'
 
 /** 登録済み Source。追加はここに 1 行足すだけ */
 export const sources: Source[] = [
   // Status
+  awsNotices,
+  azureNotices,
   cloudflareStatus,
   githubStatus,
   vercelStatus,
+  netlifyStatus,
+  railwayStatus,
+  supabaseStatus,
+  sakuraNotices,
   googleCloudStatus,
   // Security
   phpSecurity,
   nodejsSecurity,
   githubAdvisory,
+  ...languageAdvisories,
+  ...runtimeSecuritySources,
   cisaKev,
 ]
 

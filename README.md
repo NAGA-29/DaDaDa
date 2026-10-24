@@ -12,16 +12,57 @@ Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・�
 - React + Vite (`@cloudflare/vite-plugin` で Worker と SPA を 1 プロジェクトに)
 - Vanilla CSS
 
-## 初期 Source (8)
+## Source
 
 | 種別 | Source | 取得方法 |
 | --- | --- | --- |
-| Status | Cloudflare / GitHub / Vercel | Statuspage API (`StatuspageAdapter`) |
+| Status | Cloudflare / GitHub / Vercel / Netlify | Statuspage API (`StatuspageAdapter`) |
+| Status | AWS | 公式 RSS（公開告知のみ。稼働状態は未判定） |
+| Status | Azure | 公式 RSS（公開告知のみ。稼働状態は未判定） |
+| Status | さくらインターネット | 公式 RSS（障害・メンテナンスの告知のみ。稼働状態は未判定） |
+| Status | Supabase | incident.io の Statuspage 互換 API（未解決の障害の影響度も状態に反映） |
+| Status | Railway | 公式ステータス JSON (`status.railway.com/api/status`) |
 | Status | Google Cloud | `status.cloud.google.com/incidents.json` |
 | Security | PHP | php.net Atom (security release のみ) |
 | Security | Node.js | Vulnerability RSS |
-| Security | GitHub Advisory | REST API (reviewed / critical) |
+| Security | GitHub Advisory | REST API（全体の reviewed / Critical） |
+| Security | Go / Java / Rust / C# (.NET) のライブラリ | GitHub Advisory を `go` / `maven` / `rust` / `nuget` 別に High / Critical 収集（4 Source） |
+| Security | Go 標準ライブラリ・toolchain | Go 公式 Vulnerability Database（OSV JSON） |
+| Security | Java SE / GraalVM | Oracle 公式 Security Alerts RSS と Java SE Risk Matrix |
+| Security | Rust / Cargo / rustup | Rust 公式ブログ Atom のセキュリティ告知 |
+| Security | .NET / ASP.NET Core | Microsoft 公式リポジトリの Security Advisory API（2 Source） |
 | Security | CISA KEV | JSON feed (直近 30 日の追加分) |
+
+## さくらインターネットの告知
+
+Supabase は公式ステータスサイトの Statuspage 互換 API から、状態と障害履歴を5分間隔で取得します。集約状態が正常でも未解決の障害がある場合は、上流の影響度もカードの状態に反映します。認証キーは不要です。
+
+Railway は公式ステータスサイトの公開 JSON を5分間隔で取得します。公式の影響度から状態を集約し、発生中の障害と復旧履歴を共通画面に表示します。`TRIAGE`（公式表示: Notice）は告知として扱い、障害件数に含めません。Noticeのみの場合は稼働状態を「未判定」にします。予定メンテナンスは告知、実施中はメンテナンスとして扱い、予定終了日時から復旧を推測しません。認証キーは不要ですが、専用JSON形式の変更時には取得処理の更新が必要です。
+
+AWS は [公式の全サービス RSS](https://status.aws.amazon.com/rss/all.rss) を5分間隔で収集し、Services と共通の「Incidents & notices」に表示します。ホームは各社の最新1件、詳細画面は最新30件です。GUID のサービスコード・リージョンを読み取れる場合は併記し、識別子と元データを保持します。RSS の文言や記事の消失から障害の発生中・復旧を推測せず、稼働状態は「未判定」、記事は `status=notice` として扱います。アカウント固有のイベントは対象外です。
+
+AWS 公式は RSS の形式変更・網羅性の制約を説明し、プログラム連携には [EventBridge](https://docs.aws.amazon.com/health/latest/ug/cloudwatch-events-health.html) を推奨しています。将来の対応は [Issue #3](https://github.com/NAGA-29/DaDaDa/issues/3) で管理します。
+
+Azure は [公式 RSS](https://azure.status.microsoft/en-us/status/feed/) を認証なしで5分間隔で収集し、他のクラウドと同じ Services と共通の告知一覧に表示します。ホームは最新1件、詳細画面は最新30件です。GUID・記事URLのクエリ・元データを保持し、同じ告知の再取得は上書きします。記事は `status=notice`、稼働状態は「未判定」とし、記事が0件でも正常稼働や復旧とは判断しません。[公開ステータスの対象](https://learn.microsoft.com/en-us/azure/service-health/azure-status-overview)は広範囲の障害などに限られ、サブスクリプション固有の障害・計画メンテナンスを取得する Azure Service Health 連携は含みません。
+
+Services に「さくらインターネット」を表示し、[公式の障害・メンテナンス RSS](https://www.sakura.ad.jp/rss/mainte.rdf) を5分間隔の Status 収集で取得します。クラウド・VPS・レンタルサーバ・専用サーバなどの告知が混在します。
+
+RSS だけでは発生中・復旧済み・実施中の状態を確定できないため、状態は「未判定」（API: `unverified`）、記事は `kind=service` / `status=notice` として保存します。発生中のインシデント数や解決済み履歴には含めません。ホームでは他社と共通の「Incidents & notices」一覧に各サービスの最新告知1件を表示し、サービス名から詳細画面へ進むと最新30件の公式告知を確認できます。対象サービス・設備・実施日時・復旧状況は公式リンクから確認してください。
+
+RSS から項目が消えても、復旧したとは判断しません。元データと記事 URL のクエリ ID を保持し、同じ告知の再取得は上書きします。
+
+## セキュリティアラートの表示・収集範囲
+
+- 言語フィルターで Go / Java / Rust / C# (.NET) と既存の JavaScript・PHP・Python を選べます。初期表示は Critical、High または High + Critical に切り替えられます。C++ の専用収集は追加していません。
+- PHP フィルターは PHP 本体（`php`）と Composer ライブラリ（`composer`）の両方を対象にします。
+- 上流が重要度を提供しない公式告知は、重要度を推測せず「Official notices」に別表示します。言語フィルターはこの欄にも適用します。KEV は言語別情報がないため全言語共通の別枠です。
+- CVE / GHSA が一致する情報は集約して表示し、複数言語にまたがる情報は各言語のフィルターで見つけられます。元のデータは取得元ごとに保存します。
+- ライブラリは各言語・各重要度について更新日時順に最大200件を毎回確認します。過去全件の同期ではありません。1 Source の取得失敗はほかの Source に波及させません。
+- トップ画面は各言語の High / Critical / 重要度未設定それぞれ最大30件と全体の最新30件を取得してから重複をまとめます。件数が多い言語によって他言語が一覧から押し出されるのを防ぎます。
+- Go 本体は標準ライブラリ・toolchain の更新順12件、Rust は公式 Atom に残っている告知、Java は過去120日内の最新4告知（Java SE 部分のみ）、.NET / ASP.NET Core は各公式リポジトリの最新100件が対象です。Java は Oracle Java SE / GraalVM の範囲で、全 JDK ベンダーを網羅するものではありません。
+- GitHub API の呼び出しが増えるため、`GITHUB_TOKEN` の設定を推奨します。未設定でも取得できますが、公開 API のレート制限に達した Source は収集結果にエラーを返します。
+
+取得元仕様: [GitHub Advisory API](https://docs.github.com/en/rest/security-advisories/global-advisories)、[Go 公式 DB](https://go.dev/doc/security/vuln/database)、[Rust の告知方針](https://rust-lang.org/security)、[Oracle Security Alerts](https://www.oracle.com/security-alerts/)、[.NET 公式告知](https://github.com/dotnet/runtime/security/advisories)。
 
 ## 開発
 
@@ -37,6 +78,10 @@ pnpm run dev                          # http://localhost:5173
 curl -X POST -H "Authorization: Bearer $ADMIN_TOKEN" "http://localhost:5173/api/admin/collect"
 curl -X POST -H "Authorization: Bearer $ADMIN_TOKEN" "http://localhost:5173/api/admin/collect?group=status"
 ```
+
+開発サーバーのポートは5173に固定しています。使用中の場合は起動を停止するため、既存の開発サーバーを終了してから起動してください。
+
+`jq` が `Invalid numeric literal` を返す場合は、JSON以外のエラーページが返っている可能性があります。`curl -sS -i http://localhost:5173/api/health` でHTTPステータスを確認してください。開発サーバーが `fetch failed` のHTMLを返している場合は、実行中の `pnpm run dev` をCtrl+Cで終了し、起動し直してください。
 
 ```bash
 pnpm test          # vitest (Adapter 単体 + ローカル D1 を使った収集〜集約の結合テスト)
@@ -164,3 +209,7 @@ export const netlifyStatus = new StatuspageAdapter({
 - raw payload は必ず `raw_json` に保存
 - 日時は内部 UTC、表示時にローカルタイム
 - Runtime / Library には Current Status を付けない
+
+## 表示言語
+
+日本語を初期表示とし、ヘッダーの言語選択からEnglishに切り替えられます。選択はブラウザーに保存され、詳細画面と再読み込み後も引き継がれます。見出し・状態・フィルター・日時は選択言語に合わせ、公式記事のタイトル・本文とサービス名は原文のまま表示します。
