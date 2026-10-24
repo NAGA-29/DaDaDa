@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/logo.png" alt="DaDaDa ロゴ" width="500" />
+  <img src="public/LOGO.png" alt="DaDaDa ロゴ" width="500" />
 </p>
 
 # DaDaDa
