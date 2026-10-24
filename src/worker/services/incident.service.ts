@@ -20,24 +20,26 @@ function hoursAgo(now: Date, hours: number): string {
 
 export async function getSummary(db: D1Database, now = new Date()): Promise<SummaryResponse> {
   const incidents = new IncidentRepository(db)
-  const [activeService, recentSecurity, security, kev, services, providers] = await Promise.all([
-    incidents.list({ kind: 'service', active: true, limit: 100 }),
-    incidents.list({
-      kind: 'security',
-      from: hoursAgo(now, HAPPENING_NOW_SECURITY_WINDOW_HOURS),
-      limit: 100,
-    }),
-    getSecuritySummary(incidents),
-    // KEV は通常の Advisory と別枠。保存済みの行にも 30 日の期限を適用する
-    incidents.list({
-      kind: 'security',
-      source: KEV_SOURCE,
-      from: hoursAgo(now, KEV_LOOKBACK_DAYS * 24),
-      limit: 20,
-    }),
-    listProviderStatuses(db, {}, now),
-    new ProviderRepository(db).list(),
-  ])
+  const [activeService, recentSecurity, security, kev, services, providers, serviceNotices] =
+    await Promise.all([
+      incidents.list({ kind: 'service', active: true, limit: 100 }),
+      incidents.list({
+        kind: 'security',
+        from: hoursAgo(now, HAPPENING_NOW_SECURITY_WINDOW_HOURS),
+        limit: 100,
+      }),
+      getSecuritySummary(incidents),
+      // KEV は通常の Advisory と別枠。保存済みの行にも 30 日の期限を適用する
+      incidents.list({
+        kind: 'security',
+        source: KEV_SOURCE,
+        from: hoursAgo(now, KEV_LOOKBACK_DAYS * 24),
+        limit: 20,
+      }),
+      listProviderStatuses(db, {}, now),
+      new ProviderRepository(db).list(),
+      incidents.list({ kind: 'service', status: 'notice', limit: 10 }),
+    ])
 
   const isKev = (i: Incident) => i.source === KEV_SOURCE
   const happeningNow = [
@@ -51,6 +53,7 @@ export async function getSummary(db: D1Database, now = new Date()): Promise<Summ
       [...happeningNow, ...security.filter(i => i.status === 'withdrawn')].map(toView),
     ).sort((a, b) => (b.startedAt ?? b.publishedAt).localeCompare(a.startedAt ?? a.publishedAt)),
     services,
+    serviceNotices: serviceNotices.items.map(toView),
     security: deduplicateSecurity(security.map(toView)),
     kev: kev.items.map(toView),
     providers,
@@ -65,11 +68,12 @@ export async function getProviderDetail(
   const provider = await new ProviderRepository(db).get(providerId)
   if (!provider) return null
   const incidents = new IncidentRepository(db)
-  const [currentStatus, active, recent, security] = await Promise.all([
+  const [currentStatus, active, recent, security, notices] = await Promise.all([
     provider.supportsStatus ? new ProviderStatusRepository(db).get(providerId) : null,
     incidents.list({ providerId, kind: 'service', active: true, limit: 50 }),
     incidents.list({ providerId, kind: 'service', active: false, limit: 30 }),
     incidents.list({ providerId, kind: 'security', limit: 30 }),
+    incidents.list({ providerId, kind: 'service', status: 'notice', limit: 30 }),
   ])
   return {
     provider,
@@ -77,5 +81,6 @@ export async function getProviderDetail(
     activeIncidents: active.items.map(toView),
     recentIncidents: recent.items.map(toView),
     securityAdvisories: deduplicateSecurity(security.items.map(toView)),
+    officialNotices: notices.items.map(toView),
   }
 }

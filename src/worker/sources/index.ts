@@ -6,6 +6,7 @@ import { githubStatus } from './github-status'
 import { googleCloudStatus } from './google-cloud'
 import { languageAdvisories } from './language-advisories'
 import { runtimeSecuritySources } from './runtime-security'
+import { sakuraNotices } from './sakura'
 import { netlifyStatus } from './netlify'
 import { nodejsSecurity } from './nodejs'
 import { phpSecurity } from './php'
@@ -19,6 +20,7 @@ export const sources: Source[] = [
   githubStatus,
   vercelStatus,
   netlifyStatus,
+  sakuraNotices,
   googleCloudStatus,
   // Security
   phpSecurity,

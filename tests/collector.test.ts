@@ -17,6 +17,7 @@ let env: Bindings
 const now = new Date('2026-10-23T10:30:00Z')
 
 const fetcher = fakeFetch({
+  'https://www.sakura.ad.jp/rss/mainte.rdf': 'sakura-notices.xml',
   'https://www.netlifystatus.com/api/v2/summary.json': () =>
     Response.json({
       status: { indicator: 'none', description: 'All Systems Operational' },
@@ -74,6 +75,7 @@ describe('collector runner + D1', () => {
       incidents: 2,
       status: 'partial_outage',
     })
+    expect(byId['sakura-notices']).toMatchObject({ ok: true, incidents: 3, status: 'unverified' })
     expect(byId['netlify-status']).toMatchObject({ ok: true, incidents: 0, status: 'operational' })
     expect(byId['php-security']).toMatchObject({ ok: true, incidents: 1 })
     // withdrawn も status=withdrawn として保存される (一覧には出ない)
@@ -122,7 +124,24 @@ describe('collector runner + D1', () => {
       'google-cloud': 'partial_outage',
       vercel: null,
       netlify: 'operational',
+      sakura: 'unverified',
     })
+  })
+
+  it('shows Sakura in Services with notices, never as active or resolved incidents', async () => {
+    const summary = await getSummary(env.DB, now)
+    expect(summary.services.find(s => s.id === 'sakura')?.currentStatus?.status).toBe('unverified')
+    expect(summary.serviceNotices?.filter(i => i.providerId === 'sakura')).toHaveLength(3)
+    expect(summary.happeningNow.some(i => i.providerId === 'sakura')).toBe(false)
+    const detail = await getProviderDetail(env.DB, 'sakura', now)
+    expect(detail?.activeIncidents).toEqual([])
+    expect(detail?.recentIncidents).toEqual([])
+    expect(detail?.officialNotices).toHaveLength(3)
+    expect(
+      (await new IncidentRepository(env.DB).list({ providerId: 'sakura', active: true })).items,
+    ).toEqual([])
+    const staleDetail = await getProviderDetail(env.DB, 'sakura', new Date(now.getTime() + 3600000))
+    expect(staleDetail?.currentStatus?.status).toBe('unverified')
   })
 
   it('returns provider detail', async () => {

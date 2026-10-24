@@ -14,7 +14,7 @@ type Props = {
 
 export function IncidentRow({ incident, provider, showProvider = true }: Props) {
   const tone = incidentTone(incident)
-  const active = incident.kind === 'service' && !incident.resolvedAt
+  const active = incident.kind === 'service' && incident.status !== 'notice' && !incident.resolvedAt
   const meta = [
     incident.product,
     incident.kind === 'service' ? humanize(incident.status) : undefined,

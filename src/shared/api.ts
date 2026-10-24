@@ -43,6 +43,7 @@ export type ProviderDetailResponse = {
   activeIncidents: IncidentView[]
   recentIncidents: IncidentView[]
   securityAdvisories: IncidentView[]
+  officialNotices?: IncidentView[]
 }
 
 /** トップ画面を 1 リクエストで描画するための集約 */
@@ -50,6 +51,7 @@ export type SummaryResponse = {
   generatedAt: string
   happeningNow: IncidentView[]
   services: ProviderWithStatus[]
+  serviceNotices?: IncidentView[]
   security: IncidentView[]
   kev: IncidentView[]
   providers: Provider[]

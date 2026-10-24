@@ -182,7 +182,7 @@ export class IncidentRepository {
     if (filter.status) add('status = ?', filter.status)
     else add(`(status IS NULL OR status NOT IN (${HIDDEN_SQL}))`)
     if (filter.active === true)
-      add(`resolved_at IS NULL AND (status IS NULL OR status NOT IN (${RESOLVED_SQL}))`)
+      add(`resolved_at IS NULL AND (status IS NULL OR status NOT IN (${RESOLVED_SQL}, 'notice'))`)
     if (filter.active === false) add(`(resolved_at IS NOT NULL OR status IN (${RESOLVED_SQL}))`)
     if (filter.from) add('published_at >= ?', filter.from)
     if (filter.to) add('published_at <= ?', filter.to)

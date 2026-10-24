@@ -15,7 +15,8 @@ export function HappeningNow({
       </h2>
       {incidents.length === 0 ? (
         <p className="all-clear">
-          <span className="all-clear-mark">✓</span> Nothing is breaking right now. Ship it.
+          <span className="all-clear-mark">✓</span> No active incident reports. Check official
+          notices below.
         </p>
       ) : (
         <ul className="incident-list">

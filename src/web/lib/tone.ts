@@ -10,6 +10,7 @@ export const STATUS_TONE: Record<ProviderStatusValue, Tone> = {
   partial_outage: 'major',
   major_outage: 'critical',
   unknown: 'muted',
+  unverified: 'muted',
 }
 
 const SEVERITY_TONE: Record<string, Tone> = {
@@ -25,7 +26,10 @@ const SEVERITY_TONE: Record<string, Tone> = {
   critical: 'critical',
 }
 
-export function incidentTone(incident: Pick<IncidentView, 'severity' | 'kind' | 'source'>): Tone {
+export function incidentTone(
+  incident: Pick<IncidentView, 'severity' | 'kind' | 'source' | 'status'>,
+): Tone {
+  if (incident.status === 'notice') return 'info'
   if (incident.source === 'cisa-kev') return 'critical'
   const tone = incident.severity ? SEVERITY_TONE[incident.severity.toLowerCase()] : undefined
   return tone ?? (incident.kind === 'security' ? 'minor' : 'major')

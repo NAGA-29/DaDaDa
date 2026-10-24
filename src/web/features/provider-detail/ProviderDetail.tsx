@@ -71,6 +71,8 @@ export function ProviderDetail({ id }: { id: string }) {
   }
 
   const { provider, currentStatus, activeIncidents, recentIncidents, securityAdvisories } = data
+  const noticeOnly = currentStatus?.status === 'unverified'
+  const officialNotices = data.officialNotices ?? []
   return (
     <main className="page">
       <Link to="/" className="back">
@@ -90,7 +92,7 @@ export function ProviderDetail({ id }: { id: string }) {
           {currentStatus?.message && (
             <span className="detail-message">{currentStatus.message}</span>
           )}
-          {currentStatus && (
+          {currentStatus && !noticeOnly && (
             <span className="muted">checked {timeAgo(currentStatus.checkedAt)}</span>
           )}
         </div>
@@ -108,11 +110,18 @@ export function ProviderDetail({ id }: { id: string }) {
         )}
       </p>
 
-      {provider.supportsStatus && (
+      {provider.supportsStatus && !noticeOnly && (
         <IncidentSection
           title="Current incidents"
           incidents={activeIncidents}
           empty="No active incidents."
+        />
+      )}
+      {(noticeOnly || officialNotices.length > 0) && (
+        <IncidentSection
+          title="公式の障害・メンテナンス告知"
+          incidents={officialNotices}
+          empty="告知はまだ取得されていません。稼働状態は未判定です。"
         />
       )}
       {provider.supportsSecurity && (

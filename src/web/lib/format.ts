@@ -40,6 +40,7 @@ export const STATUS_LABEL: Record<ProviderStatusValue, string> = {
   major_outage: 'Major outage',
   maintenance: 'Maintenance',
   unknown: 'Unknown',
+  unverified: '未判定',
 }
 
 export const CATEGORY_LABEL: Record<ProviderCategory, string> = {

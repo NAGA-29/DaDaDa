@@ -5,6 +5,7 @@ export type ProviderStatusValue =
   | 'major_outage'
   | 'maintenance'
   | 'unknown'
+  | 'unverified'
 
 export type ProviderStatus = {
   providerId: string
@@ -18,6 +19,7 @@ export type ProviderStatus = {
 const SEVERITY_ORDER: Record<ProviderStatusValue, number> = {
   operational: 0,
   unknown: 1,
+  unverified: 1,
   maintenance: 2,
   degraded: 3,
   partial_outage: 4,
@@ -31,7 +33,11 @@ export const STATUS_STALE_AFTER_MINUTES = 30
 export function freshStatus<T extends ProviderStatus>(status: T, now: Date): T {
   const ageMs = now.getTime() - Date.parse(status.checkedAt)
   if (ageMs <= STATUS_STALE_AFTER_MINUTES * 60 * 1000) return status
-  return { ...status, status: 'unknown', message: 'Status data is stale' }
+  return {
+    ...status,
+    status: status.status === 'unverified' ? 'unverified' : 'unknown',
+    message: 'Status data is stale',
+  }
 }
 
 /** 複数の状態から最も悪いものを返す。空なら operational */

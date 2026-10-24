@@ -12,11 +12,12 @@ Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・�
 - React + Vite (`@cloudflare/vite-plugin` で Worker と SPA を 1 プロジェクトに)
 - Vanilla CSS
 
-## Source (18)
+## Source (19)
 
 | 種別 | Source | 取得方法 |
 | --- | --- | --- |
 | Status | Cloudflare / GitHub / Vercel / Netlify | Statuspage API (`StatuspageAdapter`) |
+| Status | さくらインターネット | 公式 RSS（障害・メンテナンスの告知のみ。稼働状態は未判定） |
 | Status | Google Cloud | `status.cloud.google.com/incidents.json` |
 | Security | PHP | php.net Atom (security release のみ) |
 | Security | Node.js | Vulnerability RSS |
@@ -27,6 +28,14 @@ Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・�
 | Security | Rust / Cargo / rustup | Rust 公式ブログ Atom のセキュリティ告知 |
 | Security | .NET / ASP.NET Core | Microsoft 公式リポジトリの Security Advisory API（2 Source） |
 | Security | CISA KEV | JSON feed (直近 30 日の追加分) |
+
+## さくらインターネットの告知
+
+Services に「さくらインターネット」を表示し、[公式の障害・メンテナンス RSS](https://www.sakura.ad.jp/rss/mainte.rdf) を5分間隔の Status 収集で取得します。クラウド・VPS・レンタルサーバ・専用サーバなどの告知が混在します。
+
+RSS だけでは発生中・復旧済み・実施中の状態を確定できないため、状態は「未判定」（API: `unverified`）、記事は `kind=service` / `status=notice` として保存します。発生中のインシデント数や解決済み履歴には含めません。Services 内では最新5件、詳細画面では最新30件の公式告知を表示します。対象サービス・設備・実施日時・復旧状況は公式リンクから確認してください。
+
+RSS から項目が消えても、復旧したとは判断しません。元データと記事 URL のクエリ ID を保持し、同じ告知の再取得は上書きします。
 
 ## セキュリティアラートの表示・収集範囲
 

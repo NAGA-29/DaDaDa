@@ -42,7 +42,11 @@ export function isHappeningNow(
   now: Date,
 ): boolean {
   if (incident.kind === 'service') {
-    return !incident.resolvedAt && !RESOLVED_STATUSES.includes(incident.status as never)
+    return (
+      incident.status !== 'notice' &&
+      !incident.resolvedAt &&
+      !RESOLVED_STATUSES.includes(incident.status as never)
+    )
   }
   const windowMs = HAPPENING_NOW_SECURITY_WINDOW_HOURS * 60 * 60 * 1000
   return Date.parse(incident.publishedAt) >= now.getTime() - windowMs

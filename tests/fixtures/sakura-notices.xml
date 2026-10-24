@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"><channel><title>障害・メンテナンス | さくらインターネット</title>
+<item><title>[障害] さくらのクラウドの一部</title><link>http://support.sakura.ad.jp/mainte/mainteentry.php?id=10001</link><guid>http://support.sakura.ad.jp/mainte/mainteentry.php?id=10001</guid><description>一部設備の障害に関する公式告知です。</description><pubDate>Fri, 23 Oct 2026 15:00:00 +0900</pubDate></item>
+<item><title>[メンテナンス] さくらのVPS</title><link>http://support.sakura.ad.jp/mainte/mainteentry.php?id=10002</link><guid>http://support.sakura.ad.jp/mainte/mainteentry.php?id=10002</guid><description>来週メンテナンスを実施します。</description><pubDate>Fri, 23 Oct 2026 16:00:00 +0900</pubDate></item>
+<item><title>[復旧] さくらのレンタルサーバの一部</title><link>http://support.sakura.ad.jp/mainte/mainteentry.php?id=10003</link><guid>http://support.sakura.ad.jp/mainte/mainteentry.php?id=10003</guid><description>対象設備の詳細は公式ページを参照してください。</description><pubDate>Fri, 23 Oct 2026 17:00:00 +0900</pubDate></item>
+</channel></rss>

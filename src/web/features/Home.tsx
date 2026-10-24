@@ -50,7 +50,11 @@ export function Home({ summary }: { summary: Loadable<SummaryResponse> }) {
           tabIndex={0}
         >
           <HappeningNow incidents={serviceIncidents} providers={providers} />
-          <Services services={data.services} />
+          <Services
+            services={data.services}
+            notices={data.serviceNotices ?? []}
+            providers={providers}
+          />
         </section>
         <section
           className="dashboard-column"
