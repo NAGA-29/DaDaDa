@@ -12,12 +12,13 @@ Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・�
 - React + Vite (`@cloudflare/vite-plugin` で Worker と SPA を 1 プロジェクトに)
 - Vanilla CSS
 
-## Source (19)
+## Source
 
 | 種別 | Source | 取得方法 |
 | --- | --- | --- |
 | Status | Cloudflare / GitHub / Vercel / Netlify | Statuspage API (`StatuspageAdapter`) |
 | Status | AWS | 公式 RSS（公開告知のみ。稼働状態は未判定） |
+| Status | Azure | 公式 RSS（公開告知のみ。稼働状態は未判定） |
 | Status | さくらインターネット | 公式 RSS（障害・メンテナンスの告知のみ。稼働状態は未判定） |
 | Status | Supabase | incident.io の Statuspage 互換 API（未解決の障害の影響度も状態に反映） |
 | Status | Railway | 公式ステータス JSON (`status.railway.com/api/status`) |
@@ -41,6 +42,8 @@ Railway は公式ステータスサイトの公開 JSON を5分間隔で取得�
 AWS は [公式の全サービス RSS](https://status.aws.amazon.com/rss/all.rss) を5分間隔で収集し、Services と共通の「Incidents & notices」に表示します。ホームは各社の最新1件、詳細画面は最新30件です。GUID のサービスコード・リージョンを読み取れる場合は併記し、識別子と元データを保持します。RSS の文言や記事の消失から障害の発生中・復旧を推測せず、稼働状態は「未判定」、記事は `status=notice` として扱います。アカウント固有のイベントは対象外です。
 
 AWS 公式は RSS の形式変更・網羅性の制約を説明し、プログラム連携には [EventBridge](https://docs.aws.amazon.com/health/latest/ug/cloudwatch-events-health.html) を推奨しています。将来の対応は [Issue #3](https://github.com/NAGA-29/DaDaDa/issues/3) で管理します。
+
+Azure は [公式 RSS](https://azure.status.microsoft/en-us/status/feed/) を認証なしで5分間隔で収集し、他のクラウドと同じ Services と共通の告知一覧に表示します。ホームは最新1件、詳細画面は最新30件です。GUID・記事URLのクエリ・元データを保持し、同じ告知の再取得は上書きします。記事は `status=notice`、稼働状態は「未判定」とし、記事が0件でも正常稼働や復旧とは判断しません。[公開ステータスの対象](https://learn.microsoft.com/en-us/azure/service-health/azure-status-overview)は広範囲の障害などに限られ、サブスクリプション固有の障害・計画メンテナンスを取得する Azure Service Health 連携は含みません。
 
 Services に「さくらインターネット」を表示し、[公式の障害・メンテナンス RSS](https://www.sakura.ad.jp/rss/mainte.rdf) を5分間隔の Status 収集で取得します。クラウド・VPS・レンタルサーバ・専用サーバなどの告知が混在します。
 

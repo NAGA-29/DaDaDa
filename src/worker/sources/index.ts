@@ -1,5 +1,6 @@
 import type { Provider } from '../domain/provider'
 import { awsNotices } from './aws'
+import { azureNotices } from './azure'
 import { cisaKev } from './cisa-kev'
 import { cloudflareStatus } from './cloudflare'
 import { githubAdvisory } from './github-advisory'
@@ -20,6 +21,7 @@ import { vercelStatus } from './vercel'
 export const sources: Source[] = [
   // Status
   awsNotices,
+  azureNotices,
   cloudflareStatus,
   githubStatus,
   vercelStatus,

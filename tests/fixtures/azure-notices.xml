@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Authored examples: the live public feed can contain no items. -->
+<rss version="2.0"><channel><title>Azure Status</title>
+<item><title>Azure services - Investigating connectivity issues</title>
+<link>https://azure.status.microsoft/en-us/status/?trackingId=TEST-001</link>
+<guid isPermaLink="false">TEST-001</guid>
+<pubDate>Fri, 23 Oct 2026 08:00:00 Z</pubDate>
+<description><![CDATA[<p>Investigating connectivity issues. <a href="https://azure.status.microsoft/">Details</a></p>]]></description></item>
+<item><title>Azure services - Resolved connectivity issues</title>
+<link>https://azure.status.microsoft/en-us/status/?trackingId=TEST-002</link>
+<guid isPermaLink="false">TEST-002</guid>
+<pubDate>Fri, 23 Oct 2026 09:00:00 Z</pubDate>
+<description>Recovery update.</description></item>
+</channel></rss>

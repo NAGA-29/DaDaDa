@@ -21,6 +21,7 @@ const fetcher = fakeFetch({
   'https://status.supabase.com/api/v2/incidents.json': 'supabase-incidents.json',
   'https://status.railway.com/api/status': 'railway-status.json',
   'https://status.aws.amazon.com/rss/all.rss': 'aws-notices.xml',
+  'https://azure.status.microsoft/en-us/status/feed/': 'azure-notices.xml',
   'https://www.sakura.ad.jp/rss/mainte.rdf': 'sakura-notices.xml',
   'https://www.netlifystatus.com/api/v2/summary.json': () =>
     Response.json({
@@ -86,6 +87,7 @@ describe('collector runner + D1', () => {
     })
     expect(byId['supabase-status']).toMatchObject({ ok: true, incidents: 2, status: 'degraded' })
     expect(byId['aws-notices']).toMatchObject({ ok: true, incidents: 3, status: 'unverified' })
+    expect(byId['azure-notices']).toMatchObject({ ok: true, incidents: 2, status: 'unverified' })
     expect(byId['sakura-notices']).toMatchObject({ ok: true, incidents: 3, status: 'unverified' })
     expect(byId['netlify-status']).toMatchObject({ ok: true, incidents: 0, status: 'operational' })
     expect(byId['php-security']).toMatchObject({ ok: true, incidents: 1 })
@@ -133,6 +135,7 @@ describe('collector runner + D1', () => {
       supabase: 'degraded',
       railway: 'partial_outage',
       aws: 'unverified',
+      azure: 'unverified',
       cloudflare: 'partial_outage',
       github: null,
       'google-cloud': 'partial_outage',
@@ -158,6 +161,17 @@ describe('collector runner + D1', () => {
     expect(staleDetail?.currentStatus?.status).toBe('unverified')
   })
 
+  it('shows Azure in the common views without counting its notices as active or resolved', async () => {
+    const summary = await getSummary(env.DB, now)
+    expect(summary.services.find(s => s.id === 'azure')?.currentStatus?.status).toBe('unverified')
+    expect(summary.serviceNotices?.filter(i => i.providerId === 'azure')).toHaveLength(1)
+    expect(summary.happeningNow.some(i => i.providerId === 'azure')).toBe(false)
+    const detail = await getProviderDetail(env.DB, 'azure', now)
+    expect(detail?.activeIncidents).toEqual([])
+    expect(detail?.recentIncidents).toEqual([])
+    expect(detail?.officialNotices).toHaveLength(2)
+  })
+
   it('keeps AWS notices visible when newer notices from another provider fill the page', async () => {
     const repo = new IncidentRepository(env.DB)
     const notices = Array.from({ length: 12 }, (_, i) => ({
@@ -176,6 +190,7 @@ describe('collector runner + D1', () => {
     const summary = await getSummary(env.DB, now)
     expect(summary.serviceNotices?.map(i => i.providerId).sort()).toEqual([
       'aws',
+      'azure',
       'railway',
       'sakura',
     ])
