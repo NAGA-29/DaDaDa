@@ -19,6 +19,7 @@ Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・�
 | Status | Cloudflare / GitHub / Vercel / Netlify | Statuspage API (`StatuspageAdapter`) |
 | Status | AWS | 公式 RSS（公開告知のみ。稼働状態は未判定） |
 | Status | さくらインターネット | 公式 RSS（障害・メンテナンスの告知のみ。稼働状態は未判定） |
+| Status | Railway | 公式ステータス JSON (`status.railway.com/api/status`) |
 | Status | Google Cloud | `status.cloud.google.com/incidents.json` |
 | Security | PHP | php.net Atom (security release のみ) |
 | Security | Node.js | Vulnerability RSS |
@@ -31,6 +32,8 @@ Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・�
 | Security | CISA KEV | JSON feed (直近 30 日の追加分) |
 
 ## さくらインターネットの告知
+
+Railway は公式ステータスサイトの公開 JSON を5分間隔で取得します。公式の影響度から状態を集約し、発生中の障害と復旧履歴を共通画面に表示します。`TRIAGE`（公式表示: Notice）は告知として扱い、障害件数に含めません。Noticeのみの場合は稼働状態を「未判定」にします。予定メンテナンスは告知、実施中はメンテナンスとして扱い、予定終了日時から復旧を推測しません。認証キーは不要ですが、専用JSON形式の変更時には取得処理の更新が必要です。
 
 AWS は [公式の全サービス RSS](https://status.aws.amazon.com/rss/all.rss) を5分間隔で収集し、Services と共通の「Incidents & notices」に表示します。ホームは各社の最新1件、詳細画面は最新30件です。GUID のサービスコード・リージョンを読み取れる場合は併記し、識別子と元データを保持します。RSS の文言や記事の消失から障害の発生中・復旧を推測せず、稼働状態は「未判定」、記事は `status=notice` として扱います。アカウント固有のイベントは対象外です。
 

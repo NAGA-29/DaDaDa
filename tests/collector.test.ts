@@ -17,6 +17,7 @@ let env: Bindings
 const now = new Date('2026-10-23T10:30:00Z')
 
 const fetcher = fakeFetch({
+  'https://status.railway.com/api/status': 'railway-status.json',
   'https://status.aws.amazon.com/rss/all.rss': 'aws-notices.xml',
   'https://www.sakura.ad.jp/rss/mainte.rdf': 'sakura-notices.xml',
   'https://www.netlifystatus.com/api/v2/summary.json': () =>
@@ -76,6 +77,11 @@ describe('collector runner + D1', () => {
       incidents: 2,
       status: 'partial_outage',
     })
+    expect(byId['railway-status']).toMatchObject({
+      ok: true,
+      incidents: 3,
+      status: 'partial_outage',
+    })
     expect(byId['aws-notices']).toMatchObject({ ok: true, incidents: 3, status: 'unverified' })
     expect(byId['sakura-notices']).toMatchObject({ ok: true, incidents: 3, status: 'unverified' })
     expect(byId['netlify-status']).toMatchObject({ ok: true, incidents: 0, status: 'operational' })
@@ -121,6 +127,7 @@ describe('collector runner + D1', () => {
       summary.services.map(s => [s.id, s.currentStatus?.status ?? null]),
     )
     expect(services).toEqual({
+      railway: 'partial_outage',
       aws: 'unverified',
       cloudflare: 'partial_outage',
       github: null,
@@ -163,13 +170,29 @@ describe('collector runner + D1', () => {
     }))
     await repo.upsertMany(await Promise.all(notices.map(toIncident)), now)
     const summary = await getSummary(env.DB, now)
-    expect(summary.serviceNotices?.map(i => i.providerId).sort()).toEqual(['aws', 'sakura'])
+    expect(summary.serviceNotices?.map(i => i.providerId).sort()).toEqual([
+      'aws',
+      'railway',
+      'sakura',
+    ])
     expect(summary.happeningNow.some(i => i.providerId === 'aws')).toBe(false)
     const detail = await getProviderDetail(env.DB, 'aws', now)
     expect(detail?.currentStatus?.status).toBe('unverified')
     expect(detail?.activeIncidents).toEqual([])
     expect(detail?.recentIncidents).toEqual([])
     expect(detail?.officialNotices).toHaveLength(3)
+  })
+
+  it('shows Railway incidents, notices and recovery history in their respective lists', async () => {
+    const summary = await getSummary(env.DB, now)
+    expect(
+      summary.happeningNow.filter(i => i.providerId === 'railway').map(i => i.externalId),
+    ).toEqual(['railway-active'])
+    expect(summary.serviceNotices?.find(i => i.providerId === 'railway')?.status).toBe('notice')
+    const detail = await getProviderDetail(env.DB, 'railway', now)
+    expect(detail?.activeIncidents.map(i => i.externalId)).toEqual(['railway-active'])
+    expect(detail?.recentIncidents.map(i => i.externalId)).toEqual(['railway-resolved'])
+    expect(detail?.officialNotices?.map(i => i.externalId)).toEqual(['railway-notice'])
   })
 
   it('returns provider detail', async () => {
