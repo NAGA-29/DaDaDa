@@ -5,7 +5,7 @@ const ja = {
   live: '接続中',
   offline: '未接続',
   updated: '最終更新：{time}',
-  collected: '取得：{time}',
+  collected: '最新取得：{time}',
   back: '← 一覧に戻る',
   notFound: 'ページが見つかりません。',
   footer:
@@ -72,7 +72,7 @@ const en: Record<MessageKey, string> = {
   live: 'LIVE',
   offline: 'OFFLINE',
   updated: 'Updated {time}',
-  collected: 'Collected: {time}',
+  collected: 'Last collected: {time}',
   back: '← Everything',
   notFound: 'Page not found.',
   footer: 'DaDaDa collects public status pages & security feeds. Always check the official source.',
