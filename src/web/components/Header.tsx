@@ -1,22 +1,12 @@
 import { useI18n } from '../lib/i18n'
 import { Link } from './Link'
 
-export function Radar() {
-  return (
-    <span className="radar" aria-hidden>
-      <span className="radar-sweep" />
-      <span className="radar-blip" />
-    </span>
-  )
-}
-
 export function Header({ live, updatedAt }: { live: boolean; updatedAt?: string }) {
   const { locale, setLocale, t } = useI18n()
   return (
     <header className="header">
       <Link to="/" className="brand">
-        <Radar />
-        <span className="brand-name">DaDaDa</span>
+        <img className="brand-logo" src="/header_logo.png" alt="DaDaDa" width={2172} height={724} />
       </Link>
       <div className="header-actions">
         <select

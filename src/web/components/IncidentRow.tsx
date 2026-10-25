@@ -1,6 +1,6 @@
 import { useI18n } from '../lib/i18n'
 import type { IncidentView, Provider } from '../../shared/api'
-import { humanize, timeAgo } from '../lib/format'
+import { formatDateTime, humanize, timeAgo } from '../lib/format'
 import { incidentTone } from '../lib/tone'
 import { ExternalLink, Link } from './Link'
 import { ProviderIcon } from './ProviderIcon'
@@ -52,6 +52,14 @@ export function IncidentRow({ incident, provider, showProvider = true }: Props) 
             </code>
           ))}
           {(incident.cves?.length ?? 0) > 3 && <span>+{incident.cves!.length - 3}</span>}
+          <time
+            dateTime={incident.collectedAt}
+            title={new Date(incident.collectedAt).toLocaleString(locale, {
+              timeZoneName: 'short',
+            })}
+          >
+            {t('collected', { time: formatDateTime(incident.collectedAt, locale) })}
+          </time>
         </div>
       </div>
       <time className="incident-time" dateTime={incident.startedAt ?? incident.publishedAt}>
