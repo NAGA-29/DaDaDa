@@ -24,5 +24,7 @@ jobs:
           node-version: '22'
       - name: Install and audit all dependencies
         run: pnpm install --frozen-lockfile
+      - name: Prepare local Worker configuration
+        run: cp wrangler.sample.jsonc wrangler.jsonc
       - name: Lint, formatting, types, tests, and build
         run: pnpm run check

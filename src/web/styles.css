@@ -129,70 +129,11 @@ code {
 .brand:hover {
   text-decoration: none;
 }
-.brand-name {
-  font-weight: 800;
-  font-size: 20px;
-  letter-spacing: -0.02em;
-}
-
-.radar {
-  position: relative;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background:
-    radial-gradient(
-      circle,
-      transparent 30%,
-      color-mix(in srgb, var(--accent) 35%, transparent) 31%,
-      transparent 34%
-    ),
-    radial-gradient(
-      circle,
-      transparent 62%,
-      color-mix(in srgb, var(--accent) 35%, transparent) 63%,
-      transparent 67%
-    ),
-    var(--text);
-  overflow: hidden;
-}
-.radar-sweep {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: conic-gradient(
-    from 0deg,
-    color-mix(in srgb, var(--accent) 80%, transparent),
-    transparent 25%
-  );
-  animation: sweep 2.4s linear infinite;
-}
-.radar-blip {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  top: 62%;
-  left: 64%;
-  background: var(--critical);
-  animation: blip 2.4s ease-out infinite;
-}
-@keyframes sweep {
-  to {
-    transform: rotate(360deg);
-  }
-}
-@keyframes blip {
-  0%,
-  30% {
-    opacity: 0;
-  }
-  35% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
+.brand-logo {
+  display: block;
+  width: 210px;
+  max-width: 45vw;
+  height: auto;
 }
 
 .live {
