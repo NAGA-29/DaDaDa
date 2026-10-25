@@ -6,11 +6,10 @@ import { IncidentRow } from '../../components/IncidentRow'
 
 type Props = {
   advisories: IncidentView[]
-  kev: IncidentView[]
   providers: Map<string, Provider>
 }
 
-export function Security({ advisories, kev, providers }: Props) {
+export function Security({ advisories, providers }: Props) {
   const { t } = useI18n()
   const [ecosystem, setEcosystem] = useState('')
   const [severity, setSeverity] = useState('critical')
@@ -88,17 +87,27 @@ export function Security({ advisories, kev, providers }: Props) {
           </ul>
         </div>
       )}
-      {kev.length > 0 && (
-        <div className="kev">
-          <h3 className="group-title">
-            {t('knownExploited')} <span className="group-note">{t('kevScope')}</span>
-          </h3>
-          <ul className="incident-list compact">
-            {kev.map(i => (
-              <IncidentRow key={i.id} incident={i} showProvider={false} />
-            ))}
-          </ul>
-        </div>
+    </section>
+  )
+}
+
+export function KnownExploited({ advisories }: { advisories: IncidentView[] }) {
+  const { t } = useI18n()
+
+  return (
+    <section className="section" aria-labelledby="kev-title">
+      <h2 id="kev-title" className="section-title">
+        {t('knownExploited')} <span className="section-count">{advisories.length}</span>
+      </h2>
+      <p className="security-result">{t('kevScope')}</p>
+      {advisories.length === 0 ? (
+        <p className="empty">{t('noKnownExploited')}</p>
+      ) : (
+        <ul className="incident-list compact">
+          {advisories.map(i => (
+            <IncidentRow key={i.id} incident={i} showProvider={false} />
+          ))}
+        </ul>
       )}
     </section>
   )

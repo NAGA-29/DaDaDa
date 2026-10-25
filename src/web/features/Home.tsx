@@ -4,7 +4,7 @@ import type { SummaryResponse } from '../../shared/api'
 import type { Loadable } from '../lib/api'
 import { formatDateTime } from '../lib/format'
 import { HappeningNow } from './happening-now/HappeningNow'
-import { Security } from './security/Security'
+import { KnownExploited, Security } from './security/Security'
 import { Services } from './services/Services'
 
 export function Home({ summary }: { summary: Loadable<SummaryResponse> }) {
@@ -62,7 +62,15 @@ export function Home({ summary }: { summary: Loadable<SummaryResponse> }) {
           // biome-ignore lint/a11y/noNoninteractiveTabindex: this pane must support keyboard scrolling.
           tabIndex={0}
         >
-          <Security advisories={data.security} kev={data.kev} providers={providers} />
+          <Security advisories={data.security} providers={providers} />
+        </section>
+        <section
+          className="dashboard-column dashboard-column-kev"
+          aria-label={t('knownExploited')}
+          // biome-ignore lint/a11y/noNoninteractiveTabindex: this pane must support keyboard scrolling.
+          tabIndex={0}
+        >
+          <KnownExploited advisories={data.kev} />
         </section>
       </div>
     </main>

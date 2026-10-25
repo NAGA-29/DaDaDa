@@ -70,7 +70,7 @@ code {
   padding: 0 16px;
 }
 .app-dashboard {
-  max-width: 1360px;
+  max-width: 1680px;
 }
 
 /* tones */
@@ -248,6 +248,18 @@ code {
     scrollbar-gutter: stable;
     overscroll-behavior-y: contain;
     padding-right: 8px;
+  }
+  .dashboard-column-kev {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 1200px) {
+  .dashboard-columns {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+  .dashboard-column-kev {
+    grid-column: auto;
   }
 }
 .group-title {
