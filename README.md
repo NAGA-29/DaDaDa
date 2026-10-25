@@ -90,10 +90,13 @@ Node.js 22（CIと同じバージョン）と pnpm 12.14.0 を使用します。
 
 ```bash
 pnpm install
+cp wrangler.sample.jsonc wrangler.jsonc # 環境固有の設定を手元に作成
 cp .dev.vars.example .dev.vars       # ADMIN_TOKEN などを設定
 pnpm run db:migrate:local             # ローカル D1 に migration
 pnpm run dev                          # http://localhost:5173
 ```
+
+`wrangler.sample.jsonc` を Git 管理し、環境固有の `wrangler.jsonc` は管理しません。サンプルの D1 ID はローカル開発用のダミーです。本番へデプロイする前に、作成した D1 の `database_id` を手元の `wrangler.jsonc` に設定してください。`DB` と `dadada` は同じ D1 を参照するため、両方に同じ ID を設定します。共通設定（バインディング・Cron など）を変更した場合はサンプルにも反映します。トークンは `.dev.vars` または Cloudflare の Secrets に設定します。すでに手元に設定がある場合、サンプルのコピーで上書きしないでください。
 
 初回はDBが空のため、開発サーバーを起動したまま別のターミナルから手動収集を実行してください。`.dev.vars` はWorker用の設定ファイルで、シェルの環境変数には自動で読み込まれません。以下の `ADMIN_TOKEN` には `.dev.vars` に設定した値を指定します。
 

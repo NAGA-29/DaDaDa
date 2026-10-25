@@ -16,6 +16,12 @@
       // `wrangler d1 create dadada` で発行された ID に置き換える
       "database_id": "00000000-0000-0000-0000-000000000000",
       "migrations_dir": "migrations"
+    },
+    {
+      "binding": "dadada",
+      "database_name": "dadada",
+      // DB と同じデータベースを参照する追加バインディング
+      "database_id": "00000000-0000-0000-0000-000000000000"
     }
   ],
   "triggers": {
