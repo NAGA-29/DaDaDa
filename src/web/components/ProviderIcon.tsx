@@ -14,10 +14,22 @@ export function ProviderIcon({
   provider: Pick<Provider, 'id' | 'name' | 'iconUrl'>
   size?: number
 }) {
-  if (provider.iconUrl) {
-    return (
-      <img className="provider-icon" src={provider.iconUrl} alt="" width={size} height={size} />
-    )
+  const localIcons: Record<string, string> = {
+    supabase: 'supabase.svg',
+    github: 'github.svg',
+    cloudflare: 'cloudflare.svg',
+    vercel: 'vercel.svg',
+    'google-cloud': 'google-cloud.svg',
+    netlify: 'netlify.svg',
+    railway: 'railway.svg',
+    aws: 'aws.svg',
+    azure: 'azure.svg',
+    sakura: 'sakura.ico',
+  }
+  const icon =
+    provider.iconUrl ?? (localIcons[provider.id] ? `/icons/${localIcons[provider.id]}` : undefined)
+  if (icon) {
+    return <img className="provider-icon" src={icon} alt="" width={size} height={size} />
   }
   return (
     <span

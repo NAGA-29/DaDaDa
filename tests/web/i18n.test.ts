@@ -43,13 +43,15 @@ const data: SummaryResponse = {
   kev: [],
 }
 
-function render(locale: Locale) {
+function render(locale: Locale, summary = data) {
   return renderToStaticMarkup(
     createElement(
       I18nProvider,
       { initialLocale: locale },
       createElement(Header, { live: true }),
-      createElement(Home, { summary: { data, error: null, loading: false, reload: () => {} } }),
+      createElement(Home, {
+        summary: { data: summary, error: null, loading: false, reload: () => {} },
+      }),
     ),
   )
 }
@@ -71,14 +73,14 @@ describe('Japanese and English display', () => {
 
   it('renders both languages across the dashboard while keeping upstream text unchanged', () => {
     const ja = render('ja')
-    expect(ja).toContain('障害・告知')
-    expect(ja).toContain('セキュリティアラート')
+    expect(ja).toContain('いま確認したいこと')
+    expect(ja).toContain('セキュリティ')
     expect(ja).toContain('性能低下')
     expect(ja).toContain('経過観察中')
     expect(ja).toContain('Original upstream title')
     const en = render('en')
-    expect(en).toContain('Incidents &amp; notices')
-    expect(en).toContain('Security alerts')
+    expect(en).toContain('What needs your attention?')
+    expect(en).toContain('Security')
     expect(en).toContain('Degraded')
     expect(en).toContain('Monitoring')
     expect(en).toContain('Original upstream title')
@@ -104,5 +106,47 @@ describe('Japanese and English display', () => {
     expect(statusMessage('公式RSSの公開告知を配信。現在の稼働状態は未判定です。', 'en')).toContain(
       'unverified',
     )
+  })
+})
+
+describe('Overview information hierarchy', () => {
+  it('keeps unscored notices out of the security count and active incident callout', () => {
+    const notice = {
+      ...incident,
+      id: 'notice',
+      status: 'notice',
+      severity: undefined,
+      title: 'Routine maintenance notice',
+    }
+    const security = {
+      ...incident,
+      id: 'security',
+      kind: 'security' as const,
+      severity: 'critical',
+      title: 'Critical advisory',
+    }
+    const html = render('en', {
+      ...data,
+      security: [security, { ...notice, kind: 'security' }],
+      serviceNotices: [notice],
+    })
+    expect(html).toContain('Active incidents · 1')
+    expect(html).toContain('Showing 1 of 1 matching items')
+    expect(html).toContain('Critical advisory')
+    expect(html).not.toContain('Routine maintenance notice')
+    expect(html).toContain('role="tab"')
+    expect(html).toContain('aria-selected="true"')
+  })
+
+  it('does not imply that unknown services are healthy when there are no active incidents', () => {
+    const html = render('en', {
+      ...data,
+      happeningNow: [],
+      services: [{ ...provider, currentStatus: null }],
+    })
+    expect(html).toContain('No active incidents.')
+    expect(html).toContain('Within the official information collected.')
+    expect(html).toContain('Latest status unavailable')
+    expect(html).not.toContain('Operational')
   })
 })
