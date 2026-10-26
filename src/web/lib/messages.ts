@@ -1,6 +1,31 @@
 export type Locale = 'ja' | 'en'
 
 const ja = {
+  dashboardTitle: 'いま確認したいこと',
+  dashboardDescription: '開発に影響する障害やセキュリティ情報を、ひと目で。',
+  activeIncidentCount: '発生中の障害 {count}件',
+  incidentDetails: '障害の詳細を見る',
+  officialInformation: '公式情報',
+  securityTab: 'セキュリティ',
+  exploitedTab: '悪用確認済み',
+  exploitedScope: '悪用が確認された脆弱性 · CISA KEV・全言語・過去30日間',
+  officialNotices: '公式告知',
+  informationType: '情報の種類',
+  securityScope: '取得済みのセキュリティ情報 · 言語と深刻度で絞り込み',
+  noticesScope: '各サービスの最新告知と、深刻度の記載がないセキュリティ告知',
+  showingResults: '該当{total}件中 {count}件を表示',
+  showMore: 'さらに{count}件を表示',
+  serviceStatusTitle: 'サービスの稼働状況',
+  serviceStatusDescription:
+    '各サービスの公式情報に基づく状態です。DaDaDaへの接続状態とは異なります。',
+  noticeOnly: '公開告知のみ',
+  statusUnavailable: '最新状態を確認できません',
+  unverifiedLegend: '未判定：公開告知のみで、稼働状態は未確認',
+  unknownLegend: '不明：最新の稼働状態を取得できていません',
+  noActiveScope: '取得済みの公式情報の範囲です。各サービスの取得状況もご確認ください。',
+  retry: '再試行',
+  summaryUpdated: '画面更新 {time}',
+
   language: '表示言語',
   live: '接続中',
   offline: '未接続',
@@ -69,6 +94,32 @@ const ja = {
 
 export type MessageKey = keyof typeof ja
 const en: Record<MessageKey, string> = {
+  dashboardTitle: 'What needs your attention?',
+  dashboardDescription: 'Service incidents and security updates that matter to your development.',
+  activeIncidentCount: 'Active incidents · {count}',
+  incidentDetails: 'View incident details',
+  officialInformation: 'Official source',
+  securityTab: 'Security',
+  exploitedTab: 'Known exploited',
+  exploitedScope: 'Known exploited vulnerabilities · CISA KEV · all languages · last 30 days',
+  officialNotices: 'Official notices',
+  informationType: 'Information type',
+  securityScope: 'Collected security advisories · filter by language and severity',
+  noticesScope: 'Latest notice per service and security notices without a supplied severity',
+  showingResults: 'Showing {count} of {total} matching items',
+  showMore: 'Show {count} more',
+  serviceStatusTitle: 'Service status',
+  serviceStatusDescription:
+    'Based on official service sources. Separate from your connection to DaDaDa.',
+  noticeOnly: 'Public notices only',
+  statusUnavailable: 'Latest status unavailable',
+  unverifiedLegend: 'Unverified: public notices only; availability is not confirmed',
+  unknownLegend: 'Unknown: up-to-date availability could not be retrieved',
+  noActiveScope:
+    'Within the official information collected. Check each service’s data freshness, too.',
+  retry: 'Try again',
+  summaryUpdated: 'Page refreshed {time}',
+
   language: 'Display language',
   live: 'LIVE',
   offline: 'OFFLINE',
