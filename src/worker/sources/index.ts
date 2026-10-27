@@ -5,6 +5,7 @@ import { cisaKev } from './cisa-kev'
 import { cloudflareStatus } from './cloudflare'
 import { githubAdvisory } from './github-advisory'
 import { githubStatus } from './github-status'
+import { jpcertSecurity } from './jpcert'
 import { googleCloudStatus } from './google-cloud'
 import { languageAdvisories } from './language-advisories'
 import { railwayStatus } from './railway'
@@ -37,6 +38,7 @@ export const sources: Source[] = [
   ...languageAdvisories,
   ...runtimeSecuritySources,
   cisaKev,
+  jpcertSecurity,
 ]
 
 export function sourcesFor(group: SourceGroup): Source[] {
