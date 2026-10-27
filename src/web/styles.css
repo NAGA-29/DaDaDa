@@ -1,40 +1,22 @@
 :root {
-  --bg: #f7f8f5;
-  --surface: #ffffff;
-  --text: #15191e;
-  --muted: #6b7280;
-  --line: #e5e7e1;
-  --accent: #10b981;
+  --bg: #0d1117;
+  --surface: #141a22;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --line: #232b36;
+  --accent: #3ddc97;
 
-  --ok: #16a34a;
-  --info: #3b82f6;
-  --minor: #d99a06;
-  --major: #ea580c;
-  --critical: #e11d48;
-  --gray: #9ca3af;
+  --ok: #3ddc97;
+  --info: #60a5fa;
+  --minor: #f5c542;
+  --major: #ff8a4c;
+  --critical: #ff5c7a;
+  --gray: #6b7280;
 
   --radius: 12px;
   --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Hiragino Sans", sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0d1117;
-    --surface: #141a22;
-    --text: #e6edf3;
-    --muted: #8b949e;
-    --line: #232b36;
-    --accent: #3ddc97;
-    --ok: #3ddc97;
-    --info: #60a5fa;
-    --minor: #f5c542;
-    --major: #ff8a4c;
-    --critical: #ff5c7a;
-    --gray: #6b7280;
-    color-scheme: dark;
-  }
+  color-scheme: dark;
 }
 
 * {
@@ -1047,15 +1029,6 @@ a:focus-visible,
 .services-panel .badge.tone-muted {
   color: var(--muted);
 }
-@media (prefers-color-scheme: light) {
-  img.provider-icon[src$="aws.svg"],
-  img.provider-icon[src$="github.svg"],
-  img.provider-icon[src$="vercel.svg"],
-  img.provider-icon[src$="railway.svg"] {
-    filter: brightness(0.2);
-  }
-}
-
 img.provider-icon {
   background: transparent;
   border-radius: 0;
