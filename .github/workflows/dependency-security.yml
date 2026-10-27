@@ -13,7 +13,7 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     env:
       HUSKY: 0
     steps:
@@ -28,3 +28,14 @@ jobs:
         run: cp wrangler.sample.jsonc wrangler.jsonc
       - name: Lint, formatting, types, tests, and build
         run: pnpm run check
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+      - name: E2E tests
+        run: pnpm run test:e2e
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
