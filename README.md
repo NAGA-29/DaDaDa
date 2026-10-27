@@ -45,6 +45,7 @@ Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・�
 | Security | Rust / Cargo / rustup | Rust 公式ブログ Atom のセキュリティ告知 |
 | Security | .NET / ASP.NET Core | Microsoft 公式リポジトリの Security Advisory API（2 Source） |
 | Security | CISA KEV | JSON feed (直近 30 日の追加分) |
+| Security | JPCERT/CC | 公式 RSS 1.0（注意喚起・緊急報告と Weekly Report） |
 
 ## ステータスと公式告知の扱い
 
@@ -72,6 +73,7 @@ RSS から項目が消えても、復旧したとは判断しません。元デ�
 
 ## セキュリティアラートの表示・収集範囲
 
+- JPCERT/CC は通常版の [公式RSS](https://www.jpcert.or.jp/rss/jpcert.rdf) を30分間隔で収集します。フィードに掲載された注意喚起・緊急報告と Weekly Report の各項目が対象です。重要度・言語を推測せず、全言語表示時の「Official notices」に表示します。リンクのフラグメントを保持して週報の各項目を区別し、同じURLの更新は上書きします。RSSの日時は更新時にも変わるため、初回公開日時とは限りません。本文の追加取得・過去全件の同期・統合版のお知らせやJVN新着は対象外です。
 - 言語フィルターで Go / Java / Rust / C# (.NET) と既存の JavaScript・PHP・Python を選べます。初期表示は Critical、High または High + Critical に切り替えられます。C++ の専用収集は追加していません。
 - Go / Java / Rust / C# (.NET) は専用SourceでHigh / Criticalを収集します。JavaScript・PHP・Pythonのライブラリ情報は全体向けGitHub Advisory SourceのCriticalが対象で、Highの専用収集はありません。全体向けSourceは公開日時順の最新50件を取得します。
 - PHP フィルターは PHP 本体（`php`）と Composer ライブラリ（`composer`）の両方を対象にします。

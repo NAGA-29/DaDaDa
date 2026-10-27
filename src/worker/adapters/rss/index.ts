@@ -10,8 +10,12 @@ export type RssItem = {
 }
 
 export function parseRss(xml: string): RssItem[] {
-  const doc = xmlParser.parse(xml) as { rss?: { channel?: { item?: Record<string, unknown>[] } } }
-  const items = doc.rss?.channel?.item ?? []
+  const doc = xmlParser.parse(xml) as {
+    rss?: { channel?: { item?: Record<string, unknown>[] } }
+    'rdf:RDF'?: { item?: Record<string, unknown>[] }
+  }
+  // RSS 1.0 places items beside channel, under the RDF root.
+  const items = doc.rss?.channel?.item ?? doc['rdf:RDF']?.item ?? []
   return items.map(item => ({
     guid: textOf(item.guid),
     title: textOf(item.title) ?? '(untitled)',

@@ -36,6 +36,7 @@ const fetcher = fakeFetch({
   'https://nodejs.org/en/feed/vulnerability.xml': 'nodejs-vulnerability.xml',
   'https://api.github.com/advisories': 'github-advisories.json',
   'https://www.cisa.gov/': 'cisa-kev.json',
+  'https://www.jpcert.or.jp/rss/jpcert.rdf': 'jpcert.rdf',
   // GitHub / Vercel の Statuspage は 503 を返す → 他へ波及しないこと
   'https://www.githubstatus.com': () => new Response('unavailable', { status: 503 }),
   'https://www.vercel-status.com': () => {
@@ -94,6 +95,7 @@ describe('collector runner + D1', () => {
     // withdrawn も status=withdrawn として保存される (一覧には出ない)
     expect(byId['github-advisory']).toMatchObject({ ok: true, incidents: 2 })
     expect(byId['cisa-kev']).toMatchObject({ ok: true, incidents: 1 })
+    expect(byId['jpcert-security']).toMatchObject({ ok: true, incidents: 3 })
   })
 
   it('deduplicates on re-run and keeps raw json', async () => {
@@ -126,6 +128,7 @@ describe('collector runner + D1', () => {
     expect(titles).not.toContain('R2 latency')
     expect(titles).not.toContain('Example Gateway Authentication Bypass Vulnerability')
     expect(summary.kev.map(i => i.externalId)).toEqual(['CVE-2026-44444'])
+    expect(summary.security.filter(i => i.providerId === 'jpcert')).toHaveLength(3)
     expect(summary.happeningNow.every(i => !('raw' in i))).toBe(true)
 
     const services = Object.fromEntries(
