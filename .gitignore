@@ -7,3 +7,5 @@ dist/
 .DS_Store
 
 wrangler.jsonc
+test-results/
+playwright-report/
