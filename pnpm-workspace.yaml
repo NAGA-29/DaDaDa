@@ -28,3 +28,8 @@ optimisticRepeatInstall: false
 
 # Disable implicit pre/post hooks for run commands (install lifecycle still runs).
 enablePrePostScripts: false
+
+# miniflare pins undici 7.29.1 (GHSA-xjj6-f33q-929c など 8 件)。修正版を使う miniflare が
+# 7日ルールを満たし、wrangler / @cloudflare/vite-plugin の両方が追従したら削除する。
+overrides:
+  undici: 7.30.1

@@ -126,6 +126,20 @@ pnpm run typecheck
 pnpm run build
 ```
 
+### E2E テスト
+
+[Playwright](https://playwright.dev/) で本番ビルド（Worker + 静的アセット）を `vite preview` で起動し、シード済みのローカル D1 に対してブラウザと HTTP API を検証します。外部フィードには接続しません。
+
+```bash
+pnpm exec playwright install chromium  # 初回のみ
+pnpm run test:e2e
+```
+
+- テストケース一覧: [`e2e/TEST_CASES.md`](e2e/TEST_CASES.md)
+- シードデータ: [`e2e/fixtures/seed.sql`](e2e/fixtures/seed.sql)（時刻は投入時点からの相対値）
+- 毎回 `.wrangler/e2e-state` を作り直すため、開発用のローカル D1（`.wrangler/state`）には影響しません
+- ポート4173を使います。`wrangler.jsonc` が必要です（`wrangler.sample.jsonc` をコピー）
+
 ## コミット前のチェック
 
 `pnpm install` の `prepare` で [Husky](https://typicode.github.io/husky/) を設定します。コミット時は `.husky/pre-commit` から次のチェックを順番に実行し、失敗した場合はコミットを停止します。
@@ -220,6 +234,7 @@ src/
 public/                     ロゴ / favicon（Vite の静的アセット）
 migrations/                 D1 schema
 tests/                      vitest + fixtures
+e2e/                        Playwright E2E + シード SQL + テストケース一覧
 ```
 
 ## Source の追加
