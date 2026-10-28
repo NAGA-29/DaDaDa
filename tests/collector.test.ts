@@ -32,6 +32,15 @@ const fetcher = fakeFetch({
   'https://www.cloudflarestatus.com/api/v2/summary.json': 'statuspage-summary.json',
   'https://www.cloudflarestatus.com/api/v2/incidents.json': 'statuspage-incidents.json',
   'https://status.cloud.google.com/incidents.json': 'gcp-incidents.json',
+  'https://status.openai.com/api/v2/summary.json': () =>
+    Response.json({
+      status: { indicator: 'none', description: 'All Systems Operational' },
+      components: [],
+      incidents: [],
+    }),
+  'https://status.openai.com/api/v2/incidents.json': () => Response.json({ incidents: [] }),
+  'https://status.claude.com/api/v2/summary.json': 'statuspage-summary.json',
+  'https://status.claude.com/api/v2/incidents.json': 'statuspage-incidents.json',
   'https://www.php.net/feed.atom': 'php-feed.atom',
   'https://nodejs.org/en/feed/vulnerability.xml': 'nodejs-vulnerability.xml',
   'https://api.github.com/advisories': 'github-advisories.json',
@@ -80,6 +89,18 @@ describe('collector runner + D1', () => {
       ok: true,
       incidents: 2,
       status: 'partial_outage',
+    })
+    expect(byId['openai-status']).toMatchObject({ ok: true, incidents: 0, status: 'operational' })
+    expect(byId['anthropic-status']).toMatchObject({
+      ok: true,
+      incidents: 2,
+      status: 'partial_outage',
+    })
+    // Google Cloud と同じ JSON を共有し、Gemini 関連の Incident が無ければ正常
+    expect(byId['google-gemini-status']).toMatchObject({
+      ok: true,
+      incidents: 0,
+      status: 'operational',
     })
     expect(byId['railway-status']).toMatchObject({
       ok: true,
@@ -145,6 +166,9 @@ describe('collector runner + D1', () => {
       vercel: null,
       netlify: 'operational',
       sakura: 'unverified',
+      openai: 'operational',
+      anthropic: 'partial_outage',
+      'google-gemini': 'operational',
     })
   })
 

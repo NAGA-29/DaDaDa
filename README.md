@@ -36,6 +36,9 @@ Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・�
 | Status | Supabase | incident.io の Statuspage 互換 API（未解決の障害の影響度も状態に反映） |
 | Status | Railway | 公式ステータス JSON (`status.railway.com/api/status`) |
 | Status | Google Cloud | `status.cloud.google.com/incidents.json` |
+| Status (AI) | Anthropic | Statuspage API (`StatuspageAdapter`, `status.claude.com`) |
+| Status (AI) | OpenAI | incident.io の Statuspage 互換 API（`IncidentIoStatuspageAdapter`。未解決の障害の影響度も状態に反映） |
+| Status (AI) | Google Gemini | Google Cloud の `incidents.json` から影響プロダクト名に "Gemini" を含むものを抽出（Google Cloud と 1 fetch を共有） |
 | Security | PHP | php.net Atom (security release のみ) |
 | Security | Node.js | Vulnerability RSS |
 | Security | GitHub Advisory | REST API（全体の reviewed / Critical） |
@@ -54,6 +57,14 @@ Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・�
 Supabase は公式ステータスサイトの Statuspage 互換 API から、状態と障害履歴を5分間隔で取得します。集約状態が正常でも未解決の障害がある場合は、上流の影響度もカードの状態に反映します。認証キーは不要です。
 
 Railway は公式ステータスサイトの公開 JSON を5分間隔で取得します。公式の影響度から状態を集約し、発生中の障害と復旧履歴を共通画面に表示します。`TRIAGE`（公式表示: Notice）は告知として扱い、障害件数に含めません。Noticeのみの場合は稼働状態を「未判定」にします。予定メンテナンスは告知、実施中はメンテナンスとして扱い、予定終了日時から復旧を推測しません。認証キーは不要ですが、専用JSON形式の変更時には取得処理の更新が必要です。
+
+### AI (OpenAI / Anthropic / Google Gemini)
+
+Services 画面の「AI」カテゴリとして表示します。いずれも認証キーは不要で、5分間隔で取得します。
+
+- Anthropic は Atlassian Statuspage の API をそのまま使います。
+- OpenAI は incident.io の Statuspage 互換 API を使います。Supabase と同様に、集約状態が正常でも未解決の障害があれば上流の影響度を状態に反映します。
+- Google Gemini は Gemini API（AI Studio）のステータスページに公開の機械可読フィードが無いため、Google Cloud の `incidents.json` のうち影響プロダクトに "Gemini" を含む Incident（Vertex Gemini API、Gemini Code Assist など）を対象にします。AI Studio のみで告知される障害は取得できません。
 
 ### AWS / Azure
 
