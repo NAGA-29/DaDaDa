@@ -46,7 +46,7 @@ test('UI-03 highlight links to provider detail or the official source', async ({
 })
 
 test('UI-04 security tab is selected by default with counts', async ({ page }) => {
-  const tabs = page.getByRole('tab')
+  const tabs = page.getByRole('tablist', { name: '情報の種類' }).getByRole('tab')
   await expect(tabs).toHaveCount(3)
   await expect(page.getByRole('tab', { name: /セキュリティ/ })).toHaveAttribute(
     'aria-selected',
@@ -176,36 +176,38 @@ test('UI-11 feed rows show CVEs and external official links', async ({ page }) =
   await expect(row.locator('a[target="_blank"]')).toHaveCount(2)
 })
 
-test('UI-12 services panel groups providers by category, then orders by severity', async ({
-  page,
-}) => {
+test('UI-12 service tabs filter providers and preserve severity ordering', async ({ page }) => {
   const panel = servicesPanel(page)
-  await expect(panel.locator('.service-category')).toHaveText(['クラウド・インフラ', '開発ツール'])
+  await expect(panel.getByRole('tab')).toHaveText(['クラウド', '開発ツール', 'AI'])
+  await expect(panel.getByRole('tab', { name: 'クラウド', exact: true })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  )
   await expect(panel.locator('.service-name')).toHaveText([
     'Cloudflare',
     'Netlify',
     'Vercel',
     'さくらインターネット',
-    'GitHub',
   ])
-  await expect(
-    panel.getByRole('region', { name: '開発ツール' }).locator('.service-name'),
-  ).toHaveText(['GitHub'])
-  await expect(panel.locator('.badge')).toHaveText([
-    '大規模障害',
-    '不明',
-    '不明',
-    '未判定',
-    '正常稼働',
-  ])
+  await expect(panel.locator('.badge')).toHaveText(['大規模障害', '不明', '不明', '未判定'])
   const notes = panel.locator('.service-note')
   await expect(notes.nth(0)).toContainText('に確認')
   await expect(notes.nth(1)).toHaveText('最新状態を確認できません')
   await expect(notes.nth(2)).toHaveText('最新状態を確認できません')
   await expect(notes.nth(3)).toHaveText('公開告知のみ')
-  await expect(notes.nth(4)).toContainText('に確認')
   await expect(panel.locator('.badge').nth(0)).toHaveClass(/tone-critical/)
-  await expect(panel.locator('.badge').nth(4)).toHaveClass(/tone-ok/)
+  await panel.getByRole('tab', { name: '開発ツール' }).click()
+  await expect(panel.locator('.service-name')).toHaveText(['GitHub'])
+  await expect(panel.locator('.badge')).toHaveText(['正常稼働'])
+  await expect(panel.locator('.badge')).toHaveClass(/tone-ok/)
+  await expect(panel.locator('.service-note')).toContainText('に確認')
+
+  await page.keyboard.press('ArrowRight')
+  await expect(panel.getByRole('tab', { name: 'AI', exact: true })).toBeFocused()
+  await expect(panel.getByRole('tabpanel')).toHaveText('稼働状況はまだ取得されていません。')
+  await page.keyboard.press('Home')
+  await expect(panel.getByRole('tab', { name: 'クラウド', exact: true })).toBeFocused()
+  await expect(panel.locator('.service-name')).toHaveCount(4)
 })
 
 test('UI-13 withdrawn, merged and expired records never reach the page', async ({ page }) => {

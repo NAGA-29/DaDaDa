@@ -16,6 +16,7 @@ const ja = {
   showingResults: '該当{total}件中 {count}件を表示',
   showMore: 'さらに{count}件を表示',
   serviceStatusTitle: 'サービスの稼働状況',
+  cloudTab: 'クラウド',
   serviceStatusDescription:
     '各サービスの公式情報に基づく状態です。DaDaDaへの接続状態とは異なります。',
   noticeOnly: '公開告知のみ',
@@ -109,6 +110,7 @@ const en: Record<MessageKey, string> = {
   showingResults: 'Showing {count} of {total} matching items',
   showMore: 'Show {count} more',
   serviceStatusTitle: 'Service status',
+  cloudTab: 'Cloud',
   serviceStatusDescription:
     'Based on official service sources. Separate from your connection to DaDaDa.',
   noticeOnly: 'Public notices only',

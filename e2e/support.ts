@@ -12,7 +12,7 @@ export function filterSelect(
 }
 
 export function activePanel(page: Page): Locator {
-  return page.locator('[role="tabpanel"]:not([hidden])')
+  return page.locator('.feed-panel[role="tabpanel"]:not([hidden])')
 }
 
 export function feedTitles(page: Page): Locator {
