@@ -176,29 +176,36 @@ test('UI-11 feed rows show CVEs and external official links', async ({ page }) =
   await expect(row.locator('a[target="_blank"]')).toHaveCount(2)
 })
 
-test('UI-12 services panel orders providers by severity', async ({ page }) => {
+test('UI-12 services panel groups providers by category, then orders by severity', async ({
+  page,
+}) => {
   const panel = servicesPanel(page)
+  await expect(panel.locator('.service-category')).toHaveText(['クラウド・インフラ', '開発ツール'])
   await expect(panel.locator('.service-name')).toHaveText([
     'Cloudflare',
-    'GitHub',
     'Netlify',
     'Vercel',
     'さくらインターネット',
+    'GitHub',
   ])
+  await expect(
+    panel.getByRole('region', { name: '開発ツール' }).locator('.service-name'),
+  ).toHaveText(['GitHub'])
   await expect(panel.locator('.badge')).toHaveText([
     '大規模障害',
-    '正常稼働',
     '不明',
     '不明',
     '未判定',
+    '正常稼働',
   ])
   const notes = panel.locator('.service-note')
   await expect(notes.nth(0)).toContainText('に確認')
+  await expect(notes.nth(1)).toHaveText('最新状態を確認できません')
   await expect(notes.nth(2)).toHaveText('最新状態を確認できません')
-  await expect(notes.nth(3)).toHaveText('最新状態を確認できません')
-  await expect(notes.nth(4)).toHaveText('公開告知のみ')
+  await expect(notes.nth(3)).toHaveText('公開告知のみ')
+  await expect(notes.nth(4)).toContainText('に確認')
   await expect(panel.locator('.badge').nth(0)).toHaveClass(/tone-critical/)
-  await expect(panel.locator('.badge').nth(1)).toHaveClass(/tone-ok/)
+  await expect(panel.locator('.badge').nth(4)).toHaveClass(/tone-ok/)
 })
 
 test('UI-13 withdrawn, merged and expired records never reach the page', async ({ page }) => {

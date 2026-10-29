@@ -26,9 +26,9 @@ export type GcpIncident = {
   affected_products?: { title: string; id: string }[]
 }
 
-const BASE_URL = 'https://status.cloud.google.com'
+export const GCP_STATUS_URL = 'https://status.cloud.google.com'
 /** 履歴として保存する件数 (新しい順) */
-const MAX_INCIDENTS = 50
+export const MAX_GCP_INCIDENTS = 50
 
 const IMPACT_STATUS: Record<string, ProviderStatusValue> = {
   SERVICE_INFORMATION: 'degraded',
@@ -36,10 +36,14 @@ const IMPACT_STATUS: Record<string, ProviderStatusValue> = {
   SERVICE_OUTAGE: 'major_outage',
 }
 
-export function gcpProviderStatus(incidents: GcpIncident[], now: Date): ProviderStatus {
+export function gcpProviderStatus(
+  incidents: GcpIncident[],
+  now: Date,
+  providerId = 'google-cloud',
+): ProviderStatus {
   const active = incidents.filter(i => !i.end)
   return {
-    providerId: 'google-cloud',
+    providerId,
     status: worstStatus(active.map(i => IMPACT_STATUS[i.status_impact ?? ''] ?? 'degraded')),
     message: active.length
       ? `${active.length} active incident${active.length > 1 ? 's' : ''}`
@@ -53,16 +57,17 @@ export function normalizeGcpIncident(
   source: string,
   incident: GcpIncident,
   now: Date,
+  providerId = 'google-cloud',
 ): IncidentInput {
   const begin = toIsoUtc(incident.begin) ?? now.toISOString()
   return {
-    providerId: 'google-cloud',
+    providerId,
     kind: 'service',
     source,
     externalId: incident.id,
     title: incident.external_desc.trim(),
     description: incident.most_recent_update?.text,
-    url: `${BASE_URL}/${incident.uri.replace(/^\//, '')}`,
+    url: `${GCP_STATUS_URL}/${incident.uri.replace(/^\//, '')}`,
     status: incident.end
       ? 'resolved'
       : (incident.most_recent_update?.status?.toLowerCase() ?? 'active'),
@@ -77,6 +82,18 @@ export function normalizeGcpIncident(
   }
 }
 
+// Status と Incident (Google Cloud / Gemini) は同じ JSON から作るので、1 回の収集につき 1 fetch に抑える
+const cache = new WeakMap<SourceContext, Promise<GcpIncident[]>>()
+
+export function loadGcpIncidents(context: SourceContext): Promise<GcpIncident[]> {
+  let pending = cache.get(context)
+  if (!pending) {
+    pending = fetchJson<GcpIncident[]>(context.fetch, `${GCP_STATUS_URL}/incidents.json`)
+    cache.set(context, pending)
+  }
+  return pending
+}
+
 class GoogleCloudSource implements StatusSource, IncidentSource {
   readonly id = 'google-cloud-status'
   readonly type = 'api'
@@ -86,32 +103,20 @@ class GoogleCloudSource implements StatusSource, IncidentSource {
     name: 'Google Cloud',
     category: 'cloud',
     homepageUrl: 'https://cloud.google.com',
-    statusUrl: BASE_URL,
+    statusUrl: GCP_STATUS_URL,
     supportsStatus: true,
     supportsSecurity: false,
   }
 
-  // Status と Incident は同じ JSON から作るので、1 回の収集につき 1 fetch に抑える
-  private readonly cache = new WeakMap<SourceContext, Promise<GcpIncident[]>>()
-
-  private load(context: SourceContext): Promise<GcpIncident[]> {
-    let pending = this.cache.get(context)
-    if (!pending) {
-      pending = fetchJson<GcpIncident[]>(context.fetch, `${BASE_URL}/incidents.json`)
-      this.cache.set(context, pending)
-    }
-    return pending
-  }
-
   async collectStatus(context: SourceContext): Promise<ProviderStatus> {
-    return gcpProviderStatus(await this.load(context), context.now)
+    return gcpProviderStatus(await loadGcpIncidents(context), context.now)
   }
 
   async collect(context: SourceContext): Promise<IncidentInput[]> {
-    const incidents = await this.load(context)
+    const incidents = await loadGcpIncidents(context)
     return [...incidents]
       .sort((a, b) => Date.parse(b.begin) - Date.parse(a.begin))
-      .slice(0, MAX_INCIDENTS)
+      .slice(0, MAX_GCP_INCIDENTS)
       .map(i => normalizeGcpIncident(this.id, i, context.now))
   }
 }

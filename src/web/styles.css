@@ -812,6 +812,16 @@ a:focus-visible,
   border-bottom: 1px solid var(--line);
   align-items: center;
 }
+.services-panel .service-group + .service-group {
+  margin-top: 22px;
+}
+.services-panel .service-category {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin: 0 0 8px;
+}
 .services-panel .service-list {
   border-top: 1px solid var(--line);
 }

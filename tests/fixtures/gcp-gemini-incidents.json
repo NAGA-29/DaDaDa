@@ -1,0 +1,35 @@
+[
+  {
+    "id": "gcpGeminiActive1",
+    "begin": "2026-10-23T08:00:00+00:00",
+    "created": "2026-10-23T08:05:00+00:00",
+    "end": null,
+    "modified": "2026-10-23T09:00:00+00:00",
+    "external_desc": "Vertex Gemini API: elevated error rates for gemini-2.5-pro",
+    "uri": "incidents/gcpGeminiActive1",
+    "severity": "high",
+    "status_impact": "SERVICE_OUTAGE",
+    "most_recent_update": { "status": "SERVICE_OUTAGE", "text": "Engineers are investigating.", "when": "2026-10-23T09:00:00+00:00" },
+    "affected_products": [{ "title": "Vertex Gemini API", "id": "vertex-gemini" }]
+  },
+  {
+    "id": "gcpActive1",
+    "begin": "2026-10-23T09:00:00+00:00",
+    "created": "2026-10-23T09:10:00+00:00",
+    "end": null,
+    "external_desc": "Cloud Run: elevated latency in us-central1",
+    "uri": "incidents/gcpActive1",
+    "status_impact": "SERVICE_DISRUPTION",
+    "affected_products": [{ "title": "Cloud Run", "id": "run" }]
+  },
+  {
+    "id": "gcpGeminiOld1",
+    "begin": "2026-10-10T00:00:00+00:00",
+    "end": "2026-10-10T01:00:00+00:00",
+    "external_desc": "Gemini Code Assist unavailable",
+    "uri": "incidents/gcpGeminiOld1",
+    "status_impact": "SERVICE_DISRUPTION",
+    "most_recent_update": { "status": "AVAILABLE", "text": "Resolved." },
+    "affected_products": [{ "title": "Gemini Code Assist", "id": "gca" }]
+  }
+]
