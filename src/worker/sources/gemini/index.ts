@@ -2,6 +2,7 @@ import type { IncidentInput } from '../../domain/incident'
 import type { Provider } from '../../domain/provider'
 import type { ProviderStatus } from '../../domain/provider-status'
 import {
+  GCP_SOURCE_ID,
   GCP_STATUS_URL,
   MAX_GCP_INCIDENTS,
   gcpProviderStatus,
@@ -45,10 +46,13 @@ class GeminiSource implements StatusSource, IncidentSource {
 
   async collect(context: SourceContext): Promise<IncidentInput[]> {
     const incidents = await this.load(context)
-    return incidents
-      .sort((a, b) => Date.parse(b.begin) - Date.parse(a.begin))
-      .slice(0, MAX_GCP_INCIDENTS)
-      .map(i => normalizeGcpIncident(this.id, i, context.now, PROVIDER_ID))
+    return (
+      incidents
+        .sort((a, b) => Date.parse(b.begin) - Date.parse(a.begin))
+        .slice(0, MAX_GCP_INCIDENTS)
+        // Store the same canonical row as Google Cloud; provider views select Gemini products.
+        .map(i => normalizeGcpIncident(GCP_SOURCE_ID, i, context.now))
+    )
   }
 }
 

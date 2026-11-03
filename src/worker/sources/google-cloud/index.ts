@@ -26,6 +26,7 @@ export type GcpIncident = {
   affected_products?: { title: string; id: string }[]
 }
 
+export const GCP_SOURCE_ID = 'google-cloud-status'
 export const GCP_STATUS_URL = 'https://status.cloud.google.com'
 /** 履歴として保存する件数 (新しい順) */
 export const MAX_GCP_INCIDENTS = 50
@@ -95,7 +96,7 @@ export function loadGcpIncidents(context: SourceContext): Promise<GcpIncident[]>
 }
 
 class GoogleCloudSource implements StatusSource, IncidentSource {
-  readonly id = 'google-cloud-status'
+  readonly id = GCP_SOURCE_ID
   readonly type = 'api'
   readonly group = 'status'
   readonly provider: Provider = {

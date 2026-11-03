@@ -96,8 +96,8 @@ describe('AI status sources', () => {
     })
     const [active, old] = await geminiStatus.collect(ctx)
     expect(active).toMatchObject({
-      providerId: 'google-gemini',
-      source: 'google-gemini-status',
+      providerId: 'google-cloud',
+      source: 'google-cloud-status',
       externalId: 'gcpGeminiActive1',
       product: 'Vertex Gemini API',
       url: 'https://status.cloud.google.com/incidents/gcpGeminiActive1',

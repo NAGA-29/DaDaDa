@@ -33,6 +33,7 @@ export type IncidentFilter = {
   source?: string
   excludeSource?: string
   ecosystem?: string
+  productContains?: string
   severity?: string
   unscored?: boolean
   status?: string
@@ -176,6 +177,7 @@ export class IncidentRepository {
     if (filter.source) add('source = ?', filter.source)
     if (filter.excludeSource) add('source != ?', filter.excludeSource)
     if (filter.ecosystem) add('ecosystem = ?', filter.ecosystem)
+    if (filter.productContains) add('instr(lower(product), lower(?)) > 0', filter.productContains)
     if (filter.severity) add('severity = ?', filter.severity)
     if (filter.unscored) add("(severity IS NULL OR severity = 'unknown')")
     // withdrawn などの非表示 status は、明示的に指定されたときだけ返す
