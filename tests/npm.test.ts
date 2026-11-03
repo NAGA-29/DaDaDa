@@ -8,7 +8,7 @@ const now = new Date('2026-11-03T00:00:00Z')
 
 describe('npm security source', () => {
   it('polls reviewed npm High/Critical separately and scopes package metadata', async () => {
-    const seen: string[] = []
+    const seen: (string | null)[] = []
     const items = fixtureJson<GithubAdvisory[]>('npm-advisories.json')
     const result = await npmSecurity.collect({
       now,
@@ -20,10 +20,10 @@ describe('npm security source', () => {
         expect(url.searchParams.get('ecosystem')).toBe('npm')
         const severity = url.searchParams.get('severity')!
         seen.push(severity)
-        return Response.json(items.filter(i => i.severity === severity))
+        return Response.json(items.filter(i => !severity || i.severity === severity))
       }) as typeof fetch,
     } as SourceContext)
-    expect(seen).toEqual(['critical', 'high'])
+    expect(seen).toEqual(['critical', 'high', null])
     expect(result).toHaveLength(2)
     expect(result.map(i => [i.source, i.providerId, i.ecosystem, i.severity])).toEqual([
       ['github-advisory-npm', 'nodejs', 'npm', 'critical'],

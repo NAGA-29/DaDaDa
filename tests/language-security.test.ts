@@ -56,17 +56,17 @@ describe('language advisory collection', () => {
   it.each(SECURITY_LANGUAGES)(
     'collects both severities for $label and scopes package metadata',
     async language => {
-      const seen: string[] = []
+      const seen: (string | null)[] = []
       const result = await new LanguageAdvisorySource(language).collect(
         context((url, init) => {
           expect(new Headers(init?.headers).get('Authorization')).toBe('Bearer test-token')
           expect(url.searchParams.get('ecosystem')).toBe(language.ecosystem)
           expect(url.searchParams.get('sort')).toBe('updated')
-          const severity = url.searchParams.get('severity')!
+          const severity = url.searchParams.get('severity')
           seen.push(severity)
           return [
             {
-              ...advisory(`GHSA-${severity}`, severity, language.ecosystem),
+              ...advisory(`GHSA-${severity}`, severity ?? 'medium', language.ecosystem),
               vulnerabilities: [
                 { package: { ecosystem: 'unrelated', name: 'unrelated-package' } },
                 { package: { ecosystem: language.ecosystem, name: 'target-package' } },
@@ -75,10 +75,11 @@ describe('language advisory collection', () => {
           ]
         }),
       )
-      expect(seen).toEqual(['critical', 'high'])
+      expect(seen).toEqual(['critical', 'high', null])
       expect(result.map(i => [i.severity, i.ecosystem, i.product, i.providerId])).toEqual([
         ['critical', language.ecosystem, 'target-package', language.providerId],
         ['high', language.ecosystem, 'target-package', language.providerId],
+        ['medium', language.ecosystem, 'target-package', language.providerId],
       ])
     },
   )
