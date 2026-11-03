@@ -64,6 +64,7 @@ test.describe('API', () => {
       'cloudflare',
       'github',
       'netlify',
+      'openai',
       'sakura',
       'vercel',
     ])
@@ -189,7 +190,7 @@ test.describe('API', () => {
     const { items }: ProviderListResponse = await (await request.get('/api/providers')).json()
     const names = items.map(p => p.name)
     expect(names).toEqual([...names].sort())
-    expect(items).toHaveLength(8)
+    expect(items).toHaveLength(10)
     const security: ProviderListResponse = await (
       await request.get('/api/providers?category=security')
     ).json()

@@ -53,7 +53,7 @@ test('UI-04 security tab is selected by default with counts', async ({ page }) =
     'true',
   )
   await expect(page.getByRole('tab', { name: /セキュリティ/ }).locator('.tab-count')).toHaveText(
-    '7',
+    '8',
   )
   await expect(page.getByRole('tab', { name: /公式告知/ }).locator('.tab-count')).toHaveText('2')
   await expect(page.getByRole('tab', { name: /悪用確認済み/ }).locator('.tab-count')).toHaveText(
@@ -66,7 +66,7 @@ test('UI-04 security tab is selected by default with counts', async ({ page }) =
 
 test('UI-05 severity filter switches the security feed', async ({ page }) => {
   const result = activePanel(page).locator('.security-result')
-  await expect(result).toHaveText('該当7件中 4件を表示')
+  await expect(result).toHaveText('該当8件中 4件を表示')
 
   await filterSelect(page, '深刻度').selectOption('high')
   await expect(result).toHaveText('該当1件中 1件を表示')
@@ -74,17 +74,24 @@ test('UI-05 severity filter switches the security feed', async ({ page }) => {
   await expect(activePanel(page).locator('.pill').first()).toHaveText('高')
 
   await filterSelect(page, '深刻度').selectOption('all')
-  await expect(result).toHaveText('該当8件中 4件を表示')
+  await expect(result).toHaveText('該当9件中 4件を表示')
   await expect(page.getByRole('tab', { name: /セキュリティ/ }).locator('.tab-count')).toHaveText(
-    '8',
+    '9',
   )
 })
 
-test('UI-06 language filter narrows advisories', async ({ page }) => {
+test('UI-06 target filter narrows advisories', async ({ page }) => {
   const result = activePanel(page).locator('.security-result')
   await filterSelect(page, '対象').selectOption({ label: 'PHP' })
+  await expect(result).toHaveText('該当2件中 2件を表示')
+  await expect(feedTitles(page)).toHaveText([
+    'E2E critical composer advisory',
+    'E2E critical Laravel advisory',
+  ])
+
+  await filterSelect(page, '対象').selectOption({ label: 'Laravel' })
   await expect(result).toHaveText('該当1件中 1件を表示')
-  await expect(feedTitles(page)).toHaveText(['E2E critical composer advisory'])
+  await expect(feedTitles(page)).toHaveText(['E2E critical Laravel advisory'])
 
   await filterSelect(page, '対象').selectOption({ label: 'Python' })
   await expect(result).toHaveText('該当0件中 0件を表示')
@@ -103,10 +110,10 @@ test('UI-07 show more reveals the remaining items', async ({ page }) => {
     'E2E critical npm advisory 3',
     'E2E critical npm advisory 4',
   ])
-  const more = activePanel(page).getByRole('button', { name: 'さらに3件を表示' })
+  const more = activePanel(page).getByRole('button', { name: 'さらに4件を表示' })
   await more.click()
-  await expect(feedTitles(page)).toHaveCount(7)
-  await expect(activePanel(page).locator('.security-result')).toHaveText('該当7件中 7件を表示')
+  await expect(feedTitles(page)).toHaveCount(8)
+  await expect(activePanel(page).locator('.security-result')).toHaveText('該当8件中 8件を表示')
   await expect(activePanel(page).getByRole('button', { name: /さらに/ })).toHaveCount(0)
 })
 
@@ -204,7 +211,12 @@ test('UI-12 service tabs filter providers and preserve severity ordering', async
 
   await page.keyboard.press('ArrowRight')
   await expect(panel.getByRole('tab', { name: 'AI', exact: true })).toBeFocused()
-  await expect(panel.getByRole('tabpanel')).toHaveText('稼働状況はまだ取得されていません。')
+  await expect(panel.locator('.service-name')).toHaveText(['OpenAI'])
+  await expect(panel.locator('.badge')).toHaveText(['正常稼働'])
+  await panel.getByRole('link', { name: /OpenAI/ }).click()
+  await expect(page).toHaveURL('/d/openai')
+  await page.goBack()
+  await panel.getByRole('tab', { name: 'AI', exact: true }).focus()
   await page.keyboard.press('Home')
   await expect(panel.getByRole('tab', { name: 'クラウド', exact: true })).toBeFocused()
   await expect(panel.locator('.service-name')).toHaveCount(4)
@@ -215,7 +227,7 @@ test('UI-13 withdrawn, merged and expired records never reach the page', async (
   await activePanel(page)
     .getByRole('button', { name: /さらに/ })
     .click()
-  await expect(feedTitles(page)).toHaveCount(8)
+  await expect(feedTitles(page)).toHaveCount(9)
   for (const tab of [/セキュリティ/, /公式告知/, /悪用確認済み/]) {
     await page.getByRole('tab', { name: tab }).click()
     await expect(activePanel(page)).not.toContainText('E2E withdrawn advisory')

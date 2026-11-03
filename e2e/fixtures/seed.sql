@@ -5,6 +5,8 @@
 -- Providers -----------------------------------------------------------------
 INSERT INTO providers (id, name, category, homepage_url, status_url, icon_url, supports_status, supports_security, created_at, updated_at) VALUES
   ('cloudflare', 'Cloudflare', 'cloud', 'https://www.cloudflare.com', 'https://www.cloudflarestatus.com', NULL, 1, 0, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+  ('openai', 'OpenAI', 'ai', 'https://openai.com', 'https://status.openai.com', NULL, 1, 0, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+  ('laravel', 'Laravel', 'runtime', 'https://laravel.com', NULL, NULL, 0, 1, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   ('github', 'GitHub', 'developer', 'https://github.com', 'https://www.githubstatus.com', NULL, 1, 0, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   ('vercel', 'Vercel', 'cloud', 'https://vercel.com', 'https://www.vercel-status.com', NULL, 1, 0, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   ('netlify', 'Netlify', 'cloud', 'https://www.netlify.com', 'https://www.netlifystatus.com', NULL, 1, 0, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -18,6 +20,7 @@ INSERT INTO providers (id, name, category, homepage_url, status_url, icon_url, s
 -- sakura: 公開告知のみ (unverified) / netlify: 未取得
 INSERT INTO provider_statuses (provider_id, status, message, checked_at, raw_json) VALUES
   ('cloudflare', 'major_outage', '1 active incident', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 minutes'), NULL),
+  ('openai', 'operational', 'All Systems Operational', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-3 minutes'), NULL),
   ('github', 'operational', 'All Systems Operational', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-3 minutes'), NULL),
   ('vercel', 'degraded', 'Elevated errors', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 hours'), NULL),
   ('sakura', 'unverified', '公式の障害・メンテナンス告知を配信。現在の稼働状態は未判定です。', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-5 minutes'), NULL);
@@ -31,7 +34,7 @@ INSERT INTO incidents (id, provider_id, kind, source, external_id, title, url, s
   ('sakura-notices:e2e-new', 'sakura', 'service', 'sakura-notices', 'e2e-new', 'E2E さくら 新メンテナンス告知', 'https://www.sakura.ad.jp/mainte/e2e-new', 'notice', NULL, NULL, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1 days'), NULL, strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 minutes'), '{}', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
 
 -- Security advisories -------------------------------------------------------
--- 緊急 npm x6 + 緊急 composer x1 = 緊急 7件 (「さらに表示」の確認用) / 高 pip x1
+-- 緊急 npm x6 + 緊急 composer x1 + 緊急 Laravel x1 = 緊急 8件 (「さらに表示」の確認用) / 高 pip x1
 INSERT INTO incidents (id, provider_id, kind, source, external_id, title, url, status, severity, ecosystem, cves_json, published_at, collected_at, raw_json, created_at, updated_record_at) VALUES
   ('github-advisory:GHSA-e2e0-crit-0001', 'github-advisory', 'security', 'github-advisory', 'GHSA-e2e0-crit-0001', 'E2E critical npm advisory 1', 'https://github.com/advisories/GHSA-e2e0-crit-0001', NULL, 'critical', 'npm', '["CVE-2026-10001"]', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1 hours'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 minutes'), '{}', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   ('github-advisory:GHSA-e2e0-crit-0002', 'github-advisory', 'security', 'github-advisory', 'GHSA-e2e0-crit-0002', 'E2E critical npm advisory 2', 'https://github.com/advisories/GHSA-e2e0-crit-0002', NULL, 'critical', 'npm', '["CVE-2026-10002"]', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 hours'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 minutes'), '{}', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
@@ -41,6 +44,7 @@ INSERT INTO incidents (id, provider_id, kind, source, external_id, title, url, s
   ('github-advisory:GHSA-e2e0-crit-0006', 'github-advisory', 'security', 'github-advisory', 'GHSA-e2e0-crit-0006', 'E2E critical npm advisory 6', 'https://github.com/advisories/GHSA-e2e0-crit-0006', NULL, 'critical', 'npm', '["CVE-2026-10006"]', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-6 hours'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 minutes'), '{}', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   ('github-advisory:GHSA-e2e0-crit-0007', 'github-advisory', 'security', 'github-advisory', 'GHSA-e2e0-crit-0007', 'E2E critical composer advisory', 'https://github.com/advisories/GHSA-e2e0-crit-0007', NULL, 'critical', 'composer', '["CVE-2026-10007"]', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-7 hours'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 minutes'), '{}', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   ('github-advisory:GHSA-e2e0-high-0001', 'github-advisory', 'security', 'github-advisory', 'GHSA-e2e0-high-0001', 'E2E high pip advisory', 'https://github.com/advisories/GHSA-e2e0-high-0001', NULL, 'high', 'pip', '["CVE-2026-10101"]', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-8 hours'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 minutes'), '{}', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+  ('laravel-security:GHSA-e2e0-laravel-0001', 'laravel', 'security', 'laravel-security', 'GHSA-e2e0-laravel-0001', 'E2E critical Laravel advisory', 'https://github.com/laravel/framework/security/advisories/GHSA-e2e0-laravel-0001', NULL, 'critical', 'laravel', '["CVE-2026-10301"]', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-9 hours'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 minutes'), '{}', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   -- 取り下げ済み: 明示的に status=withdrawn を指定したときだけ返る
   ('github-advisory:GHSA-e2e0-wdrn-0001', 'github-advisory', 'security', 'github-advisory', 'GHSA-e2e0-wdrn-0001', 'E2E withdrawn advisory', 'https://github.com/advisories/GHSA-e2e0-wdrn-0001', 'withdrawn', 'critical', 'npm', '["CVE-2026-10901"]', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-9 hours'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 minutes'), '{}', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   -- 深刻度なしの公式告知 (公式告知タブ)
