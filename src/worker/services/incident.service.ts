@@ -87,12 +87,16 @@ export async function getProviderDetail(
   const provider = await new ProviderRepository(db).get(providerId)
   if (!provider) return null
   const incidents = new IncidentRepository(db)
+  const serviceFilter =
+    providerId === 'google-gemini'
+      ? { providerId: 'google-cloud', productContains: 'Gemini' }
+      : { providerId }
   const [currentStatus, active, recent, security, notices] = await Promise.all([
     provider.supportsStatus ? new ProviderStatusRepository(db).get(providerId) : null,
-    incidents.list({ providerId, kind: 'service', active: true, limit: 50 }),
-    incidents.list({ providerId, kind: 'service', active: false, limit: 30 }),
+    incidents.list({ ...serviceFilter, kind: 'service', active: true, limit: 50 }),
+    incidents.list({ ...serviceFilter, kind: 'service', active: false, limit: 30 }),
     incidents.list({ providerId, kind: 'security', limit: 30 }),
-    incidents.list({ providerId, kind: 'service', status: 'notice', limit: 30 }),
+    incidents.list({ ...serviceFilter, kind: 'service', status: 'notice', limit: 30 }),
   ])
   return {
     provider,

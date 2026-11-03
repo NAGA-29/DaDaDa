@@ -1,0 +1,132 @@
+- generic [ref=f1e3]:
+  - banner [ref=f1e4]:
+    - link [ref=f1e5] [cursor=pointer]:
+      - /url: /
+      - img "DaDaDa" [ref=f1e6]
+    - generic [ref=f1e7]:
+      - time [ref=f1e14]: 画面更新 10月29日 18:35
+      - combobox "表示言語" [ref=f1e8]:
+        - option "日本語" [selected]
+        - option "English"
+      - generic "最終更新：18:35:41" [ref=f1e15]: 接続中
+  - main [ref=f1e11]:
+    - generic [ref=f1e16]:
+      - heading "いま確認したいこと" [level=1] [ref=f1e17]
+      - paragraph [ref=f1e18]: 開発に影響する障害やセキュリティ情報を、ひと目で。
+    - generic [ref=f1e19]:
+      - generic [ref=f1e20]:
+        - region "発生中の障害" [ref=f1e21]:
+          - generic [ref=f1e22]:
+            - paragraph [ref=f1e23]: 発生中の障害 1件
+            - generic [ref=f1e24]:
+              - heading "Railway · Slow build snapshot uploads in EU West (Amsterdam)" [level=2] [ref=f1e25]
+              - generic [ref=f1e26]:
+                - generic [ref=f1e27]: 原因特定済み
+                - time [ref=f1e28]: 最新取得：10月26日 22:53
+              - link "障害の詳細を見る" [ref=f1e29] [cursor=pointer]:
+                - /url: /d/railway
+        - tablist "情報の種類" [ref=f1e30]:
+          - tab "セキュリティ 137" [selected] [ref=f1e31] [cursor=pointer]:
+            - generic [ref=f1e32]: セキュリティ
+            - generic [ref=f1e33]: "137"
+          - tab "公式告知 100" [ref=f1e34] [cursor=pointer]:
+            - generic [ref=f1e35]: 公式告知
+            - generic [ref=f1e36]: "100"
+          - tab "悪用確認済み 20" [ref=f1e37] [cursor=pointer]:
+            - generic [ref=f1e38]: 悪用確認済み
+            - generic [ref=f1e39]: "20"
+        - tabpanel "セキュリティ 137" [ref=f1e40]:
+          - paragraph [ref=f1e41]: 取得済みのセキュリティ情報 · 言語と深刻度で絞り込み
+          - generic [ref=f1e42]:
+            - generic [ref=f1e43]:
+              - text: 言語
+              - combobox "言語" [ref=f1e44]:
+                - option "すべての言語" [selected]
+                - option "JavaScript / Node.js"
+                - option "PHP"
+                - option "Go"
+                - option "Java"
+                - option "Rust"
+                - option "C# / .NET"
+                - option "Python"
+            - generic [ref=f1e45]:
+              - text: 深刻度
+              - combobox "深刻度" [ref=f1e46]:
+                - option "緊急" [selected]
+                - option "高"
+                - option "高・緊急"
+          - status [ref=f1e47]: 該当137件中 4件を表示
+          - list [ref=f1e48]:
+            - listitem [ref=f1e49]:
+              - generic [ref=f1e52]:
+                - 'link "Wasmtime: Bit-packing in Cranelift compiler causes silent overflow and miscompilation" [ref=f1e53] [cursor=pointer]':
+                  - /url: https://github.com/advisories/GHSA-897f-g5gm-fmxm
+                - generic [ref=f1e54]:
+                  - generic [ref=f1e55]: 緊急
+                  - link "Rust" [ref=f1e56] [cursor=pointer]:
+                    - /url: /d/rust
+                  - generic [ref=f1e57]: wasmtime
+                  - code [ref=f1e58]: CVE-2026-115889
+              - generic [ref=f1e59]:
+                - time [ref=f1e60]: 5 日前
+                - time [ref=f1e61]: 最新取得：10月26日 22:53
+                - link "公式情報" [ref=f1e62] [cursor=pointer]:
+                  - /url: https://github.com/advisories/GHSA-897f-g5gm-fmxm
+            - listitem [ref=f1e63]:
+              - generic [ref=f1e66]:
+                - 'link "Pillow: Heap buffer overflow in FlashPix (FPX) JPEG decoding leads to code execution" [ref=f1e67] [cursor=pointer]':
+                  - /url: https://github.com/advisories/GHSA-5x8w-8jj5-q52h
+                - generic [ref=f1e68]:
+                  - generic [ref=f1e69]: 緊急
+                  - link "GitHub Advisory" [ref=f1e70] [cursor=pointer]:
+                    - /url: /d/github-advisory
+                  - generic [ref=f1e71]: pillow
+                  - code [ref=f1e72]: CVE-2026-112398
+              - generic [ref=f1e73]:
+                - time [ref=f1e74]: 5 日前
+                - time [ref=f1e75]: 最新取得：10月26日 22:53
+                - link "公式情報" [ref=f1e76] [cursor=pointer]:
+                  - /url: https://github.com/advisories/GHSA-5x8w-8jj5-q52h
+            - listitem [ref=f1e77]:
+              - generic [ref=f1e80]:
+                - link "Laravel TokenGuard authentication bypass through non-string API credentials" [ref=f1e81] [cursor=pointer]:
+                  - /url: https://github.com/advisories/GHSA-f9x3-7vq9-cph6
+                - generic [ref=f1e82]:
+                  - generic [ref=f1e83]: 緊急
+                  - link "GitHub Advisory" [ref=f1e84] [cursor=pointer]:
+                    - /url: /d/github-advisory
+                  - generic [ref=f1e85]: laravel/framework
+                  - code [ref=f1e86]: CVE-2026-114509
+              - generic [ref=f1e87]:
+                - time [ref=f1e88]: 5 日前
+                - time [ref=f1e89]: 最新取得：10月26日 22:53
+                - link "公式情報" [ref=f1e90] [cursor=pointer]:
+                  - /url: https://github.com/advisories/GHSA-f9x3-7vq9-cph6
+            - listitem [ref=f1e91]:
+              - generic [ref=f1e94]:
+                - 'link "Echo: Rejected WebSocket upgrades can bypass Echo route-level access controls" [ref=f1e95] [cursor=pointer]':
+                  - /url: https://github.com/advisories/GHSA-cxf3-9h37-7rr8
+                - generic [ref=f1e96]:
+                  - generic [ref=f1e97]: 緊急
+                  - link "Go" [ref=f1e98] [cursor=pointer]:
+                    - /url: /d/go
+                  - generic [ref=f1e99]: github.com/labstack/echo/v4, github.com/labstack/echo/v5
+              - generic [ref=f1e100]:
+                - time [ref=f1e101]: 6 日前
+                - time [ref=f1e102]: 最新取得：10月26日 22:53
+                - link "公式情報" [ref=f1e103] [cursor=pointer]:
+                  - /url: https://github.com/advisories/GHSA-cxf3-9h37-7rr8
+          - button "さらに12件を表示" [ref=f1e104] [cursor=pointer]
+      - complementary [ref=f1e105]:
+        - heading "サービスの稼働状況" [level=2] [ref=f1e106]
+        - paragraph [ref=f1e107]: 各サービスの公式情報に基づく状態です。DaDaDaへの接続状態とは異なります。
+        - tablist "サービスの稼働状況" [ref=f1e108]:
+          - tab "クラウド" [ref=f1e109] [cursor=pointer]
+          - tab "開発ツール" [ref=f1e110] [cursor=pointer]
+          - tab "AI" [active] [selected] [ref=f1e111] [cursor=pointer]
+        - tabpanel "AI" [ref=f1e180]:
+          - paragraph [ref=f1e181]: 稼働状況はまだ取得されていません。
+        - generic [ref=f1e177]:
+          - paragraph [ref=f1e178]: 未判定：公開告知のみで、稼働状態は未確認
+          - paragraph [ref=f1e179]: 不明：最新の稼働状態を取得できていません
+  - contentinfo [ref=f1e13]: DaDaDaは公開ステータスとセキュリティ情報を収集しています。詳細は必ず公式情報をご確認ください。

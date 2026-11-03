@@ -1,11 +1,20 @@
 import type { Provider } from '../domain/provider'
+import { anthropicStatus } from './anthropic'
 import { awsNotices } from './aws'
 import { azureNotices } from './azure'
 import { cisaKev } from './cisa-kev'
 import { cloudflareStatus } from './cloudflare'
+import { geminiStatus } from './gemini'
 import { githubAdvisory } from './github-advisory'
 import { githubStatus } from './github-status'
 import { jpcertSecurity } from './jpcert'
+import { ipaSecurity } from './ipa'
+import { jvnSecurity } from './jvn'
+import { postgresqlSecurity } from './postgresql'
+import { laravelSecurity } from './laravel'
+import { npmSecurity } from './npm'
+import { redisSecurity } from './redis'
+import { composerSecurity } from './composer'
 import { googleCloudStatus } from './google-cloud'
 import { languageAdvisories } from './language-advisories'
 import { railwayStatus } from './railway'
@@ -13,6 +22,7 @@ import { runtimeSecuritySources } from './runtime-security'
 import { sakuraNotices } from './sakura'
 import { netlifyStatus } from './netlify'
 import { nodejsSecurity } from './nodejs'
+import { openaiStatus } from './openai'
 import { phpSecurity } from './php'
 import type { Source, SourceGroup } from './types'
 import { supabaseStatus } from './supabase'
@@ -31,6 +41,10 @@ export const sources: Source[] = [
   supabaseStatus,
   sakuraNotices,
   googleCloudStatus,
+  // Status (AI)
+  openaiStatus,
+  anthropicStatus,
+  geminiStatus,
   // Security
   phpSecurity,
   nodejsSecurity,
@@ -39,6 +53,13 @@ export const sources: Source[] = [
   ...runtimeSecuritySources,
   cisaKev,
   jpcertSecurity,
+  ipaSecurity,
+  jvnSecurity,
+  postgresqlSecurity,
+  laravelSecurity,
+  npmSecurity,
+  redisSecurity,
+  composerSecurity,
 ]
 
 export function sourcesFor(group: SourceGroup): Source[] {

@@ -46,14 +46,14 @@ test('UI-03 highlight links to provider detail or the official source', async ({
 })
 
 test('UI-04 security tab is selected by default with counts', async ({ page }) => {
-  const tabs = page.getByRole('tab')
+  const tabs = page.getByRole('tablist', { name: '情報の種類' }).getByRole('tab')
   await expect(tabs).toHaveCount(3)
   await expect(page.getByRole('tab', { name: /セキュリティ/ })).toHaveAttribute(
     'aria-selected',
     'true',
   )
   await expect(page.getByRole('tab', { name: /セキュリティ/ }).locator('.tab-count')).toHaveText(
-    '7',
+    '8',
   )
   await expect(page.getByRole('tab', { name: /公式告知/ }).locator('.tab-count')).toHaveText('2')
   await expect(page.getByRole('tab', { name: /悪用確認済み/ }).locator('.tab-count')).toHaveText(
@@ -61,12 +61,12 @@ test('UI-04 security tab is selected by default with counts', async ({ page }) =
   )
   await expect(activePanel(page)).toContainText('取得済みのセキュリティ情報')
   await expect(filterSelect(page, '深刻度')).toHaveValue('critical')
-  await expect(filterSelect(page, '言語')).toHaveValue('')
+  await expect(filterSelect(page, '対象')).toHaveValue('')
 })
 
 test('UI-05 severity filter switches the security feed', async ({ page }) => {
   const result = activePanel(page).locator('.security-result')
-  await expect(result).toHaveText('該当7件中 4件を表示')
+  await expect(result).toHaveText('該当8件中 4件を表示')
 
   await filterSelect(page, '深刻度').selectOption('high')
   await expect(result).toHaveText('該当1件中 1件を表示')
@@ -74,19 +74,26 @@ test('UI-05 severity filter switches the security feed', async ({ page }) => {
   await expect(activePanel(page).locator('.pill').first()).toHaveText('高')
 
   await filterSelect(page, '深刻度').selectOption('all')
-  await expect(result).toHaveText('該当8件中 4件を表示')
+  await expect(result).toHaveText('該当9件中 4件を表示')
   await expect(page.getByRole('tab', { name: /セキュリティ/ }).locator('.tab-count')).toHaveText(
-    '8',
+    '9',
   )
 })
 
-test('UI-06 language filter narrows advisories', async ({ page }) => {
+test('UI-06 target filter narrows advisories', async ({ page }) => {
   const result = activePanel(page).locator('.security-result')
-  await filterSelect(page, '言語').selectOption({ label: 'PHP' })
-  await expect(result).toHaveText('該当1件中 1件を表示')
-  await expect(feedTitles(page)).toHaveText(['E2E critical composer advisory'])
+  await filterSelect(page, '対象').selectOption({ label: 'PHP' })
+  await expect(result).toHaveText('該当2件中 2件を表示')
+  await expect(feedTitles(page)).toHaveText([
+    'E2E critical composer advisory',
+    'E2E critical Laravel advisory',
+  ])
 
-  await filterSelect(page, '言語').selectOption({ label: 'Python' })
+  await filterSelect(page, '対象').selectOption({ label: 'Laravel' })
+  await expect(result).toHaveText('該当1件中 1件を表示')
+  await expect(feedTitles(page)).toHaveText(['E2E critical Laravel advisory'])
+
+  await filterSelect(page, '対象').selectOption({ label: 'Python' })
   await expect(result).toHaveText('該当0件中 0件を表示')
   await expect(activePanel(page).locator('.feed-empty')).toHaveText(
     '条件に一致するアラートはありません。',
@@ -103,10 +110,10 @@ test('UI-07 show more reveals the remaining items', async ({ page }) => {
     'E2E critical npm advisory 3',
     'E2E critical npm advisory 4',
   ])
-  const more = activePanel(page).getByRole('button', { name: 'さらに3件を表示' })
+  const more = activePanel(page).getByRole('button', { name: 'さらに4件を表示' })
   await more.click()
-  await expect(feedTitles(page)).toHaveCount(7)
-  await expect(activePanel(page).locator('.security-result')).toHaveText('該当7件中 7件を表示')
+  await expect(feedTitles(page)).toHaveCount(8)
+  await expect(activePanel(page).locator('.security-result')).toHaveText('該当8件中 8件を表示')
   await expect(activePanel(page).getByRole('button', { name: /さらに/ })).toHaveCount(0)
 })
 
@@ -121,7 +128,7 @@ test('UI-08 official notices tab shows latest notices and unscored advisories', 
     'E2E さくら 新メンテナンス告知',
   ])
   await expect(activePanel(page).locator('.pill', { hasText: '告知' })).toHaveCount(1)
-  await expect(filterSelect(page, '言語')).toBeVisible()
+  await expect(filterSelect(page, '対象')).toBeVisible()
   await expect(filterSelect(page, '深刻度')).toHaveCount(0)
 })
 
@@ -176,29 +183,43 @@ test('UI-11 feed rows show CVEs and external official links', async ({ page }) =
   await expect(row.locator('a[target="_blank"]')).toHaveCount(2)
 })
 
-test('UI-12 services panel orders providers by severity', async ({ page }) => {
+test('UI-12 service tabs filter providers and preserve severity ordering', async ({ page }) => {
   const panel = servicesPanel(page)
+  await expect(panel.getByRole('tab')).toHaveText(['クラウド', '開発ツール', 'AI'])
+  await expect(panel.getByRole('tab', { name: 'クラウド', exact: true })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  )
   await expect(panel.locator('.service-name')).toHaveText([
     'Cloudflare',
-    'GitHub',
     'Netlify',
     'Vercel',
     'さくらインターネット',
   ])
-  await expect(panel.locator('.badge')).toHaveText([
-    '大規模障害',
-    '正常稼働',
-    '不明',
-    '不明',
-    '未判定',
-  ])
+  await expect(panel.locator('.badge')).toHaveText(['大規模障害', '不明', '不明', '未判定'])
   const notes = panel.locator('.service-note')
   await expect(notes.nth(0)).toContainText('に確認')
+  await expect(notes.nth(1)).toHaveText('最新状態を確認できません')
   await expect(notes.nth(2)).toHaveText('最新状態を確認できません')
-  await expect(notes.nth(3)).toHaveText('最新状態を確認できません')
-  await expect(notes.nth(4)).toHaveText('公開告知のみ')
+  await expect(notes.nth(3)).toHaveText('公開告知のみ')
   await expect(panel.locator('.badge').nth(0)).toHaveClass(/tone-critical/)
-  await expect(panel.locator('.badge').nth(1)).toHaveClass(/tone-ok/)
+  await panel.getByRole('tab', { name: '開発ツール' }).click()
+  await expect(panel.locator('.service-name')).toHaveText(['GitHub'])
+  await expect(panel.locator('.badge')).toHaveText(['正常稼働'])
+  await expect(panel.locator('.badge')).toHaveClass(/tone-ok/)
+  await expect(panel.locator('.service-note')).toContainText('に確認')
+
+  await page.keyboard.press('ArrowRight')
+  await expect(panel.getByRole('tab', { name: 'AI', exact: true })).toBeFocused()
+  await expect(panel.locator('.service-name')).toHaveText(['OpenAI'])
+  await expect(panel.locator('.badge')).toHaveText(['正常稼働'])
+  await panel.getByRole('link', { name: /OpenAI/ }).click()
+  await expect(page).toHaveURL('/d/openai')
+  await page.goBack()
+  await panel.getByRole('tab', { name: 'AI', exact: true }).focus()
+  await page.keyboard.press('Home')
+  await expect(panel.getByRole('tab', { name: 'クラウド', exact: true })).toBeFocused()
+  await expect(panel.locator('.service-name')).toHaveCount(4)
 })
 
 test('UI-13 withdrawn, merged and expired records never reach the page', async ({ page }) => {
@@ -206,7 +227,7 @@ test('UI-13 withdrawn, merged and expired records never reach the page', async (
   await activePanel(page)
     .getByRole('button', { name: /さらに/ })
     .click()
-  await expect(feedTitles(page)).toHaveCount(8)
+  await expect(feedTitles(page)).toHaveCount(9)
   for (const tab of [/セキュリティ/, /公式告知/, /悪用確認済み/]) {
     await page.getByRole('tab', { name: tab }).click()
     await expect(activePanel(page)).not.toContainText('E2E withdrawn advisory')

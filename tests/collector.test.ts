@@ -8,7 +8,11 @@ import type { Bindings } from '../src/worker/env'
 import { IncidentRepository } from '../src/worker/repositories/incident.repository'
 import { getProviderDetail, getSummary } from '../src/worker/services/incident.service'
 import { sources } from '../src/worker/sources'
-import { fakeFetch, fixture } from './helpers'
+import { JPCERT_FEED_URL, jpcertSecurity } from '../src/worker/sources/jpcert'
+import { npmSecurity } from '../src/worker/sources/npm'
+import { composerSecurity } from '../src/worker/sources/composer'
+import type { GithubAdvisory } from '../src/worker/sources/github-advisory'
+import { fakeFetch, fixture, fixtureJson } from './helpers'
 
 // wrangler のローカル D1 (インメモリ) に migration を当てて、収集〜API 集約まで通す
 let proxy: Awaited<ReturnType<typeof getPlatformProxy<Bindings>>>
@@ -32,11 +36,27 @@ const fetcher = fakeFetch({
   'https://www.cloudflarestatus.com/api/v2/summary.json': 'statuspage-summary.json',
   'https://www.cloudflarestatus.com/api/v2/incidents.json': 'statuspage-incidents.json',
   'https://status.cloud.google.com/incidents.json': 'gcp-incidents.json',
+  'https://status.openai.com/api/v2/summary.json': () =>
+    Response.json({
+      status: { indicator: 'none', description: 'All Systems Operational' },
+      components: [],
+      incidents: [],
+    }),
+  'https://status.openai.com/api/v2/incidents.json': () => Response.json({ incidents: [] }),
+  'https://status.claude.com/api/v2/summary.json': 'statuspage-summary.json',
+  'https://status.claude.com/api/v2/incidents.json': 'statuspage-incidents.json',
   'https://www.php.net/feed.atom': 'php-feed.atom',
   'https://nodejs.org/en/feed/vulnerability.xml': 'nodejs-vulnerability.xml',
+  'https://api.github.com/repos/laravel/framework/security-advisories': 'laravel-advisories.json',
+  'https://api.github.com/repos/redis/redis/security-advisories': 'redis-advisories.json',
+  'https://api.github.com/advisories?type=reviewed&ecosystem=npm': 'npm-advisories.json',
+  'https://api.github.com/advisories?type=reviewed&ecosystem=composer': 'composer-advisories.json',
   'https://api.github.com/advisories': 'github-advisories.json',
   'https://www.cisa.gov/': 'cisa-kev.json',
   'https://www.jpcert.or.jp/rss/jpcert.rdf': 'jpcert.rdf',
+  'https://www.ipa.go.jp/security/alert-rss.rdf': 'ipa.rdf',
+  'https://jvn.jp/rss/jvn.rdf': 'jvn.rdf',
+  'https://www.postgresql.org/news.rss': 'postgresql.xml',
   // GitHub / Vercel の Statuspage は 503 を返す → 他へ波及しないこと
   'https://www.githubstatus.com': () => new Response('unavailable', { status: 503 }),
   'https://www.vercel-status.com': () => {
@@ -81,6 +101,18 @@ describe('collector runner + D1', () => {
       incidents: 2,
       status: 'partial_outage',
     })
+    expect(byId['openai-status']).toMatchObject({ ok: true, incidents: 0, status: 'operational' })
+    expect(byId['anthropic-status']).toMatchObject({
+      ok: true,
+      incidents: 2,
+      status: 'partial_outage',
+    })
+    // Google Cloud と同じ JSON を共有し、Gemini 関連の Incident が無ければ正常
+    expect(byId['google-gemini-status']).toMatchObject({
+      ok: true,
+      incidents: 0,
+      status: 'operational',
+    })
     expect(byId['railway-status']).toMatchObject({
       ok: true,
       incidents: 3,
@@ -96,6 +128,13 @@ describe('collector runner + D1', () => {
     expect(byId['github-advisory']).toMatchObject({ ok: true, incidents: 2 })
     expect(byId['cisa-kev']).toMatchObject({ ok: true, incidents: 1 })
     expect(byId['jpcert-security']).toMatchObject({ ok: true, incidents: 3 })
+    expect(byId['ipa-security']).toMatchObject({ ok: true, incidents: 1 })
+    expect(byId['jvn-security']).toMatchObject({ ok: true, incidents: 1 })
+    expect(byId['postgresql-security']).toMatchObject({ ok: true, incidents: 1 })
+    expect(byId['laravel-security']).toMatchObject({ ok: true, incidents: 3 })
+    expect(byId['github-advisory-npm']).toMatchObject({ ok: true, incidents: 2 })
+    expect(byId['redis-security']).toMatchObject({ ok: true, incidents: 3 })
+    expect(byId['github-advisory-composer']).toMatchObject({ ok: true, incidents: 2 })
   })
 
   it('deduplicates on re-run and keeps raw json', async () => {
@@ -145,6 +184,9 @@ describe('collector runner + D1', () => {
       vercel: null,
       netlify: 'operational',
       sakura: 'unverified',
+      openai: 'operational',
+      anthropic: 'partial_outage',
+      'google-gemini': 'operational',
     })
   })
 
@@ -238,7 +280,11 @@ describe('collector runner + D1', () => {
 
     const php = await getProviderDetail(env.DB, 'php')
     expect(php?.currentStatus).toBeNull()
-    expect(php?.securityAdvisories).toHaveLength(1)
+    expect(php?.securityAdvisories.map(i => i.source).sort()).toEqual([
+      'github-advisory-composer',
+      'github-advisory-composer',
+      'php-security',
+    ])
   })
 
   it('keeps the successful half when status or incidents fail', async () => {
@@ -397,4 +443,85 @@ describe('collector runner + D1', () => {
     ).toBe(false)
     expect((await getSummary(env.DB, now)).security.some(i => i.id === release.id)).toBe(true)
   })
+
+  it('stores Gemini incidents once and retains both provider detail views', async () => {
+    let fetches = 0
+    const result = await runCollectors(env, ['status'], {
+      now,
+      sources: sources.filter(s => ['google-cloud-status', 'google-gemini-status'].includes(s.id)),
+      fetch: (async () => {
+        fetches++
+        return new Response(fixture('gcp-gemini-incidents.json'))
+      }) as typeof fetch,
+    })
+    expect(result.results.every(r => r.ok)).toBe(true)
+    expect(fetches).toBe(1)
+    const repo = new IncidentRepository(env.DB)
+    const all = await repo.list({ kind: 'service', limit: 200 })
+    expect(all.items.filter(i => i.externalId === 'gcpGeminiActive1')).toHaveLength(1)
+    const gemini = await getProviderDetail(env.DB, 'google-gemini', now)
+    const cloud = await getProviderDetail(env.DB, 'google-cloud', now)
+    expect(gemini?.activeIncidents.map(i => i.externalId)).toEqual(['gcpGeminiActive1'])
+    expect(gemini?.recentIncidents.map(i => i.externalId)).toEqual(['gcpGeminiOld1'])
+    expect(cloud?.activeIncidents.some(i => i.externalId === 'gcpGeminiActive1')).toBe(true)
+    expect(
+      (await getSummary(env.DB, now)).happeningNow.filter(i => i.externalId === 'gcpGeminiActive1'),
+    ).toHaveLength(1)
+  })
+
+  it('refreshes existing JPCERT notices without admitting unrelated new notices', async () => {
+    const repo = new IncidentRepository(env.DB)
+    const original = (await repo.list({ source: 'jpcert-security' })).items[0]!
+    const xml = `<rdf:RDF><item><title>注意喚起を更新しました</title><link>${original.url}</link><dc:date>2026-10-24T00:00:00Z</dc:date></item><item><title>関連製品のない新規告知</title><link>https://www.jpcert.or.jp/at/unrelated-new.html</link><dc:date>2026-10-24T00:00:00Z</dc:date></item></rdf:RDF>`
+    const result = await runCollectors(env, ['security'], {
+      now,
+      sources: [jpcertSecurity],
+      fetch: fakeFetch({ [JPCERT_FEED_URL]: () => new Response(xml) }),
+    })
+    expect(result.results[0]).toMatchObject({ ok: true, incidents: 1 })
+    expect(await repo.get(original.id)).toMatchObject({
+      title: '注意喚起を更新しました',
+      updatedAt: '2026-10-24T00:00:00.000Z',
+    })
+    expect(
+      await repo.get('jpcert-security:https://www.jpcert.or.jp/at/unrelated-new.html'),
+    ).toBeNull()
+    // A second update still qualifies even after the stored title loses the product name.
+    expect(
+      (
+        await runCollectors(env, ['security'], {
+          now,
+          sources: [jpcertSecurity],
+          fetch: fakeFetch({ [JPCERT_FEED_URL]: () => new Response(xml) }),
+        })
+      ).results[0]?.incidents,
+    ).toBe(1)
+  })
+
+  it.each([npmSecurity, composerSecurity])(
+    'overwrites persisted High rows after a downgrade for $id',
+    async source => {
+      const item = fixtureJson<GithubAdvisory[]>(`${source.language.ecosystem}-advisories.json`)[1]!
+      const repo = new IncidentRepository(env.DB)
+      for (const severity of ['high', 'medium', 'low']) {
+        const result = await runCollectors(env, ['security'], {
+          now,
+          sources: [source],
+          fetch: (async input => {
+            const filter = new URL(String(input)).searchParams.get('severity')
+            return Response.json(!filter || filter === severity ? [{ ...item, severity }] : [])
+          }) as typeof fetch,
+        })
+        expect(result.results[0]).toMatchObject({ ok: true, incidents: 1 })
+        expect(await repo.get(`${source.id}:${item.ghsa_id}`)).toMatchObject({ severity })
+        if (severity !== 'high') {
+          expect(
+            (await repo.list({ source: source.id, severity: 'high' })).items.some(
+              i => i.externalId === item.ghsa_id,
+            ),
+          ).toBe(false)
+        }
+      }
+    },
+  )
 })

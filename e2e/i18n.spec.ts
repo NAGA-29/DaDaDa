@@ -17,7 +17,7 @@ test('I18N-02 switches the interface to English', async ({ page }) => {
   await expect(page.getByRole('tab', { name: /Security/ })).toBeVisible()
   await expect(page.getByRole('tab', { name: /Known exploited/ })).toBeVisible()
   await expect(page.locator('.live')).toHaveText('LIVE')
-  await expect(page.locator('.security-result')).toHaveText('Showing 4 of 7 matching items')
+  await expect(page.locator('.security-result')).toHaveText('Showing 4 of 8 matching items')
   await expect(servicesPanel(page).locator('.badge').first()).toHaveText('Major outage')
   await expect(page.locator('.highlight-label')).toHaveText('Active incidents · 2')
   await expect(page.locator('.highlight-item .pill').first()).toHaveText('Identified')

@@ -5,7 +5,12 @@ import type { Provider } from '../../domain/provider'
 import { githubHeaders, normalizeGithubAdvisory, type GithubAdvisory } from '../github-advisory'
 import type { IncidentSource, SourceContext } from '../types'
 
-type Language = (typeof SECURITY_LANGUAGES)[number]
+type Language = {
+  ecosystem: string
+  label: string
+  providerId: string
+  homepageUrl: string
+}
 
 export function languageProvider(language: Language): Provider {
   return {
@@ -33,16 +38,17 @@ export class LanguageAdvisorySource implements IncidentSource {
     const result = new Map<string, IncidentInput>()
     // Independent severity requests keep High traffic from crowding out Critical.
     // Each severity polls the latest 200 updated records, including old CVEs and withdrawals.
-    for (const severity of ['critical', 'high']) {
+    // An unfiltered pass also refreshes downgrades without reducing either severity quota.
+    for (const severity of ['critical', 'high', undefined]) {
       const first = new URL('https://api.github.com/advisories')
       first.search = new URLSearchParams({
         type: 'reviewed',
         ecosystem: this.language.ecosystem,
-        severity,
         sort: 'updated',
         direction: 'desc',
         per_page: '100',
       }).toString()
+      if (severity) first.searchParams.set('severity', severity)
       let next: URL | undefined = first
       for (let page = 0; page < 2 && next; page++) {
         const { data: items, headers }: { data: GithubAdvisory[]; headers: Headers } =
@@ -52,7 +58,6 @@ export class LanguageAdvisorySource implements IncidentSource {
             githubHeaders(context),
           )
         for (const item of items) {
-          if (!['high', 'critical'].includes(item.severity)) continue
           const packages =
             item.vulnerabilities?.flatMap(v =>
               v.package?.ecosystem === this.language.ecosystem ? [v.package] : [],

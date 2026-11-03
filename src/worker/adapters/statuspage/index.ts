@@ -5,6 +5,7 @@ import {
   type ProviderStatus,
   type ProviderStatusValue,
 } from '../../domain/provider-status'
+import { RESOLVED_STATUSES } from '../../domain/incident'
 import { toIsoUtc } from '../../lib/time'
 import type { IncidentSource, SourceContext, StatusSource } from '../../sources/types'
 import { fetchJson } from '../http'
@@ -131,7 +132,7 @@ export class StatuspageAdapter implements StatusSource, IncidentSource {
   readonly group = 'status'
   readonly id: string
   readonly provider: Provider
-  private readonly baseUrl: string
+  protected readonly baseUrl: string
 
   constructor(options: StatuspageAdapterOptions) {
     this.provider = options.provider
@@ -155,5 +156,36 @@ export class StatuspageAdapter implements StatusSource, IncidentSource {
     return data.incidents.map(i =>
       normalizeStatuspageIncident(this.id, this.provider.id, this.baseUrl, i, context.now),
     )
+  }
+}
+
+type IncidentIoSummary = StatuspageSummary & { incidents?: StatuspageIncident[] }
+
+/**
+ * incident.io の Statuspage 互換 API 用。
+ * 互換 API は障害が未解決でも indicator=none を返すことがあるため、
+ * summary に含まれる未解決 Incident の impact も状態に反映する。
+ */
+export class IncidentIoStatuspageAdapter extends StatuspageAdapter {
+  override async collectStatus(context: SourceContext): Promise<ProviderStatus> {
+    const summary = await fetchJson<IncidentIoSummary>(
+      context.fetch,
+      `${this.baseUrl}/api/v2/summary.json`,
+    )
+    if (!Array.isArray(summary.incidents)) {
+      throw new Error(`Unexpected ${this.provider.name} summary format`)
+    }
+    const status = normalizeStatuspageSummary(this.provider.id, summary, context.now)
+    const active = summary.incidents.filter(
+      i => !i.resolved_at && !RESOLVED_STATUSES.includes(i.status as never),
+    )
+    return {
+      ...status,
+      status: worstStatus([
+        status.status,
+        ...active.map(i => INDICATOR_STATUS[i.impact] ?? 'unknown'),
+      ]),
+      message: active.length ? active.map(i => i.name).join('; ') : status.message,
+    }
   }
 }
