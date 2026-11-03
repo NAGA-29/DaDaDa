@@ -1,5 +1,6 @@
 [
   {
+    "state": "published",
     "ghsa_id": "GHSA-f9x3-7vq9-cph6",
     "cve_id": "CVE-2026-114509",
     "html_url": "https://github.com/laravel/framework/security/advisories/GHSA-f9x3-7vq9-cph6",
@@ -41,6 +42,7 @@
     ]
   },
   {
+    "state": "published",
     "ghsa_id": "GHSA-5vg9-5847-vvmq",
     "cve_id": "CVE-2026-48019",
     "html_url": "https://github.com/laravel/framework/security/advisories/GHSA-5vg9-5847-vvmq",
@@ -82,6 +84,7 @@
     ]
   },
   {
+    "state": "published",
     "ghsa_id": "GHSA-jh5r-qr3c-85q8",
     "cve_id": "CVE-2026-102279",
     "html_url": "https://github.com/laravel/framework/security/advisories/GHSA-jh5r-qr3c-85q8",

@@ -1,5 +1,6 @@
 [
   {
+    "state": "published",
     "ghsa_id": "GHSA-4789-qfc9-5f9q",
     "cve_id": "CVE-2025-49844",
     "html_url": "https://github.com/redis/redis/security/advisories/GHSA-4789-qfc9-5f9q",
@@ -32,6 +33,7 @@
     ]
   },
   {
+    "state": "published",
     "ghsa_id": "GHSA-c8h9-259x-jff4",
     "cve_id": "CVE-2026-25243",
     "html_url": "https://github.com/redis/redis/security/advisories/GHSA-c8h9-259x-jff4",
@@ -64,6 +66,7 @@
     ]
   },
   {
+    "state": "published",
     "ghsa_id": "GHSA-8ghh-qpmp-7826",
     "cve_id": "CVE-2026-23631",
     "html_url": "https://github.com/redis/redis/security/advisories/GHSA-8ghh-qpmp-7826",

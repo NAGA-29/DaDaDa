@@ -9,6 +9,7 @@ const API_URL =
   'https://api.github.com/advisories?type=reviewed&severity=critical&sort=published&direction=desc&per_page=50'
 
 export type GithubAdvisory = {
+  state?: string
   ghsa_id: string
   cve_id: string | null
   html_url: string

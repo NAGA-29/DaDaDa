@@ -16,12 +16,14 @@ export async function collectRepoAdvisories(
   extra: Partial<IncidentInput> = {},
 ): Promise<IncidentInput[]> {
   const first = new URL(url)
+  first.searchParams.set('state', 'published')
   let next: URL | undefined = first
   const result: IncidentInput[] = []
   for (let page = 0; page < MAX_PAGES && next; page++) {
     const { data: items, headers }: { data: GithubAdvisory[]; headers: Headers } =
       await fetchJsonPage<GithubAdvisory[]>(context.fetch, next.toString(), githubHeaders(context))
     for (const item of items) {
+      if (item.state !== 'published') continue
       result.push({
         ...normalizeGithubAdvisory(sourceId, item, context.now),
         providerId,
