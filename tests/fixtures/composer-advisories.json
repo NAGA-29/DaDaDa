@@ -1,0 +1,75 @@
+[
+  {
+    "ghsa_id": "GHSA-hgjx-r89m-m7v4",
+    "cve_id": "CVE-2026-77526",
+    "html_url": "https://github.com/advisories/GHSA-hgjx-r89m-m7v4",
+    "summary": "FacturaScripts: Path traversal in UploadedFile::move() via getClientOriginalName() — arbitrary file write outside MyFiles/ leading to   RCE",
+    "description": "## Summary\n\n`FacturaScripts\\Core\\UploadedFile::move($destiny, $destinyName)` concatenates `$destiny` and `$destinyName` without normalizing the resulting path. Every caller in the codebase passes `UploadedFile::getClientOriginalName()` — the unsanitized client-supplied filename — as `$destinyName`, so an authenticated user submitting a filename containing `../` segments can write the uploaded content to any directory writable by the web-server user, escaping the intended `MyFiles/` location.\n\nBe",
+    "severity": "critical",
+    "published_at": "2026-07-14T20:52:00Z",
+    "updated_at": "2026-11-02T23:03:15Z",
+    "withdrawn_at": null,
+    "identifiers": [
+      {
+        "value": "GHSA-hgjx-r89m-m7v4",
+        "type": "GHSA"
+      },
+      {
+        "value": "CVE-2026-77526",
+        "type": "CVE"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "package": {
+          "ecosystem": "composer",
+          "name": "facturascripts/facturascripts"
+        },
+        "vulnerable_version_range": ">= 2025, <= 2026.2",
+        "first_patched_version": "2026.3",
+        "vulnerable_functions": []
+      }
+    ]
+  },
+  {
+    "ghsa_id": "GHSA-wg36-wvj6-r67p",
+    "cve_id": "CVE-2026-40176",
+    "html_url": "https://github.com/advisories/GHSA-wg36-wvj6-r67p",
+    "summary": "Composer has a command injection via malicious perforce repository",
+    "description": "### Impact\nThe `Perforce::generateP4Command()` method constructed shell commands by interpolating user-supplied Perforce connection parameters (port, user, client) without proper escaping. An attacker controlling a repository configuration in a malicious composer.json declaring a Perforce VCS repository could inject arbitrary commands through these values, leading to command execution in the context of the user running Composer. Composer would execute these injected commands even if Perforce is ",
+    "severity": "high",
+    "published_at": "2026-04-14T20:03:08Z",
+    "updated_at": "2026-11-02T23:03:50Z",
+    "withdrawn_at": null,
+    "identifiers": [
+      {
+        "value": "GHSA-wg36-wvj6-r67p",
+        "type": "GHSA"
+      },
+      {
+        "value": "CVE-2026-40176",
+        "type": "CVE"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "package": {
+          "ecosystem": "composer",
+          "name": "composer/composer"
+        },
+        "vulnerable_version_range": ">= 2.3.0, < 2.9.6",
+        "first_patched_version": "2.9.6",
+        "vulnerable_functions": []
+      },
+      {
+        "package": {
+          "ecosystem": "composer",
+          "name": "composer/composer"
+        },
+        "vulnerable_version_range": ">= 1.0.0, < 2.2.27",
+        "first_patched_version": "2.2.27",
+        "vulnerable_functions": []
+      }
+    ]
+  }
+]

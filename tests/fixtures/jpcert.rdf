@@ -5,7 +5,7 @@
     <items><rdf:Seq><rdf:li rdf:resource="https://www.jpcert.or.jp/at/2026/at260001.html"/></rdf:Seq></items>
   </channel>
   <item rdf:about="https://www.jpcert.or.jp/at/2026/at260001.html">
-    <title>注意喚起: 複数の脆弱性（CVE-2026-55555、CVE-2026-55556） (更新)</title>
+    <title>注意喚起: Apache Tomcat の複数の脆弱性（CVE-2026-55555、CVE-2026-55556） (更新)</title>
     <link>https://www.jpcert.or.jp/at/2026/at260001.html</link>
     <dc:identifier>at260001</dc:identifier>
     <dc:date>2026-10-23T16:25+09:00</dc:date>
@@ -13,15 +13,20 @@
   <item rdf:about="https://www.jpcert.or.jp/wr/2026/wr261021.html#1">
     <title>Weekly Report: 製品Aに脆弱性</title>
     <description>短い説明</description>
-    <content:encoded><![CDATA[<p>製品A &amp; 関連製品に脆弱性</p>]]></content:encoded>
+    <content:encoded><![CDATA[<p>PHP &amp; 関連製品に脆弱性</p>]]></content:encoded>
     <link>https://www.jpcert.or.jp/wr/2026/wr261021.html#1</link>
     <dc:identifier>wr261021</dc:identifier>
     <dc:date>2026-10-21T09:12+09:00</dc:date>
   </item>
   <item rdf:about="https://www.jpcert.or.jp/wr/2026/wr261021.html#2">
-    <title>Weekly Report: 製品Bに脆弱性</title>
+    <title>Weekly Report: PostgreSQLに脆弱性</title>
     <link>https://www.jpcert.or.jp/wr/2026/wr261021.html#2</link>
     <dc:identifier>wr261021</dc:identifier>
+    <dc:date>2026-10-21T09:12+09:00</dc:date>
+  </item>
+  <item>
+    <title>家庭用ルーターの脆弱性 CVE-2026-99999</title>
+    <link>https://www.jpcert.or.jp/wr/2026/wr261021.html#3</link>
     <dc:date>2026-10-21T09:12+09:00</dc:date>
   </item>
 </rdf:RDF>

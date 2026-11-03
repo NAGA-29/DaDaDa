@@ -8,6 +8,13 @@ import { geminiStatus } from './gemini'
 import { githubAdvisory } from './github-advisory'
 import { githubStatus } from './github-status'
 import { jpcertSecurity } from './jpcert'
+import { ipaSecurity } from './ipa'
+import { jvnSecurity } from './jvn'
+import { postgresqlSecurity } from './postgresql'
+import { laravelSecurity } from './laravel'
+import { npmSecurity } from './npm'
+import { redisSecurity } from './redis'
+import { composerSecurity } from './composer'
 import { googleCloudStatus } from './google-cloud'
 import { languageAdvisories } from './language-advisories'
 import { railwayStatus } from './railway'
@@ -46,6 +53,13 @@ export const sources: Source[] = [
   ...runtimeSecuritySources,
   cisaKev,
   jpcertSecurity,
+  ipaSecurity,
+  jvnSecurity,
+  postgresqlSecurity,
+  laravelSecurity,
+  npmSecurity,
+  redisSecurity,
+  composerSecurity,
 ]
 
 export function sourcesFor(group: SourceGroup): Source[] {

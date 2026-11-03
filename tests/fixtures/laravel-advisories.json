@@ -1,0 +1,125 @@
+[
+  {
+    "ghsa_id": "GHSA-f9x3-7vq9-cph6",
+    "cve_id": "CVE-2026-114509",
+    "html_url": "https://github.com/laravel/framework/security/advisories/GHSA-f9x3-7vq9-cph6",
+    "summary": "Token-based API guard Auth Bypass",
+    "description": "Laravel's built-in TokenGuard, **when configured with a standard token-based API guard**, may be bypassed to authenticate as an arbitrary existing user without knowledge of their valid API token. \r\n\r\n**Under certain database configurations (MySQL/MariaDB)** an attacker can submit a specially crafted, non-string credential value that is mishandled during the authentication lookup, causing the underlying query to match an unintended user record rather than failing authentication as expected.\r\n\r\n##",
+    "severity": "critical",
+    "published_at": "2026-10-19T13:32:50Z",
+    "updated_at": "2026-10-21T21:46:33Z",
+    "withdrawn_at": null,
+    "identifiers": [
+      {
+        "value": "GHSA-f9x3-7vq9-cph6",
+        "type": "GHSA"
+      },
+      {
+        "value": "CVE-2026-114509",
+        "type": "CVE"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "package": {
+          "ecosystem": "composer",
+          "name": "laravel/framework"
+        },
+        "vulnerable_version_range": "< 13.29.0",
+        "patched_versions": ">= 13.29.0",
+        "vulnerable_functions": []
+      },
+      {
+        "package": {
+          "ecosystem": "composer",
+          "name": "laravel/framework"
+        },
+        "vulnerable_version_range": "< v12.68.0",
+        "patched_versions": ">= v12.68.0",
+        "vulnerable_functions": []
+      }
+    ]
+  },
+  {
+    "ghsa_id": "GHSA-5vg9-5847-vvmq",
+    "cve_id": "CVE-2026-48019",
+    "html_url": "https://github.com/laravel/framework/security/advisories/GHSA-5vg9-5847-vvmq",
+    "summary": "CRLF injection in default email rule ",
+    "description": "## Summary\r\nA CRLF injection vulnerability in Laravel's email validation, in combination with how Symfony Mailer and Symfony Mime handle certain character sequences, may allow an unauthenticated attacker to interfere with outbound email processing in applications that send mail to user-supplied addresses.\r\n\r\n## Description\r\nLaravel applications that send email to addresses provided by users — for example during authentication flows or contact forms — may be vulnerable to manipulation of outbound",
+    "severity": "high",
+    "published_at": "2026-06-01T08:23:09Z",
+    "updated_at": "2026-06-01T08:23:09Z",
+    "withdrawn_at": null,
+    "identifiers": [
+      {
+        "value": "GHSA-5vg9-5847-vvmq",
+        "type": "GHSA"
+      },
+      {
+        "value": "CVE-2026-48019",
+        "type": "CVE"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "package": {
+          "ecosystem": "composer",
+          "name": "laravel/framework"
+        },
+        "vulnerable_version_range": "<= 13.9.0",
+        "patched_versions": ">= 13.10.0",
+        "vulnerable_functions": []
+      },
+      {
+        "package": {
+          "ecosystem": "composer",
+          "name": "laravel/framework"
+        },
+        "vulnerable_version_range": "< 12.60.0",
+        "patched_versions": ">= 12.60.0",
+        "vulnerable_functions": []
+      }
+    ]
+  },
+  {
+    "ghsa_id": "GHSA-jh5r-qr3c-85q8",
+    "cve_id": "CVE-2026-102279",
+    "html_url": "https://github.com/laravel/framework/security/advisories/GHSA-jh5r-qr3c-85q8",
+    "summary": "XSS in Debug Page Information",
+    "description": "### Impact\r\nWhen `APP_DEBUG=true`, attacker-controlled input is passed to a Tippy.js tooltip configured with `allowHTML: true`, enabling DOM-based XSS during mouse hover.\r\n\r\n### Patches\r\n[#61381](https://github.com/laravel/framework/pull/61381) ",
+    "severity": "low",
+    "published_at": "2026-09-10T09:56:39Z",
+    "updated_at": "2026-09-28T20:58:40Z",
+    "withdrawn_at": null,
+    "identifiers": [
+      {
+        "value": "GHSA-jh5r-qr3c-85q8",
+        "type": "GHSA"
+      },
+      {
+        "value": "CVE-2026-102279",
+        "type": "CVE"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "package": {
+          "ecosystem": "composer",
+          "name": "laravel/framework"
+        },
+        "vulnerable_version_range": "<v12.69.0",
+        "patched_versions": ">=v12.69.0",
+        "vulnerable_functions": []
+      },
+      {
+        "package": {
+          "ecosystem": "composer",
+          "name": "laravel/framework"
+        },
+        "vulnerable_version_range": "<v13.30.0",
+        "patched_versions": ">=v13.30.0",
+        "vulnerable_functions": []
+      }
+    ]
+  }
+]

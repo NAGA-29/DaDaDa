@@ -5,7 +5,12 @@ import type { Provider } from '../../domain/provider'
 import { githubHeaders, normalizeGithubAdvisory, type GithubAdvisory } from '../github-advisory'
 import type { IncidentSource, SourceContext } from '../types'
 
-type Language = (typeof SECURITY_LANGUAGES)[number]
+type Language = {
+  ecosystem: string
+  label: string
+  providerId: string
+  homepageUrl: string
+}
 
 export function languageProvider(language: Language): Provider {
   return {

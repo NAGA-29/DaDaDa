@@ -43,9 +43,16 @@ const fetcher = fakeFetch({
   'https://status.claude.com/api/v2/incidents.json': 'statuspage-incidents.json',
   'https://www.php.net/feed.atom': 'php-feed.atom',
   'https://nodejs.org/en/feed/vulnerability.xml': 'nodejs-vulnerability.xml',
+  'https://api.github.com/repos/laravel/framework/security-advisories': 'laravel-advisories.json',
+  'https://api.github.com/repos/redis/redis/security-advisories': 'redis-advisories.json',
+  'https://api.github.com/advisories?type=reviewed&ecosystem=npm': 'npm-advisories.json',
+  'https://api.github.com/advisories?type=reviewed&ecosystem=composer': 'composer-advisories.json',
   'https://api.github.com/advisories': 'github-advisories.json',
   'https://www.cisa.gov/': 'cisa-kev.json',
   'https://www.jpcert.or.jp/rss/jpcert.rdf': 'jpcert.rdf',
+  'https://www.ipa.go.jp/security/alert-rss.rdf': 'ipa.rdf',
+  'https://jvn.jp/rss/jvn.rdf': 'jvn.rdf',
+  'https://www.postgresql.org/news.rss': 'postgresql.xml',
   // GitHub / Vercel の Statuspage は 503 を返す → 他へ波及しないこと
   'https://www.githubstatus.com': () => new Response('unavailable', { status: 503 }),
   'https://www.vercel-status.com': () => {
@@ -117,6 +124,13 @@ describe('collector runner + D1', () => {
     expect(byId['github-advisory']).toMatchObject({ ok: true, incidents: 2 })
     expect(byId['cisa-kev']).toMatchObject({ ok: true, incidents: 1 })
     expect(byId['jpcert-security']).toMatchObject({ ok: true, incidents: 3 })
+    expect(byId['ipa-security']).toMatchObject({ ok: true, incidents: 1 })
+    expect(byId['jvn-security']).toMatchObject({ ok: true, incidents: 1 })
+    expect(byId['postgresql-security']).toMatchObject({ ok: true, incidents: 1 })
+    expect(byId['laravel-security']).toMatchObject({ ok: true, incidents: 2 })
+    expect(byId['github-advisory-npm']).toMatchObject({ ok: true, incidents: 2 })
+    expect(byId['redis-security']).toMatchObject({ ok: true, incidents: 2 })
+    expect(byId['github-advisory-composer']).toMatchObject({ ok: true, incidents: 2 })
   })
 
   it('deduplicates on re-run and keeps raw json', async () => {
@@ -262,7 +276,11 @@ describe('collector runner + D1', () => {
 
     const php = await getProviderDetail(env.DB, 'php')
     expect(php?.currentStatus).toBeNull()
-    expect(php?.securityAdvisories).toHaveLength(1)
+    expect(php?.securityAdvisories.map(i => i.source).sort()).toEqual([
+      'github-advisory-composer',
+      'github-advisory-composer',
+      'php-security',
+    ])
   })
 
   it('keeps the successful half when status or incidents fail', async () => {

@@ -1,0 +1,71 @@
+[
+  {
+    "ghsa_id": "GHSA-4xm8-rg9h-jhq2",
+    "cve_id": null,
+    "html_url": "https://github.com/advisories/GHSA-4xm8-rg9h-jhq2",
+    "summary": "Signal K resources API path traversal can disclose the JWT signing secret and enable remote code execution",
+    "description": "### Summary\n\nPath traversal in the Signal K resources and applicationData APIs lets an\nunauthenticated or low-privileged user read, write and delete files outside\nthe storage root. Reading <config>/security.json discloses the JWT signing\nsecret, enabling admin token forgery and remote code execution. \n\n### Details\n\n## Description\n\nThe v2 REST resources API `GET /signalk/v2/api/resources/:resourceType/:resourceId` passes `resourceId` to `FileStore.getResource()` without validation. `getResource()",
+    "severity": "critical",
+    "published_at": "2026-10-30T22:57:22Z",
+    "updated_at": "2026-10-30T22:57:23Z",
+    "withdrawn_at": null,
+    "identifiers": [
+      {
+        "value": "GHSA-4xm8-rg9h-jhq2",
+        "type": "GHSA"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "package": {
+          "ecosystem": "npm",
+          "name": "signalk-server"
+        },
+        "vulnerable_version_range": ">= 2.0.0, < 2.34.0",
+        "first_patched_version": "2.34.0",
+        "vulnerable_functions": []
+      },
+      {
+        "package": {
+          "ecosystem": "npm",
+          "name": "@signalk/resources-provider"
+        },
+        "vulnerable_version_range": ">= 1.0.0, < 1.5.3",
+        "first_patched_version": "1.5.3",
+        "vulnerable_functions": []
+      }
+    ]
+  },
+  {
+    "ghsa_id": "GHSA-wcjj-9m6g-2fr2",
+    "cve_id": "CVE-2026-59176",
+    "html_url": "https://github.com/advisories/GHSA-wcjj-9m6g-2fr2",
+    "summary": "functype-mcp-server: MCP `set_functype_version` Package Alias RCE via Unsanitized pnpm install + Dynamic Import",
+    "description": "## MCP `set_functype_version` Package Alias RCE via Unsanitized pnpm install + Dynamic Import\n\n### Summary\n\nThe `set_functype_version` MCP tool in `functype-mcp-server` accepts an unconstrained `version` string, interpolates it directly into an npm package specifier (`functype@<version>`), and installs it via `pnpm add` without any validation. Because npm/pnpm package specifiers support `file:`, `npm:`, and other alias syntaxes, an attacker who can send an MCP `tools/call` request to this tool c",
+    "severity": "high",
+    "published_at": "2026-09-09T23:49:20Z",
+    "updated_at": "2026-11-02T19:30:31Z",
+    "withdrawn_at": null,
+    "identifiers": [
+      {
+        "value": "GHSA-wcjj-9m6g-2fr2",
+        "type": "GHSA"
+      },
+      {
+        "value": "CVE-2026-59176",
+        "type": "CVE"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "package": {
+          "ecosystem": "npm",
+          "name": "functype-mcp-server"
+        },
+        "vulnerable_version_range": "<= 1.4.3",
+        "first_patched_version": "1.4.4",
+        "vulnerable_functions": []
+      }
+    ]
+  }
+]

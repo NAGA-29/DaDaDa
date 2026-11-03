@@ -25,7 +25,7 @@ describe('JPCERT/CC RSS', () => {
       updatedAt: '2026-10-23T07:25:00.000Z',
       raw: { 'dc:identifier': 'at260001' },
     })
-    expect(notices[1]!.description).toBe('製品A & 関連製品に脆弱性')
+    expect(notices[1]!.description).toBe('PHP & 関連製品に脆弱性')
     for (const notice of notices) {
       expect(notice.severity).toBeUndefined()
       expect(notice.ecosystem).toBeUndefined()
@@ -40,6 +40,22 @@ describe('JPCERT/CC RSS', () => {
   it('handles a single RDF item and an empty feed', () => {
     expect(parseRss('<rdf:RDF><item><title>single</title></item></rdf:RDF>')).toHaveLength(1)
     expect(parseRss('<rdf:RDF><channel/></rdf:RDF>')).toEqual([])
+  })
+
+  it('only collects named Developer Stack products, never CVEs alone or link text', () => {
+    const items = parseRss(fixture('jpcert.rdf'))
+    expect(items).toHaveLength(4)
+    expect(normalizeJpcertItem(items[3]!, now)).toBeUndefined()
+    const item = items[0]!
+    for (const title of [
+      'CVE-2026-11111 Critical',
+      'Go to the security seminar',
+      'Server update',
+    ]) {
+      expect(normalizeJpcertItem({ ...item, title }, now)).toBeUndefined()
+    }
+    expect(normalizeJpcertItem({ ...item, title: 'Node.js security update' }, now)).toBeDefined()
+    expect(normalizeJpcertItem({ ...item, title: 'Linuxカーネルの脆弱性' }, now)).toBeDefined()
   })
 
   it('rejects invalid dates and links', () => {
