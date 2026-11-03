@@ -51,8 +51,8 @@ Developer が使っている Cloud / SaaS / Runtime / OSS の **現在状態・�
 | Security | JPCERT/CC | 公式 RSS 1.0（注意喚起・緊急報告と Weekly Report。Developer Stack 関連のみ） |
 | Security | IPA | 公式 RSS（重要なセキュリティ情報。Developer Stack 関連のみ） |
 | Security | JVN | 公式 RSS 1.0（脆弱性対策情報。Developer Stack 関連のみ） |
-| Security | Laravel | `laravel/framework` の GitHub Security Advisory（High / Critical） |
-| Security | Redis | `redis/redis` の GitHub Security Advisory（High / Critical） |
+| Security | Laravel | `laravel/framework` の GitHub Security Advisory（全件。上流の重要度を保持） |
+| Security | Redis | `redis/redis` の GitHub Security Advisory（全件。上流の重要度を保持） |
 | Security | PostgreSQL | 公式ニュース RSS（セキュリティリリースのみ） |
 | Security | npm / Composer のライブラリ | GitHub Advisory を `npm` / `composer` 別に収集（2 Source） |
 
@@ -92,7 +92,7 @@ RSS から項目が消えても、復旧したとは判断しません。元デ�
 
 - JPCERT/CC は通常版の [公式RSS](https://www.jpcert.or.jp/rss/jpcert.rdf) を30分間隔で収集します。フィードに掲載された注意喚起・緊急報告と Weekly Report のうち、タイトルまたは概要に Developer Stack の製品名（PHP / Laravel / Node.js / PostgreSQL / Redis など）を含む項目だけが対象です。重要度・言語を推測せず、全言語表示時の「Official notices」に表示します。リンクのフラグメントを保持して週報の各項目を区別し、同じURLの更新は上書きします。RSSの日時は更新時にも変わるため、初回公開日時とは限りません。本文の追加取得・過去全件の同期・統合版のお知らせやJVN新着は対象外です。
 - IPA（[重要なセキュリティ情報 RSS](https://www.ipa.go.jp/security/alert-rss.rdf)）と JVN（[新着 RSS](https://jvn.jp/rss/jvn.rdf)）は JPCERT/CC と同じ Developer Stack フィルター（`src/worker/lib/developer-stack.ts`）を通した項目だけを30分間隔で収集します。全 CVE は流しません。重要度は上流が提供しないため推測せず「Official notices」に表示します。IPA は更新のたびに同じ URL を繰り返すため、URL ごとに上流の最新日時の1件に集約します。製品名の許可リストにない製品の告知は表示されません。
-- PostgreSQL は公式ニュース RSS のうちセキュリティリリースの告知だけを対象にします。Laravel と Redis は各公式リポジトリの GitHub Security Advisory から High / Critical（と取り下げ）を収集します。npm と Composer は GitHub Advisory を `npm` / `composer` 別に収集する専用 Source で、PHP フィルターには Composer が含まれます。Composer は専用の公式フィードを持たないため、GitHub Advisory 経由のみです。
+- PostgreSQL は公式ニュース RSS のうちセキュリティリリースの告知だけを対象にします。Laravel と Redis は各公式リポジトリの GitHub Security Advisory を `Link` ヘッダーのページングで最大5ページ（500件）まで収集します。上流で High から下がった告知を保存済みの High 行に残さないよう、重要度で絞らず上流の値のまま保存します。npm と Composer は GitHub Advisory を `npm` / `composer` 別に収集する専用 Source で、PHP フィルターには Composer が含まれます。Composer は専用の公式フィードを持たないため、GitHub Advisory 経由のみです。
 - Linux Kernel は未対応です（[Issue #12](https://github.com/NAGA-29/DaDaDa/issues/12) で継続管理）。
 - 言語フィルターで Go / Java / Rust / C# (.NET) と既存の JavaScript・PHP・Python を選べます。初期表示は Critical、High または High + Critical に切り替えられます。C++ の専用収集は追加していません。
 - Go / Java / Rust / C# (.NET) は専用SourceでHigh / Criticalを収集します。JavaScript・PHP・Pythonのライブラリ情報は全体向けGitHub Advisory SourceのCriticalが対象で、Highの専用収集はありません。全体向けSourceは公開日時順の最新50件を取得します。

@@ -12,11 +12,11 @@ const context = {
 } as SourceContext
 
 describe('Redis security source', () => {
-  it('collects official High/Critical notices with upstream severity and package metadata', async () => {
+  it('collects official notices, including downgraded ones, with upstream severity and package metadata', async () => {
     const items = fixtureJson<GithubAdvisory[]>('redis-advisories.json')
     const result = await redisSecurity.collect(context)
-    expect(result).toHaveLength(2)
-    expect(result.map(i => i.severity)).toEqual(['critical', 'high'])
+    expect(result).toHaveLength(3)
+    expect(result.map(i => i.severity)).toEqual(['critical', 'high', 'medium'])
     expect(result[0]).toMatchObject({
       providerId: 'redis',
       source: 'redis-security',
@@ -50,5 +50,28 @@ describe('Redis security source', () => {
     await expect(redisSecurity.collect({ ...context, fetch: fakeFetch({}) })).rejects.toThrow(
       'HTTP 404',
     )
+  })
+
+  it('follows rel="next" pagination and rejects foreign next URLs', async () => {
+    const items = fixtureJson<GithubAdvisory[]>('redis-advisories.json')
+    const calls: string[] = []
+    const paged = (next: string | undefined) =>
+      (async (url: RequestInfo | URL) => {
+        calls.push(String(url))
+        const first = calls.length === 1
+        return Response.json(first ? items.slice(0, 1) : items.slice(1), {
+          headers: first && next ? { Link: `<${next}>; rel="next"` } : {},
+        })
+      }) as typeof fetch
+    const ok = await redisSecurity.collect({
+      ...context,
+      fetch: paged(`${REDIS_ADVISORIES_URL}&page=2`),
+    })
+    expect(ok).toHaveLength(3)
+    expect(calls).toHaveLength(2)
+    calls.length = 0
+    await expect(
+      redisSecurity.collect({ ...context, fetch: paged('https://evil.example/x') }),
+    ).rejects.toThrow('Unexpected GitHub pagination URL')
   })
 })

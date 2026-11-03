@@ -1,5 +1,4 @@
-import { fetchJson } from '../../adapters/http'
-import { githubHeaders, normalizeGithubAdvisory, type GithubAdvisory } from '../github-advisory'
+import { collectRepoAdvisories } from '../repo-advisories'
 import type { IncidentSource } from '../types'
 
 export const LARAVEL_ADVISORIES_URL =
@@ -17,18 +16,9 @@ export const laravelSecurity: IncidentSource = {
     supportsStatus: false,
     supportsSecurity: true,
   },
-  async collect(context) {
-    const items = await fetchJson<GithubAdvisory[]>(
-      context.fetch,
-      LARAVEL_ADVISORIES_URL,
-      githubHeaders(context),
-    )
-    return items
-      .filter(item => ['high', 'critical'].includes(item.severity) || item.withdrawn_at)
-      .map(item => ({
-        ...normalizeGithubAdvisory(this.id, item, context.now),
-        providerId: this.provider.id,
-        ecosystem: 'composer',
-      }))
+  collect(context) {
+    return collectRepoAdvisories(context, LARAVEL_ADVISORIES_URL, this.id, this.provider.id, {
+      ecosystem: 'composer',
+    })
   },
 }

@@ -127,9 +127,9 @@ describe('collector runner + D1', () => {
     expect(byId['ipa-security']).toMatchObject({ ok: true, incidents: 1 })
     expect(byId['jvn-security']).toMatchObject({ ok: true, incidents: 1 })
     expect(byId['postgresql-security']).toMatchObject({ ok: true, incidents: 1 })
-    expect(byId['laravel-security']).toMatchObject({ ok: true, incidents: 2 })
+    expect(byId['laravel-security']).toMatchObject({ ok: true, incidents: 3 })
     expect(byId['github-advisory-npm']).toMatchObject({ ok: true, incidents: 2 })
-    expect(byId['redis-security']).toMatchObject({ ok: true, incidents: 2 })
+    expect(byId['redis-security']).toMatchObject({ ok: true, incidents: 3 })
     expect(byId['github-advisory-composer']).toMatchObject({ ok: true, incidents: 2 })
   })
 
