@@ -1,6 +1,7 @@
 import { fetchText } from '../../adapters/http'
 import { parseRss, type RssItem } from '../../adapters/rss'
 import type { IncidentInput } from '../../domain/incident'
+import { matchesDeveloperStack } from '../../lib/developer-stack'
 import { extractCves, htmlToText } from '../../lib/text'
 import { toIsoUtc } from '../../lib/time'
 import type { IncidentSource } from '../types'
@@ -8,6 +9,7 @@ import type { IncidentSource } from '../types'
 export const JPCERT_FEED_URL = 'https://www.jpcert.or.jp/rss/jpcert.rdf'
 
 export function normalizeJpcertItem(item: RssItem, now: Date): IncidentInput | undefined {
+  if (!matchesDeveloperStack(item.title, item.description)) return undefined
   const publishedAt = toIsoUtc(item.pubDate)
   if (!publishedAt || !item.link) return undefined
   let url: URL

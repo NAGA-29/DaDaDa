@@ -61,7 +61,7 @@ test('UI-04 security tab is selected by default with counts', async ({ page }) =
   )
   await expect(activePanel(page)).toContainText('取得済みのセキュリティ情報')
   await expect(filterSelect(page, '深刻度')).toHaveValue('critical')
-  await expect(filterSelect(page, '言語')).toHaveValue('')
+  await expect(filterSelect(page, '対象')).toHaveValue('')
 })
 
 test('UI-05 severity filter switches the security feed', async ({ page }) => {
@@ -82,11 +82,11 @@ test('UI-05 severity filter switches the security feed', async ({ page }) => {
 
 test('UI-06 language filter narrows advisories', async ({ page }) => {
   const result = activePanel(page).locator('.security-result')
-  await filterSelect(page, '言語').selectOption({ label: 'PHP' })
+  await filterSelect(page, '対象').selectOption({ label: 'PHP' })
   await expect(result).toHaveText('該当1件中 1件を表示')
   await expect(feedTitles(page)).toHaveText(['E2E critical composer advisory'])
 
-  await filterSelect(page, '言語').selectOption({ label: 'Python' })
+  await filterSelect(page, '対象').selectOption({ label: 'Python' })
   await expect(result).toHaveText('該当0件中 0件を表示')
   await expect(activePanel(page).locator('.feed-empty')).toHaveText(
     '条件に一致するアラートはありません。',
@@ -121,7 +121,7 @@ test('UI-08 official notices tab shows latest notices and unscored advisories', 
     'E2E さくら 新メンテナンス告知',
   ])
   await expect(activePanel(page).locator('.pill', { hasText: '告知' })).toHaveCount(1)
-  await expect(filterSelect(page, '言語')).toBeVisible()
+  await expect(filterSelect(page, '対象')).toBeVisible()
   await expect(filterSelect(page, '深刻度')).toHaveCount(0)
 })
 

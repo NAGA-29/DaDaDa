@@ -1,0 +1,98 @@
+[
+  {
+    "ghsa_id": "GHSA-4789-qfc9-5f9q",
+    "cve_id": "CVE-2025-49844",
+    "html_url": "https://github.com/redis/redis/security/advisories/GHSA-4789-qfc9-5f9q",
+    "summary": "Lua Use-After-Free may lead to remote code execution",
+    "description": "### Impact\r\nAn authenticated user may use a specially crafted Lua script to manipulate the garbage collector, trigger a use-after-free and potentially lead to remote code execution.\r\n\r\nThe problem exists in all versions of Redis with Lua scripting.\r\n\r\n### Workarounds\r\nAn additional workaround to mitigate the problem without patching the redis-server executable is to prevent users from executing Lua scripts. This can be done using ACL to restrict EVAL and EVALSHA commands.\r\n\r\n### Credit\r\nThe prob",
+    "severity": "critical",
+    "published_at": "2025-10-03T07:22:30Z",
+    "updated_at": "2025-10-03T12:28:31Z",
+    "withdrawn_at": null,
+    "identifiers": [
+      {
+        "value": "GHSA-4789-qfc9-5f9q",
+        "type": "GHSA"
+      },
+      {
+        "value": "CVE-2025-49844",
+        "type": "CVE"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "package": {
+          "ecosystem": "",
+          "name": "redis-server"
+        },
+        "vulnerable_version_range": "All",
+        "patched_versions": "6.2.20, 7.2.11, 7.4.6, 8.0.4, 8.2.2",
+        "vulnerable_functions": []
+      }
+    ]
+  },
+  {
+    "ghsa_id": "GHSA-c8h9-259x-jff4",
+    "cve_id": "CVE-2026-25243",
+    "html_url": "https://github.com/redis/redis/security/advisories/GHSA-c8h9-259x-jff4",
+    "summary": "Invalid Memory Access in Redis RESTORE Command May Lead to Remote Code Execution",
+    "description": "### Impact\r\nA vulnerability in the Redis RESTORE command allows an authenticated user to trigger an invalid memory access via a specially crafted serialized payload, potentially resulting in remote code execution.\r\n\r\nSuccessful exploitation could allow an attacker with authenticated access to execute arbitrary code in the context of the Redis server, potentially leading to full compromise of the affected system, data exfiltration, or service disruption\r\n\r\nThis problem affects all Redis versions.",
+    "severity": "high",
+    "published_at": "2026-05-05T13:59:17Z",
+    "updated_at": "2026-05-05T13:59:17Z",
+    "withdrawn_at": null,
+    "identifiers": [
+      {
+        "value": "GHSA-c8h9-259x-jff4",
+        "type": "GHSA"
+      },
+      {
+        "value": "CVE-2026-25243",
+        "type": "CVE"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "package": {
+          "ecosystem": "",
+          "name": "redis-server"
+        },
+        "vulnerable_version_range": "All",
+        "patched_versions": "TBD",
+        "vulnerable_functions": []
+      }
+    ]
+  },
+  {
+    "ghsa_id": "GHSA-8ghh-qpmp-7826",
+    "cve_id": "CVE-2026-23631",
+    "html_url": "https://github.com/redis/redis/security/advisories/GHSA-8ghh-qpmp-7826",
+    "summary": "Lua Use-After-Free may lead to remote code execution",
+    "description": "### Impact\r\nAn authenticated user may exploit the synchronization mechanism of the master-replica and trigger a use-after-free vulnerability, potentially leading to remote code execution.\r\n\r\nThe bug affects only replicas that are configured, or may be configured with `replica-read-only` disabled , and exists in all versions of Redis with Lua scripting\r\n\r\n### Workarounds\r\nAn additional workaround to mitigate the problem without patching the redis-server executable is to prevent users from executi",
+    "severity": "medium",
+    "published_at": "2026-05-05T13:58:51Z",
+    "updated_at": "2026-05-11T14:24:09Z",
+    "withdrawn_at": null,
+    "identifiers": [
+      {
+        "value": "GHSA-8ghh-qpmp-7826",
+        "type": "GHSA"
+      },
+      {
+        "value": "CVE-2026-23631",
+        "type": "CVE"
+      }
+    ],
+    "vulnerabilities": [
+      {
+        "package": {
+          "ecosystem": "",
+          "name": "redis-server"
+        },
+        "vulnerable_version_range": ">= 7.0.0",
+        "patched_versions": "TBD",
+        "vulnerable_functions": []
+      }
+    ]
+  }
+]

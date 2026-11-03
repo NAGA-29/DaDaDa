@@ -13,15 +13,20 @@ export const SECURITY_LANGUAGES = [
 ] as const
 
 export const SECURITY_ECOSYSTEMS = [
-  { ecosystem: 'npm', label: 'JavaScript / Node.js' },
-  { ecosystem: 'composer', label: 'PHP' },
-  ...SECURITY_LANGUAGES,
-  { ecosystem: 'pip', label: 'Python' },
+  { ecosystem: 'npm', label: 'JavaScript / Node.js', group: 'language' },
+  { ecosystem: 'composer', label: 'PHP', group: 'language' },
+  ...SECURITY_LANGUAGES.map(language => ({ ...language, group: 'language' as const })),
+  { ecosystem: 'pip', label: 'Python', group: 'language' },
+  { ecosystem: 'laravel', label: 'Laravel', group: 'middleware' },
+  { ecosystem: 'postgresql', label: 'PostgreSQL', group: 'middleware' },
+  { ecosystem: 'redis', label: 'Redis', group: 'middleware' },
 ] as const
 
-/** PHP runtime notices use php; package advisories use Composer. Keep stored IDs intact. */
+/** PHP runtime notices use php; package advisories use Composer; Laravel is a PHP framework. Keep stored IDs intact. */
 export function ecosystemAliases(ecosystem: string): string[] {
-  return ecosystem === 'composer' || ecosystem === 'php' ? ['composer', 'php'] : [ecosystem]
+  return ecosystem === 'composer' || ecosystem === 'php'
+    ? ['composer', 'php', 'laravel']
+    : [ecosystem]
 }
 
 export function matchesEcosystem(incident: IncidentView, ecosystem: string): boolean {
