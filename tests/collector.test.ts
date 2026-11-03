@@ -8,7 +8,11 @@ import type { Bindings } from '../src/worker/env'
 import { IncidentRepository } from '../src/worker/repositories/incident.repository'
 import { getProviderDetail, getSummary } from '../src/worker/services/incident.service'
 import { sources } from '../src/worker/sources'
-import { fakeFetch, fixture } from './helpers'
+import { JPCERT_FEED_URL, jpcertSecurity } from '../src/worker/sources/jpcert'
+import { npmSecurity } from '../src/worker/sources/npm'
+import { composerSecurity } from '../src/worker/sources/composer'
+import type { GithubAdvisory } from '../src/worker/sources/github-advisory'
+import { fakeFetch, fixture, fixtureJson } from './helpers'
 
 // wrangler のローカル D1 (インメモリ) に migration を当てて、収集〜API 集約まで通す
 let proxy: Awaited<ReturnType<typeof getPlatformProxy<Bindings>>>
@@ -439,4 +443,85 @@ describe('collector runner + D1', () => {
     ).toBe(false)
     expect((await getSummary(env.DB, now)).security.some(i => i.id === release.id)).toBe(true)
   })
+
+  it('stores Gemini incidents once and retains both provider detail views', async () => {
+    let fetches = 0
+    const result = await runCollectors(env, ['status'], {
+      now,
+      sources: sources.filter(s => ['google-cloud-status', 'google-gemini-status'].includes(s.id)),
+      fetch: (async () => {
+        fetches++
+        return new Response(fixture('gcp-gemini-incidents.json'))
+      }) as typeof fetch,
+    })
+    expect(result.results.every(r => r.ok)).toBe(true)
+    expect(fetches).toBe(1)
+    const repo = new IncidentRepository(env.DB)
+    const all = await repo.list({ kind: 'service', limit: 200 })
+    expect(all.items.filter(i => i.externalId === 'gcpGeminiActive1')).toHaveLength(1)
+    const gemini = await getProviderDetail(env.DB, 'google-gemini', now)
+    const cloud = await getProviderDetail(env.DB, 'google-cloud', now)
+    expect(gemini?.activeIncidents.map(i => i.externalId)).toEqual(['gcpGeminiActive1'])
+    expect(gemini?.recentIncidents.map(i => i.externalId)).toEqual(['gcpGeminiOld1'])
+    expect(cloud?.activeIncidents.some(i => i.externalId === 'gcpGeminiActive1')).toBe(true)
+    expect(
+      (await getSummary(env.DB, now)).happeningNow.filter(i => i.externalId === 'gcpGeminiActive1'),
+    ).toHaveLength(1)
+  })
+
+  it('refreshes existing JPCERT notices without admitting unrelated new notices', async () => {
+    const repo = new IncidentRepository(env.DB)
+    const original = (await repo.list({ source: 'jpcert-security' })).items[0]!
+    const xml = `<rdf:RDF><item><title>注意喚起を更新しました</title><link>${original.url}</link><dc:date>2026-10-24T00:00:00Z</dc:date></item><item><title>関連製品のない新規告知</title><link>https://www.jpcert.or.jp/at/unrelated-new.html</link><dc:date>2026-10-24T00:00:00Z</dc:date></item></rdf:RDF>`
+    const result = await runCollectors(env, ['security'], {
+      now,
+      sources: [jpcertSecurity],
+      fetch: fakeFetch({ [JPCERT_FEED_URL]: () => new Response(xml) }),
+    })
+    expect(result.results[0]).toMatchObject({ ok: true, incidents: 1 })
+    expect(await repo.get(original.id)).toMatchObject({
+      title: '注意喚起を更新しました',
+      updatedAt: '2026-10-24T00:00:00.000Z',
+    })
+    expect(
+      await repo.get('jpcert-security:https://www.jpcert.or.jp/at/unrelated-new.html'),
+    ).toBeNull()
+    // A second update still qualifies even after the stored title loses the product name.
+    expect(
+      (
+        await runCollectors(env, ['security'], {
+          now,
+          sources: [jpcertSecurity],
+          fetch: fakeFetch({ [JPCERT_FEED_URL]: () => new Response(xml) }),
+        })
+      ).results[0]?.incidents,
+    ).toBe(1)
+  })
+
+  it.each([npmSecurity, composerSecurity])(
+    'overwrites persisted High rows after a downgrade for $id',
+    async source => {
+      const item = fixtureJson<GithubAdvisory[]>(`${source.language.ecosystem}-advisories.json`)[1]!
+      const repo = new IncidentRepository(env.DB)
+      for (const severity of ['high', 'medium', 'low']) {
+        const result = await runCollectors(env, ['security'], {
+          now,
+          sources: [source],
+          fetch: (async input => {
+            const filter = new URL(String(input)).searchParams.get('severity')
+            return Response.json(!filter || filter === severity ? [{ ...item, severity }] : [])
+          }) as typeof fetch,
+        })
+        expect(result.results[0]).toMatchObject({ ok: true, incidents: 1 })
+        expect(await repo.get(`${source.id}:${item.ghsa_id}`)).toMatchObject({ severity })
+        if (severity !== 'high') {
+          expect(
+            (await repo.list({ source: source.id, severity: 'high' })).items.some(
+              i => i.externalId === item.ghsa_id,
+            ),
+          ).toBe(false)
+        }
+      }
+    },
+  )
 })

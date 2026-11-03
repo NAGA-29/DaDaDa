@@ -24,6 +24,7 @@ describe('PostgreSQL security source', () => {
       source: 'postgresql-security',
       kind: 'security',
       product: 'PostgreSQL',
+      ecosystem: 'postgresql',
       cves: ['CVE-2026-66663', 'CVE-2026-66664'],
       publishedAt: '2026-10-23T07:00:00.000Z',
     })
