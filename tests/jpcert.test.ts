@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { parseRss } from '../src/worker/adapters/rss'
 import { incidentId } from '../src/worker/domain/fingerprint'
 import { JPCERT_FEED_URL, jpcertSecurity, normalizeJpcertItem } from '../src/worker/sources/jpcert'
@@ -12,6 +12,15 @@ describe('JPCERT/CC RSS', () => {
     const context = {
       now,
       env: {},
+      db: {
+        batch: vi.fn<D1Database['batch']>(),
+        exec: vi.fn<D1Database['exec']>(),
+        dump: vi.fn<D1Database['dump']>(),
+        withSession: vi.fn<D1Database['withSession']>(),
+        prepare: vi
+          .fn<D1Database['prepare']>()
+          .mockReturnValue({ bind: () => ({ first: async () => null }) } as D1PreparedStatement),
+      },
       fetch: fakeFetch({ [JPCERT_FEED_URL]: 'jpcert.rdf' }),
     } as SourceContext
     const notices = await jpcertSecurity.collect(context)
@@ -55,7 +64,7 @@ describe('JPCERT/CC RSS', () => {
       expect(normalizeJpcertItem({ ...item, title }, now)).toBeUndefined()
     }
     expect(normalizeJpcertItem({ ...item, title: 'Node.js security update' }, now)).toBeDefined()
-    expect(normalizeJpcertItem({ ...item, title: 'Linuxカーネルの脆弱性' }, now)).toBeDefined()
+    expect(normalizeJpcertItem({ ...item, title: 'Linuxカーネルの脆弱性' }, now)).toBeUndefined()
   })
 
   it('rejects invalid dates and links', () => {

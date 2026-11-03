@@ -1,5 +1,6 @@
 import { fetchText } from '../../adapters/http'
 import { parseRss, type RssItem } from '../../adapters/rss'
+import { IncidentRepository } from '../../repositories/incident.repository'
 import type { IncidentInput } from '../../domain/incident'
 import { matchesDeveloperStack } from '../../lib/developer-stack'
 import { extractCves, htmlToText } from '../../lib/text'
@@ -8,8 +9,12 @@ import type { IncidentSource } from '../types'
 
 export const JPCERT_FEED_URL = 'https://www.jpcert.or.jp/rss/jpcert.rdf'
 
-export function normalizeJpcertItem(item: RssItem, now: Date): IncidentInput | undefined {
-  if (!matchesDeveloperStack(item.title, item.description)) return undefined
+export function normalizeJpcertItem(
+  item: RssItem,
+  now: Date,
+  previouslyCollected = false,
+): IncidentInput | undefined {
+  if (!previouslyCollected && !matchesDeveloperStack(item.title, item.description)) return undefined
   const publishedAt = toIsoUtc(item.pubDate)
   if (!publishedAt || !item.link) return undefined
   let url: URL
@@ -58,8 +63,18 @@ export const jpcertSecurity: IncidentSource = {
   async collect(context) {
     const xml = await fetchText(context.fetch, JPCERT_FEED_URL)
     if (!/<rdf:RDF\b/.test(xml)) throw new Error('Unexpected JPCERT/CC RSS format')
-    return parseRss(xml)
-      .map(item => normalizeJpcertItem(item, context.now))
-      .filter(item => item !== undefined)
+    const repo = new IncidentRepository(context.db)
+    const result: IncidentInput[] = []
+    for (const item of parseRss(xml)) {
+      // Validate the URL and date before looking up an existing, previously admitted notice.
+      const candidate = normalizeJpcertItem(item, context.now, true)
+      if (!candidate) continue
+      if (!matchesDeveloperStack(item.title, item.description)) {
+        const existing = await repo.get(`${this.id}:${candidate.externalId}`)
+        if (!existing || existing.source !== this.id || existing.kind !== 'security') continue
+      }
+      result.push(candidate)
+    }
+    return result
   },
 }
