@@ -14,7 +14,7 @@
 | Provider 状態 | Cloudflare=大規模障害 / GitHub=正常 / Vercel=2時間前の性能低下 / さくら=未判定 / Netlify=未取得 | 並び順・鮮度切れ（unknown）・未判定・未取得の表示 |
 | Service 障害 | Cloudflare 発生中・復旧済み、Provider なしの発生中 | 発生中ハイライト、詳細リンク / 公式情報リンク、復旧履歴 |
 | Service 告知 | さくら 旧・新告知 | 告知は「発生中」に含めない、Provider ごとに最新のみ |
-| Security | 緊急 npm×6 + composer×1、高 pip×1、取り下げ×1、深刻度なし Node.js×1、CVE 重複の JPCERT×1 | 深刻度・言語フィルタ、さらに表示、取り下げ非表示、重複統合 |
+| Security | 緊急 npm×6 + composer×1、高 pip×1、取り下げ×1、深刻度なし Node.js×1、CVE 重複の JPCERT×1 | 深刻度・対象フィルタ、さらに表示、取り下げ非表示、重複統合 |
 | KEV | 2日前 / 45日前 | 30日の期限 |
 
 ## API（`api.spec.ts`）
@@ -51,7 +51,7 @@
 | UI-03 | ハイライトのリンク | Provider ありは詳細ページへ、なしは公式情報（別タブ） | `Home.tsx` |
 | UI-04 | タブの初期状態と件数 | 「セキュリティ」が選択、各タブの件数バッジ | `Home.tsx` |
 | UI-05 | 深刻度フィルタ | 緊急 / 高 / 高・緊急 で件数と表示が切り替わる | `Home.tsx` / `Security.tsx` |
-| UI-06 | 言語フィルタ | 言語で絞り込み、該当なしは空メッセージ | `shared/security.ts` / `Security.tsx` |
+| UI-06 | 対象フィルタ | 言語・ミドルウェアで絞り込み、該当なしは空メッセージ | `shared/security.ts` / `Security.tsx` |
 | UI-07 | さらに表示 | 最初は4件、ボタンで残りを表示しボタンが消える | `Security.tsx` (`Feed`) |
 | UI-08 | 公式告知タブ | Provider ごとの最新告知 + 深刻度なしの告知、深刻度フィルタは出ない | `Home.tsx` |
 | UI-09 | 悪用確認済みタブ | 30日以内の KEV のみ、言語フィルタは出ない | `Home.tsx` |

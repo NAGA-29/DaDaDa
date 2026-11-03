@@ -17,6 +17,8 @@ export const redisSecurity: IncidentSource = {
     supportsSecurity: true,
   },
   collect(context) {
-    return collectRepoAdvisories(context, REDIS_ADVISORIES_URL, this.id, this.provider.id)
+    return collectRepoAdvisories(context, REDIS_ADVISORIES_URL, this.id, this.provider.id, {
+      ecosystem: 'redis',
+    })
   },
 }

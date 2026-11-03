@@ -19,13 +19,20 @@ export function SecurityFilters({
   return (
     <div className="security-filters">
       <label>
-        {t('programmingLanguage')}
+        {t('securityTarget')}
         <select value={ecosystem} onChange={event => onEcosystemChange(event.target.value)}>
-          <option value="">{t('allLanguages')}</option>
-          {SECURITY_ECOSYSTEMS.map(language => (
-            <option key={language.ecosystem} value={language.ecosystem}>
-              {language.label}
-            </option>
+          <option value="">{t('allTargets')}</option>
+          {(['language', 'middleware'] as const).map(group => (
+            <optgroup
+              key={group}
+              label={t(group === 'language' ? 'targetLanguages' : 'targetMiddleware')}
+            >
+              {SECURITY_ECOSYSTEMS.filter(target => target.group === group).map(target => (
+                <option key={target.ecosystem} value={target.ecosystem}>
+                  {target.label}
+                </option>
+              ))}
+            </optgroup>
           ))}
         </select>
       </label>

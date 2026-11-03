@@ -49,6 +49,7 @@ export function normalizePostgresqlItem(item: RssItem, now: Date): IncidentInput
     description: htmlToText(item.description),
     url: url.toString(),
     product: 'PostgreSQL',
+    ecosystem: 'postgresql',
     cves: extractCves(item.title, description),
     publishedAt,
     collectedAt: now.toISOString(),

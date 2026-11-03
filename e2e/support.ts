@@ -3,7 +3,7 @@ import type { Locator, Page } from '@playwright/test'
 /** フィード上部の絞り込み (言語 / 深刻度)。label 内の select は名前に選択肢が混ざるため構造で引く */
 export function filterSelect(
   page: Page,
-  label: '言語' | '深刻度' | 'Language' | 'Severity',
+  label: '対象' | '深刻度' | 'Target' | 'Severity',
 ): Locator {
   return page
     .locator('.security-filters label')

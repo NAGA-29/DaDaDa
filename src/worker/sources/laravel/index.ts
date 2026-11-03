@@ -18,7 +18,7 @@ export const laravelSecurity: IncidentSource = {
   },
   collect(context) {
     return collectRepoAdvisories(context, LARAVEL_ADVISORIES_URL, this.id, this.provider.id, {
-      ecosystem: 'composer',
+      ecosystem: 'laravel',
     })
   },
 }

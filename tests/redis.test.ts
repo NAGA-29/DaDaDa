@@ -19,6 +19,7 @@ describe('Redis security source', () => {
     expect(result.map(i => i.severity)).toEqual(['critical', 'high', 'medium'])
     expect(result[0]).toMatchObject({
       providerId: 'redis',
+      ecosystem: 'redis',
       source: 'redis-security',
       externalId: items[0]!.ghsa_id,
       publishedAt: new Date(items[0]!.published_at).toISOString(),

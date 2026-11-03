@@ -94,7 +94,7 @@ RSS から項目が消えても、復旧したとは判断しません。元デ�
 - IPA（[重要なセキュリティ情報 RSS](https://www.ipa.go.jp/security/alert-rss.rdf)）と JVN（[新着 RSS](https://jvn.jp/rss/jvn.rdf)）は JPCERT/CC と同じ Developer Stack フィルター（`src/worker/lib/developer-stack.ts`）を通した項目だけを30分間隔で収集します。全 CVE は流しません。重要度は上流が提供しないため推測せず「Official notices」に表示します。IPA は更新のたびに同じ URL を繰り返すため、URL ごとに上流の最新日時の1件に集約します。製品名の許可リストにない製品の告知は表示されません。
 - PostgreSQL は公式ニュース RSS のうちセキュリティリリースの告知だけを対象にします。Laravel と Redis は各公式リポジトリの GitHub Security Advisory を `Link` ヘッダーのページングで最大5ページ（500件）まで収集します。上流で High から下がった告知を保存済みの High 行に残さないよう、重要度で絞らず上流の値のまま保存します。npm と Composer は GitHub Advisory を `npm` / `composer` 別に収集する専用 Source で、PHP フィルターには Composer が含まれます。Composer は専用の公式フィードを持たないため、GitHub Advisory 経由のみです。
 - Linux Kernel は未対応です（[Issue #12](https://github.com/NAGA-29/DaDaDa/issues/12) で継続管理）。
-- 言語フィルターで Go / Java / Rust / C# (.NET) と既存の JavaScript・PHP・Python を選べます。初期表示は Critical、High または High + Critical に切り替えられます。C++ の専用収集は追加していません。
+- 「対象」フィルターで、言語（Go / Java / Rust / C# (.NET) / JavaScript・Node.js / PHP / Python）とフレームワーク・ミドルウェア（Laravel / PostgreSQL / Redis）を選べます。Laravel は PHP フィルターにも含まれます。IPA / JVN / JPCERT/CC は提供元の告知で対象を持たないため、「すべて」のときに「公式告知」へ表示します。初期表示は Critical、High または High + Critical に切り替えられます。C++ の専用収集は追加していません。
 - Go / Java / Rust / C# (.NET) は専用SourceでHigh / Criticalを収集します。JavaScript・PHP・Pythonのライブラリ情報は全体向けGitHub Advisory SourceのCriticalが対象で、Highの専用収集はありません。全体向けSourceは公開日時順の最新50件を取得します。
 - PHP フィルターは PHP 本体（`php`）と Composer ライブラリ（`composer`）の両方を対象にします。
 - 上流が重要度を提供しない公式告知は、重要度を推測せず「Official notices」に別表示します。言語フィルターはこの欄にも適用します。KEV は言語別情報がないため全言語共通の別枠です。

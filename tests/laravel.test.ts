@@ -12,7 +12,7 @@ const context = {
 } as SourceContext
 
 describe('Laravel security source', () => {
-  it('collects official notices, including downgraded ones, with upstream severity and Composer metadata', async () => {
+  it('collects official notices, including downgraded ones, with upstream severity and Laravel ecosystem', async () => {
     const items = fixtureJson<GithubAdvisory[]>('laravel-advisories.json')
     const result = await laravelSecurity.collect(context)
     expect(result).toHaveLength(3)
@@ -20,7 +20,7 @@ describe('Laravel security source', () => {
     expect(result[0]).toMatchObject({
       providerId: 'laravel',
       source: 'laravel-security',
-      ecosystem: 'composer',
+      ecosystem: 'laravel',
       externalId: items[0]!.ghsa_id,
       publishedAt: new Date(items[0]!.published_at).toISOString(),
       cves: [items[0]!.cve_id],
