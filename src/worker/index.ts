@@ -5,6 +5,7 @@ import { groupsForCron } from './collectors/schedule'
 import type { Bindings } from './env'
 import { adminRoute } from './routes/admin'
 import { incidentsRoute } from './routes/incidents'
+import { handleMcpRequest } from './routes/mcp'
 import { providersRoute } from './routes/providers'
 import { statusRoute } from './routes/status'
 import { webhooksRoute } from './routes/webhooks'
@@ -25,6 +26,13 @@ app.route('/api/incidents', incidentsRoute)
 app.route('/api/providers', providersRoute)
 app.route('/api/webhooks', webhooksRoute)
 app.route('/api/admin', adminRoute)
+app.all('/api/mcp', c =>
+  handleMcpRequest(
+    c.req.raw,
+    c.env,
+    c.executionCtx as unknown as Parameters<typeof handleMcpRequest>[2],
+  ),
+)
 
 app.notFound(c => c.json<ErrorResponse>({ error: 'not found' }, 404))
 app.onError((err, c) => {
