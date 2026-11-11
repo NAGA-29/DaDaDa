@@ -56,7 +56,7 @@ function History({ incidents }: { incidents: IncidentView[] }) {
 }
 
 export function ProviderDetail({ id }: { id: string }) {
-  const { locale, t } = useI18n()
+  const { t } = useI18n()
   const { data, error, loading } = useApi<ProviderDetailResponse>(
     `/api/providers/${encodeURIComponent(id)}`,
     60_000,
@@ -75,6 +75,12 @@ export function ProviderDetail({ id }: { id: string }) {
     )
   }
 
+  return <ProviderDetailView data={data} />
+}
+
+/** 取得済みデータの表示部分 (テストしやすいよう分離) */
+export function ProviderDetailView({ data }: { data: ProviderDetailResponse }) {
+  const { locale, t } = useI18n()
   const { provider, currentStatus, activeIncidents, recentIncidents, securityAdvisories } = data
   const noticeOnly = currentStatus?.status === 'unverified'
   const officialNotices = data.officialNotices ?? []
