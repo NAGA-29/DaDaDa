@@ -59,6 +59,31 @@ test('RES-04 periodic refresh shows newly collected incidents', async ({ page })
   )
 })
 
+test('RES-04b many active incidents are collapsed and can be expanded', async ({ page }) => {
+  await page.route(SUMMARY, async route => {
+    const res = await route.fetch()
+    const body = (await res.json()) as SummaryResponse
+    const base = body.happeningNow.find(i => i.id === 'cloudflare:e2e-active')!
+    for (let n = 0; n < 4; n++) {
+      body.happeningNow.push({ ...base, id: `cloudflare:e2e-many-${n}`, title: `E2E many ${n}` })
+    }
+    await route.fulfill({ response: res, json: body })
+  })
+  await page.goto('/')
+
+  const highlight = page.getByRole('region', { name: '発生中の障害' })
+  await expect(highlight.locator('.highlight-label')).toHaveText('発生中の障害 6件')
+  await expect(highlight.locator('.highlight-item')).toHaveCount(3)
+
+  const toggle = highlight.getByRole('button', { name: 'ほか 3件を表示' })
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+  await toggle.click()
+  await expect(highlight.locator('.highlight-item')).toHaveCount(6)
+
+  await highlight.getByRole('button', { name: '折りたたむ' }).click()
+  await expect(highlight.locator('.highlight-item')).toHaveCount(3)
+})
+
 test('RES-05 empty data renders empty states', async ({ page }) => {
   const empty: SummaryResponse = {
     generatedAt: new Date().toISOString(),
