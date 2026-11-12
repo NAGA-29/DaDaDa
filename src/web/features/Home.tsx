@@ -13,12 +13,15 @@ import { Services } from './services/Services'
 
 const TABS = ['security', 'notices', 'kev'] as const
 type Tab = (typeof TABS)[number]
+// 障害がこの件数を超えたら、超過分を畳んで表示する
+const COLLAPSED_INCIDENT_LIMIT = 3
 
 export function Home({ summary }: { summary: Loadable<SummaryResponse> }) {
   const { locale, t } = useI18n()
   const [tab, setTab] = useState<Tab>('security')
   const [ecosystem, setEcosystem] = useState('')
   const [severity, setSeverity] = useState('critical')
+  const [incidentsExpanded, setIncidentsExpanded] = useState(false)
   const { data, error, loading } = summary
   const providers = useMemo(() => new Map((data?.providers ?? []).map(p => [p.id, p])), [data])
 
@@ -38,6 +41,10 @@ export function Home({ summary }: { summary: Loadable<SummaryResponse> }) {
   }
 
   const incidents = data.happeningNow.filter(i => i.kind === 'service')
+  const hiddenIncidentCount = Math.max(0, incidents.length - COLLAPSED_INCIDENT_LIMIT)
+  const visibleIncidents = incidentsExpanded
+    ? incidents
+    : incidents.slice(0, COLLAPSED_INCIDENT_LIMIT)
   const alerts = data.security
     .filter(i => matchesEcosystem(i, ecosystem))
     .filter(i =>
@@ -109,7 +116,7 @@ export function Home({ summary }: { summary: Loadable<SummaryResponse> }) {
                   <p className="highlight-label">
                     {t('activeIncidentCount', { count: incidents.length })}
                   </p>
-                  {incidents.map(i => (
+                  {visibleIncidents.map(i => (
                     <div className="highlight-item" key={i.id}>
                       <h2>
                         {i.providerId && providers.get(i.providerId)?.name}
@@ -136,6 +143,18 @@ export function Home({ summary }: { summary: Loadable<SummaryResponse> }) {
                       )}
                     </div>
                   ))}
+                  {hiddenIncidentCount > 0 && (
+                    <button
+                      className="highlight-toggle"
+                      type="button"
+                      aria-expanded={incidentsExpanded}
+                      onClick={() => setIncidentsExpanded(v => !v)}
+                    >
+                      {incidentsExpanded
+                        ? t('collapseIncidents')
+                        : t('showMoreIncidents', { count: hiddenIncidentCount })}
+                    </button>
+                  )}
                 </div>
               </>
             ) : (

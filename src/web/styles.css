@@ -635,6 +635,22 @@ a:focus-visible,
   font-size: 14px;
   margin-top: 14px;
 }
+.highlight-toggle {
+  display: block;
+  margin-top: 18px;
+  padding: 8px 14px;
+  border: 1px solid color-mix(in srgb, var(--minor) 40%, var(--line));
+  border-radius: 8px;
+  background: transparent;
+  color: var(--minor);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.highlight-toggle:hover {
+  background: color-mix(in srgb, var(--minor) 10%, var(--bg));
+}
 .incident-highlight.is-clear {
   border-color: var(--line);
   border-left-color: var(--ok);
