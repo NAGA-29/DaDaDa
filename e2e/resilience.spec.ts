@@ -110,6 +110,6 @@ test('RES-05 empty data renders empty states', async ({ page }) => {
 
   await page.getByRole('tab', { name: /悪用確認済み/ }).click()
   await expect(activePanel(page).locator('.feed-empty')).toHaveText(
-    '過去30日間に追加された脆弱性はありません。',
+    '過去90日間に追加された脆弱性はありません。',
   )
 })

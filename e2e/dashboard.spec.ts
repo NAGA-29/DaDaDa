@@ -134,7 +134,7 @@ test('UI-08 official notices tab shows latest notices and unscored advisories', 
 
 test('UI-09 known exploited tab lists recent KEV only', async ({ page }) => {
   await page.getByRole('tab', { name: /悪用確認済み/ }).click()
-  await expect(activePanel(page)).toContainText('CISA KEV・全言語・過去30日間')
+  await expect(activePanel(page)).toContainText('CISA KEV・全言語・過去90日間')
   await expect(feedTitles(page)).toHaveText(['E2E KEV recent exploited'])
   await expect(activePanel(page).locator('.security-filters')).toHaveCount(0)
   await expect(activePanel(page).locator('.incident').first()).toHaveClass(/tone-critical/)

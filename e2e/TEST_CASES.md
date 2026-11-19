@@ -15,7 +15,7 @@
 | Service 障害 | Cloudflare 発生中・復旧済み、Provider なしの発生中 | 発生中ハイライト、詳細リンク / 公式情報リンク、復旧履歴 |
 | Service 告知 | さくら 旧・新告知 | 告知は「発生中」に含めない、Provider ごとに最新のみ |
 | Security | 緊急 npm×6 + composer×1、高 pip×1、取り下げ×1、深刻度なし Node.js×1、CVE 重複の JPCERT×1 | 深刻度・対象フィルタ、さらに表示、取り下げ非表示、重複統合 |
-| KEV | 2日前 / 45日前 | 30日の期限 |
+| KEV | 2日前 / 100日前 | 90日の期限 |
 
 ## API（`api.spec.ts`）
 
@@ -54,7 +54,7 @@
 | UI-06 | 対象フィルタ | 言語・ミドルウェアで絞り込み、該当なしは空メッセージ | `shared/security.ts` / `Security.tsx` |
 | UI-07 | さらに表示 | 最初は4件、ボタンで残りを表示しボタンが消える | `Security.tsx` (`Feed`) |
 | UI-08 | 公式告知タブ | Provider ごとの最新告知 + 深刻度なしの告知、深刻度フィルタは出ない | `Home.tsx` |
-| UI-09 | 悪用確認済みタブ | 30日以内の KEV のみ、言語フィルタは出ない | `Home.tsx` |
+| UI-09 | 悪用確認済みタブ | 90日以内の KEV のみ、言語フィルタは出ない | `Home.tsx` |
 | UI-10 | タブのキーボード操作 | ←/→/Home/End で選択とフォーカスが移動（WAI-ARIA） | `Home.tsx` (`handleTabKey`) |
 | UI-11 | 行の表示 | CVE は3件まで + 残数、公式情報リンクは別タブ（noopener） | `IncidentRow.tsx` / `Link.tsx` |
 | UI-12 | サービス稼働状況パネル | カテゴリ別（タブで切り替え）、各カテゴリ内は深刻な順 → 名前順、状態ラベル、未判定=公開告知のみ、不明/未取得=最新状態を確認できません | `Services.tsx` |

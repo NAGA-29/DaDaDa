@@ -1,5 +1,5 @@
 -- E2E シードデータ
--- 時刻は投入時点からの相対値。鮮度判定 (Status 30分 / Security 72時間 / KEV 30日) を
+-- 時刻は投入時点からの相対値。鮮度判定 (Status 30分 / Security 72時間 / KEV 90日) を
 -- 実行日に依存させないため、ISO8601 (toISOString と同じ形式) を SQLite で組み立てる。
 
 -- Providers -----------------------------------------------------------------
@@ -51,6 +51,6 @@ INSERT INTO incidents (id, provider_id, kind, source, external_id, title, url, s
   ('nodejs-security:e2e-release', 'nodejs', 'security', 'nodejs-security', 'e2e-release', 'E2E Node.js security release', 'https://nodejs.org/en/blog/vulnerability/e2e-release', NULL, NULL, 'npm', '["CVE-2026-10201"]', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-10 hours'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 minutes'), '{}', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   -- CVE-2026-10001 の重複。緊急の GHSA 側に統合されて一覧から消える
   ('jpcert-security:e2e-dup', NULL, 'security', 'jpcert-security', 'e2e-dup', 'E2E JPCERT duplicate of advisory 1', 'https://www.jpcert.or.jp/at/e2e-dup.html', NULL, NULL, NULL, '["CVE-2026-10001"]', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-30 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 minutes'), '{}', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
-  -- CISA KEV: 直近 (表示) と 45日前 (30日の期限外)
+  -- CISA KEV: 直近 (表示) と 100日前 (90日の期限外)
   ('cisa-kev:CVE-2026-20001', 'cisa-kev', 'security', 'cisa-kev', 'CVE-2026-20001', 'E2E KEV recent exploited', 'https://nvd.nist.gov/vuln/detail/CVE-2026-20001', NULL, NULL, NULL, '["CVE-2026-20001"]', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 days'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 minutes'), '{}', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
-  ('cisa-kev:CVE-2026-20002', 'cisa-kev', 'security', 'cisa-kev', 'CVE-2026-20002', 'E2E KEV expired', 'https://nvd.nist.gov/vuln/detail/CVE-2026-20002', NULL, NULL, NULL, '["CVE-2026-20002"]', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-45 days'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 minutes'), '{}', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
+  ('cisa-kev:CVE-2026-20002', 'cisa-kev', 'security', 'cisa-kev', 'CVE-2026-20002', 'E2E KEV expired', 'https://nvd.nist.gov/vuln/detail/CVE-2026-20002', NULL, NULL, NULL, '["CVE-2026-20002"]', strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-100 days'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-2 minutes'), '{}', strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), strftime('%Y-%m-%dT%H:%M:%fZ', 'now'));
