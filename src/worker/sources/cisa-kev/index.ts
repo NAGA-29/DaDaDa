@@ -7,7 +7,9 @@ import type { IncidentSource, SourceContext } from '../types'
 // CISA Known Exploited Vulnerabilities。カタログ全体ではなく最近追加された分だけ取り込む
 const FEED_URL =
   'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json'
-export const KEV_LOOKBACK_DAYS = 30
+export const KEV_LOOKBACK_DAYS = 90
+/** Summary に載せる KEV の最大件数 (リポジトリの MAX_LIMIT と同じ) */
+export const KEV_SUMMARY_LIMIT = 200
 
 export type KevVulnerability = {
   cveID: string

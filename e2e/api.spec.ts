@@ -48,7 +48,7 @@ test.describe('API', () => {
       expect(summary.security.every(i => !('raw' in i))).toBe(true)
     })
 
-    test('API-05 kev keeps only the last 30 days', () => {
+    test('API-05 kev keeps only the last 90 days', () => {
       expect(ids(summary.kev)).toEqual(['cisa-kev:CVE-2026-20001'])
     })
 

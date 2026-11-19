@@ -9,6 +9,7 @@ import { IncidentRepository } from '../src/worker/repositories/incident.reposito
 import { getProviderDetail, getSummary } from '../src/worker/services/incident.service'
 import { sources } from '../src/worker/sources'
 import { JPCERT_FEED_URL, jpcertSecurity } from '../src/worker/sources/jpcert'
+import { KEV_LOOKBACK_DAYS, KEV_SUMMARY_LIMIT, normalizeKev } from '../src/worker/sources/cisa-kev'
 import { npmSecurity } from '../src/worker/sources/npm'
 import { composerSecurity } from '../src/worker/sources/composer'
 import type { GithubAdvisory } from '../src/worker/sources/github-advisory'
@@ -323,8 +324,46 @@ describe('collector runner + D1', () => {
   })
 
   it('applies the KEV window when reading', async () => {
-    const later = new Date(now.getTime() + 40 * 24 * 60 * 60 * 1000)
+    const later = new Date(now.getTime() + (KEV_LOOKBACK_DAYS + 10) * 24 * 60 * 60 * 1000)
     expect((await getSummary(env.DB, later)).kev).toEqual([])
+  })
+
+  it('keeps KEV beyond 30 days and caps the summary at KEV_SUMMARY_LIMIT', async () => {
+    const DAY = 24 * 60 * 60 * 1000
+    const kev = (cveID: string, addedAt: Date) =>
+      toIncident(
+        normalizeKev(
+          'cisa-kev',
+          {
+            cveID,
+            vendorProject: 'Window',
+            product: 'Test',
+            vulnerabilityName: cveID,
+            dateAdded: addedAt.toISOString(),
+            shortDescription: '',
+          },
+          now,
+        ),
+      )
+    // 31〜89 日前に KEV_SUMMARY_LIMIT 件 (旧仕様の 30 日・20 件を超える) + 期限外 1 件
+    const inWindow = Array.from({ length: KEV_SUMMARY_LIMIT }, (_, i) =>
+      kev(
+        `CVE-2026-9${String(i).padStart(4, '0')}`,
+        new Date(now.getTime() - (31 + (i * 58) / KEV_SUMMARY_LIMIT) * DAY),
+      ),
+    )
+    const expired = kev('CVE-2026-89999', new Date(now.getTime() - (KEV_LOOKBACK_DAYS + 10) * DAY))
+    await new IncidentRepository(env.DB).upsertMany(await Promise.all([...inWindow, expired]), now)
+
+    const ids = (await getSummary(env.DB, now)).kev.map(i => i.externalId)
+    // 既存の 2 日前の KEV + 31〜89 日前の 200 件 = 201 件 → 上限ちょうど 200 件で切れる
+    expect(ids).toHaveLength(KEV_SUMMARY_LIMIT)
+    expect(ids[0]).toBe('CVE-2026-44444')
+    expect(ids).toContain('CVE-2026-90000')
+    expect(ids).toContain(`CVE-2026-9${String(KEV_SUMMARY_LIMIT - 2).padStart(4, '0')}`)
+    // 最も古い 1 件は上限で、期限外の 1 件は期間で除外される
+    expect(ids).not.toContain(`CVE-2026-9${String(KEV_SUMMARY_LIMIT - 1).padStart(4, '0')}`)
+    expect(ids).not.toContain('CVE-2026-89999')
   })
 
   it('hides advisories that were withdrawn after being stored', async () => {

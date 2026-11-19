@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { parseAtom } from '../src/worker/adapters/atom'
 import { parseRss } from '../src/worker/adapters/rss'
-import { normalizeKev, recentKev, type KevCatalog } from '../src/worker/sources/cisa-kev'
+import {
+  KEV_LOOKBACK_DAYS,
+  normalizeKev,
+  recentKev,
+  type KevCatalog,
+} from '../src/worker/sources/cisa-kev'
 import {
   githubAdvisory,
   normalizeGithubAdvisory,
@@ -107,5 +112,25 @@ describe('CISA KEV source', () => {
       publishedAt: '2026-10-21T00:00:00.000Z',
       status: 'known_exploited',
     })
+  })
+
+  it('keeps KEV added within KEV_LOOKBACK_DAYS beyond the old 30-day window', () => {
+    const daysAgo = (days: number) => new Date(now.getTime() - days * 86400000).toISOString()
+    const entry = (cveID: string, dateAdded: string) => ({
+      cveID,
+      vendorProject: 'V',
+      product: 'P',
+      vulnerabilityName: cveID,
+      dateAdded,
+      shortDescription: '',
+    })
+    const catalog: KevCatalog = {
+      vulnerabilities: [
+        entry('CVE-45', daysAgo(45)),
+        entry('CVE-89', daysAgo(KEV_LOOKBACK_DAYS - 1)),
+        entry('CVE-91', daysAgo(KEV_LOOKBACK_DAYS + 1)),
+      ],
+    }
+    expect(recentKev(catalog, now).map(v => v.cveID)).toEqual(['CVE-45', 'CVE-89'])
   })
 })
