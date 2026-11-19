@@ -5,7 +5,7 @@ import { IncidentRepository } from '../repositories/incident.repository'
 import { ProviderRepository } from '../repositories/provider.repository'
 import { ProviderStatusRepository } from '../repositories/provider-status.repository'
 import { registeredProviders } from '../sources'
-import { KEV_LOOKBACK_DAYS } from '../sources/cisa-kev'
+import { KEV_LOOKBACK_DAYS, KEV_SUMMARY_LIMIT } from '../sources/cisa-kev'
 import { deduplicateSecurity, getSecuritySummary } from './security.service'
 import { listProviderStatuses } from './status.service'
 
@@ -30,12 +30,12 @@ export async function getSummary(db: D1Database, now = new Date()): Promise<Summ
         limit: 100,
       }),
       getSecuritySummary(incidents),
-      // KEV は通常の Advisory と別枠。保存済みの行にも 30 日の期限を適用する
+      // KEV は通常の Advisory と別枠。保存済みの行にも KEV_LOOKBACK_DAYS の期限を適用する
       incidents.list({
         kind: 'security',
         source: KEV_SOURCE,
         from: hoursAgo(now, KEV_LOOKBACK_DAYS * 24),
-        limit: 20,
+        limit: KEV_SUMMARY_LIMIT,
       }),
       listProviderStatuses(db, {}, now),
       new ProviderRepository(db).list(),

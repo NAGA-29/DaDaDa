@@ -9,6 +9,7 @@ import { IncidentRepository } from '../src/worker/repositories/incident.reposito
 import { getProviderDetail, getSummary } from '../src/worker/services/incident.service'
 import { sources } from '../src/worker/sources'
 import { JPCERT_FEED_URL, jpcertSecurity } from '../src/worker/sources/jpcert'
+import { KEV_LOOKBACK_DAYS } from '../src/worker/sources/cisa-kev'
 import { npmSecurity } from '../src/worker/sources/npm'
 import { composerSecurity } from '../src/worker/sources/composer'
 import type { GithubAdvisory } from '../src/worker/sources/github-advisory'
@@ -323,7 +324,7 @@ describe('collector runner + D1', () => {
   })
 
   it('applies the KEV window when reading', async () => {
-    const later = new Date(now.getTime() + 40 * 24 * 60 * 60 * 1000)
+    const later = new Date(now.getTime() + (KEV_LOOKBACK_DAYS + 10) * 24 * 60 * 60 * 1000)
     expect((await getSummary(env.DB, later)).kev).toEqual([])
   })
 

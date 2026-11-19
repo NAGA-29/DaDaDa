@@ -25,7 +25,7 @@
 | API-02 | `GET /api/summary` のキャッシュ | `Cache-Control: public, max-age=30` | `src/worker/index.ts` |
 | API-03 | summary の発生中障害 | 未解決の Service のみ。復旧済み・告知は含まない | `incident.service.ts` / `incident.repository.ts` |
 | API-04 | summary のセキュリティ | 取り下げは非表示、CVE 重複は緊急側に統合（CVE を合成）、KEV は含まない | `security.service.ts` |
-| API-05 | summary の KEV | 30日以内のみ | `incident.service.ts` (`KEV_LOOKBACK_DAYS`) |
+| API-05 | summary の KEV | 90日以内のみ (最大200件) | `incident.service.ts` (`KEV_LOOKBACK_DAYS`) |
 | API-06 | summary の公式告知 | Provider ごとに最新の告知のみ | `incident.service.ts` |
 | API-07 | `GET /api/status` | Status 対応 Provider のみ、古い状態は `unknown` + `Status data is stale`、未判定は維持 | `status.service.ts` / `provider-status.ts` |
 | API-08 | `GET /api/status?category=&status=` | カテゴリ・状態で絞り込める（未取得は `unknown` 扱い） | `status.service.ts` |
