@@ -58,7 +58,7 @@
 | UI-10 | タブのキーボード操作 | ←/→/Home/End で選択とフォーカスが移動（WAI-ARIA） | `Home.tsx` (`handleTabKey`) |
 | UI-11 | 行の表示 | CVE は3件まで + 残数、公式情報リンクは別タブ（noopener） | `IncidentRow.tsx` / `Link.tsx` |
 | UI-12 | サービス稼働状況パネル | カテゴリ別（タブで切り替え）、各カテゴリ内は深刻な順 → 名前順、状態ラベル、未判定=公開告知のみ、不明/未取得=最新状態を確認できません | `Services.tsx` |
-| UI-13 | 取り下げ・重複・期限切れの非表示 | 取り下げ・統合された重複・45日前の KEV は画面に出ない | `security.service.ts` / `incident.service.ts` |
+| UI-13 | 取り下げ・重複・期限切れの非表示 | 取り下げ・統合された重複・100日前 (90日の期限外) の KEV は画面に出ない | `security.service.ts` / `incident.service.ts` |
 
 ## Provider 詳細・ルーティング（`provider-detail.spec.ts`）
 
